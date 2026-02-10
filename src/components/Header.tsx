@@ -17,7 +17,7 @@ export default function Header() {
               D' Irma
             </h1>
             <p className="text-[10px] font-bold text-gray-400 tracking-widest uppercase mt-0.5">
-              Sazón Judicial
+              Esencia y sazón
             </p>
           </div>
         </div>
