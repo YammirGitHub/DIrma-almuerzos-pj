@@ -1,41 +1,48 @@
 "use client";
-import { UtensilsCrossed } from "lucide-react";
+import { ChefHat } from "lucide-react";
 
 export default function Header() {
   return (
-    // 'sticky' para que te siga al bajar, 'z-50' para estar encima de todo
-    <header className="sticky top-0 z-50 w-full backdrop-blur-xl bg-white/80 border-b border-gray-200 shadow-sm transition-all">
-      {/* Contenedor interno limitado a max-w-5xl para alinearse con el cuerpo */}
-      <div className="w-full max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
-        {/* Marca */}
+    <div className="fixed top-4 left-0 right-0 z-50 flex justify-center px-4 pointer-events-none">
+      {/* HEADER ESTILO APPLE (Glassmorphism) 
+          1. bg-white/70: Mucho más transparente (antes 90).
+          2. backdrop-blur-3xl: Desenfoque "congelado" súper fuerte.
+          3. border-white/40: Borde sutil para definir el cristal.
+      */}
+      <header className="pointer-events-auto w-full max-w-5xl bg-white/70 backdrop-blur-3xl shadow-2xl shadow-black/5 border border-white/40 rounded-full py-3 px-5 flex items-center justify-between transition-all duration-300 hover:bg-white/90 hover:shadow-orange-500/10 group">
+        {/* IZQUIERDA: Marca */}
         <div className="flex items-center gap-3">
-          <div className="bg-black text-white p-2 rounded-xl shadow-lg shadow-black/20 transform hover:scale-105 transition-transform">
-            <UtensilsCrossed size={20} />
+          {/* Logo Naranja Vibrante */}
+          <div className="flex items-center justify-center bg-orange-500 text-white h-10 w-10 rounded-xl shadow-lg shadow-orange-200/50 transition-transform duration-300 group-hover:scale-105 group-hover:rotate-3">
+            <ChefHat size={22} strokeWidth={2.5} />
           </div>
-          <div className="flex flex-col">
-            <h1 className="text-xl font-black tracking-tighter text-gray-900 leading-none">
+
+          <div className="flex flex-col justify-center">
+            <h1 className="font-black tracking-tighter text-gray-900 leading-none text-lg group-hover:text-orange-500 transition-colors">
               D' Irma
             </h1>
-            <p className="text-[10px] font-bold text-gray-400 tracking-widest uppercase mt-0.5">
-              Esencia y sazón
+            <p className="font-bold text-[9px] text-gray-500 uppercase tracking-[0.2em] mt-0.5 group-hover:text-gray-400 transition-colors">
+              Sazón Judicial
             </p>
           </div>
         </div>
 
-        {/* Status */}
-        <div className="flex items-center gap-2 bg-green-50 px-3 py-1.5 rounded-full border border-green-200 shadow-sm">
-          <span className="relative flex h-2.5 w-2.5">
-            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-500 opacity-75"></span>
-            <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-green-500"></span>
-          </span>
-          <span className="text-xs font-bold text-green-800 uppercase tracking-wide hidden sm:block">
-            Pedidos Abiertos
-          </span>
-          <span className="text-xs font-bold text-green-800 uppercase tracking-wide sm:hidden">
-            Abierto
-          </span>
+        {/* DERECHA: Estado */}
+        <div>
+          <div className="flex items-center gap-2.5 px-4 py-1.5 rounded-full bg-emerald-50/50 border border-emerald-100/50 backdrop-blur-md shadow-sm">
+            <span className="relative flex h-2.5 w-2.5">
+              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-500 opacity-75"></span>
+              <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-emerald-500"></span>
+            </span>
+            <span className="text-[10px] font-bold text-emerald-800 uppercase tracking-wide hidden sm:block">
+              Pedidos Abiertos
+            </span>
+            <span className="text-[10px] font-bold text-emerald-800 uppercase tracking-wide sm:hidden">
+              ON
+            </span>
+          </div>
         </div>
-      </div>
-    </header>
+      </header>
+    </div>
   );
 }
