@@ -1,0 +1,22 @@
+@import "tailwindcss";
+/* Si usas tailwind v4, esto es todo lo que necesitas arriba. 
+   Si usas v3, mantén tus @tailwind base; etc. */
+
+:root {
+  /* Hacemos que el scroll sea suave */
+  scroll-behavior: smooth;
+  /* Evitamos el rebote elástico en iOS fuera de la app */
+  overscroll-behavior-y: none;
+}
+
+body {
+  /* Tipografía base más nítida */
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Ocultar barra de scroll pero permitir funcionalidad (Estética limpia) */
+::-webkit-scrollbar {
+  width: 0px;
+  background: transparent;
+}
