@@ -351,3 +351,159 @@ You cannot have two parallel pages that resolve to the same path. Please check /
 [01:18:18.114] Server  LOG     ✓ Compiled in 24ms
 [01:18:23.465] Browser INFO    %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
 [01:20:04.552] Server  LOG     ✓ Compiled in 224ms
+[05:15:08.358] Browser INFO    %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
+[05:15:13.886] Browser WARN    Detected `scroll-behavior: smooth` on the `<html>` element. To disable smooth scrolling during route transitions, add `data-scroll-behavior="smooth"` to your <html> element. Learn more: https://nextjs.org/docs/messages/missing-data-scroll-behavior
+[05:15:18.965] Browser INFO    %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
+[05:15:19.959] Browser INFO    %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
+[05:15:49.788] Browser INFO    %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
+[05:16:01.409] Browser INFO    %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
+[05:23:54.611] Browser INFO    %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
+[05:24:07.372] Browser INFO    %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
+[05:25:04.297] Browser INFO    %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
+[05:36:23.093] Browser INFO    %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
+[05:40:16.096] Browser ERROR   ./src/app/(client)/page.tsx:166:7
+Parsing ecmascript source code failed
+  164 |         </div>
+  165 |
+> 166 |       </div>
+      |       ^
+  167 |     </main>
+  168 |   );
+  169 | }
+
+Expression expected
+[05:40:16.096] Browser ERROR   ./src/app/(client)/page.tsx:166:8
+Parsing ecmascript source code failed
+  164 |         </div>
+  165 |
+> 166 |       </div>
+      |        ^^^^^
+  167 |     </main>
+  168 |   );
+  169 | }
+
+Unterminated regexp literal
+[05:40:16.909] Browser ERROR   ./src/app/(client)/page.tsx:166:7
+Parsing ecmascript source code failed
+  164 |         </div>
+  165 |
+> 166 |       </div>
+      |       ^
+  167 |     </main>
+  168 |   );
+  169 | }
+
+Expression expected
+[05:40:16.909] Browser ERROR   ./src/app/(client)/page.tsx:166:8
+Parsing ecmascript source code failed
+  164 |         </div>
+  165 |
+> 166 |       </div>
+      |        ^^^^^
+  167 |     </main>
+  168 |   );
+  169 | }
+
+Unterminated regexp literal
+[05:40:31.992] Browser ERROR   ./src/app/(client)/page.tsx:163:5
+Parsing ecmascript source code failed
+  161 |
+  162 |       </div>
+> 163 |     </main>
+      |     ^
+  164 |   );
+  165 | }
+
+Expression expected
+[05:40:31.992] Browser ERROR   ./src/app/(client)/page.tsx:163:6
+Parsing ecmascript source code failed
+  161 |
+  162 |       </div>
+> 163 |     </main>
+      |      ^^^^^^
+  164 |   );
+  165 | }
+
+Unterminated regexp literal
+[05:40:32.909] Browser ERROR   ./src/app/(client)/page.tsx:163:5
+Parsing ecmascript source code failed
+  161 |
+  162 |       </div>
+> 163 |     </main>
+      |     ^
+  164 |   );
+  165 | }
+
+Expression expected
+[05:40:32.909] Browser ERROR   ./src/app/(client)/page.tsx:163:6
+Parsing ecmascript source code failed
+  161 |
+  162 |       </div>
+> 163 |     </main>
+      |      ^^^^^^
+  164 |   );
+  165 | }
+
+Unterminated regexp literal
+[05:40:37.714] Browser ERROR   ./src/app/(client)/page.tsx:163:5
+Parsing ecmascript source code failed
+  161 |
+  162 |       </div>
+> 163 |     </main>
+      |     ^
+  164 |   );
+  165 | }
+
+Expression expected
+[05:40:37.714] Browser ERROR   ./src/app/(client)/page.tsx:163:6
+Parsing ecmascript source code failed
+  161 |
+  162 |       </div>
+> 163 |     </main>
+      |      ^^^^^^
+  164 |   );
+  165 | }
+
+Unterminated regexp literal
+[05:40:37.909] Browser ERROR   ./src/app/(client)/page.tsx:163:5
+Parsing ecmascript source code failed
+  161 |
+  162 |       </div>
+> 163 |     </main>
+      |     ^
+  164 |   );
+  165 | }
+
+Expression expected
+[05:40:37.909] Browser ERROR   ./src/app/(client)/page.tsx:163:6
+Parsing ecmascript source code failed
+  161 |
+  162 |       </div>
+> 163 |     </main>
+      |      ^^^^^^
+  164 |   );
+  165 | }
+
+Unterminated regexp literal
+[05:41:07.699] Browser ERROR   ./src/app/(client)/page.tsx:161:1
+Parsing ecmascript source code failed
+  159 |     </main>
+  160 |   );
+> 161 | }
+      | ^
+
+Unexpected token. Did you mean `{'}'}` or `&rbrace;`?
+[05:41:07.909] Browser ERROR   ./src/app/(client)/page.tsx:161:1
+Parsing ecmascript source code failed
+  159 |     </main>
+  160 |   );
+> 161 | }
+      | ^
+
+Unexpected token. Did you mean `{'}'}` or `&rbrace;`?
+[05:43:27.164] Server  LOG     ✓ Compiled in 0ms
+[05:43:27.223] Server  LOG     ✓ Compiled in 27ms
+[05:43:34.795] Browser INFO    %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
+[05:44:02.212] Browser INFO    %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
+[05:48:50.219] Server  LOG     ✓ Compiled in 0ms
+[05:48:57.384] Browser INFO    %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
