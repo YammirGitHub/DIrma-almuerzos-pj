@@ -17,10 +17,10 @@ export const metadata: Metadata = {
 export const viewport: Viewport = {
   width: "device-width",
   initialScale: 1,
-  maximumScale: 5, // Permitir zoom por accesibilidad (Mejor práctica UI/UX)
-  // interactiveWidget soluciona problemas cuando sale el teclado en el checkout
-  interactiveWidget: "resizes-content",
-  themeColor: "#F8F9FA", // El color de la barra de estado del navegador combina con tu fondo
+  maximumScale: 1, // BLOQUEA el zoom manual (pellizco)
+  userScalable: false, // BLOQUEA el zoom del usuario
+  interactiveWidget: "resizes-content", // Evita que el teclado rompa el layout
+  themeColor: "#F8F9FA",
 };
 
 export default function RootLayout({
