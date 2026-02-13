@@ -37,3 +37,419 @@ Read more: https://nextjs.org/docs/messages/next-image-unconfigured-qualities
 [00:14:51.478] Browser INFO    %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
 [00:14:51.598] Browser WARN    Image with src "https://images.unsplash.com/photo-1543353071-873f17a7a088?q=80&w=2070&auto=format&fit=crop" is using quality "90" which is not configured in images.qualities [75]. Please update your config to [75, 90].
 Read more: https://nextjs.org/docs/messages/next-image-unconfigured-qualities
+[00:33:53.989] Server  LOG     ✓ Compiled in 306ms
+[00:33:54.094] Browser ERROR   ./src/components/MenuList.tsx:16:1
+Export default doesn't exist in target module
+  14 | } from "lucide-react";
+  15 | import { motion, AnimatePresence } from "framer-motion";
+> 16 | import CheckoutModal from "./CheckoutModal";
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  17 |
+  18 | const EXTRAS_OPTIONS = {
+  19 |   entrada: [
+
+The export default was not found in module [project]/src/components/CheckoutModal.tsx [app-client] (ecmascript).
+The module has no exports at all.
+All exports of the module are statically known (It doesn't have dynamic exports). So it's known statically that the requested export doesn't exist.
+
+Import trace:
+  Server Component:
+    ./src/components/MenuList.tsx
+    ./src/app/(client)/page.tsx
+[00:33:54.094] Browser ERROR   ./src/components/MenuList.tsx:16:1
+Export default doesn't exist in target module
+  14 | } from "lucide-react";
+  15 | import { motion, AnimatePresence } from "framer-motion";
+> 16 | import CheckoutModal from "./CheckoutModal";
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  17 |
+  18 | const EXTRAS_OPTIONS = {
+  19 |   entrada: [
+
+The export default was not found in module [project]/src/components/CheckoutModal.tsx [app-ssr] (ecmascript).
+The module has no exports at all.
+All exports of the module are statically known (It doesn't have dynamic exports). So it's known statically that the requested export doesn't exist.
+
+Import trace:
+  Server Component:
+    ./src/components/MenuList.tsx
+    ./src/app/(client)/page.tsx
+[00:33:54.631] Browser ERROR   ./src/components/MenuList.tsx:16:1
+Export default doesn't exist in target module
+  14 | } from "lucide-react";
+  15 | import { motion, AnimatePresence } from "framer-motion";
+> 16 | import CheckoutModal from "./CheckoutModal";
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  17 |
+  18 | const EXTRAS_OPTIONS = {
+  19 |   entrada: [
+
+The export default was not found in module [project]/src/components/CheckoutModal.tsx [app-client] (ecmascript).
+The module has no exports at all.
+All exports of the module are statically known (It doesn't have dynamic exports). So it's known statically that the requested export doesn't exist.
+
+Import trace:
+  Server Component:
+    ./src/components/MenuList.tsx
+    ./src/app/(client)/page.tsx
+[00:33:54.631] Browser ERROR   ./src/components/MenuList.tsx:16:1
+Export default doesn't exist in target module
+  14 | } from "lucide-react";
+  15 | import { motion, AnimatePresence } from "framer-motion";
+> 16 | import CheckoutModal from "./CheckoutModal";
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  17 |
+  18 | const EXTRAS_OPTIONS = {
+  19 |   entrada: [
+
+The export default was not found in module [project]/src/components/CheckoutModal.tsx [app-ssr] (ecmascript).
+The module has no exports at all.
+All exports of the module are statically known (It doesn't have dynamic exports). So it's known statically that the requested export doesn't exist.
+
+Import trace:
+  Server Component:
+    ./src/components/MenuList.tsx
+    ./src/app/(client)/page.tsx
+[00:33:56.415] Server  LOG     ✓ Compiled in 140ms
+[00:34:20.656] Server  LOG     ✓ Compiled in 24ms
+[00:36:17.132] Server  LOG     ✓ Compiled in 91ms
+[00:37:07.161] Server  LOG     ✓ Compiled in 25ms
+[00:37:07.264] Browser ERROR   ./src/components/CheckoutModal.tsx:387:9
+Parsing ecmascript source code failed
+  385 |       </div>
+  386 |     )}
+> 387 |   </div>
+      |         ^
+> 388 | </div>
+      | ^
+  389 |
+  390 |           {/* --- FOOTER FLOTANTE --- */}
+  391 |           <div className="p-4 bg-white border-t border-gray-100 shrink-0 z-20 pb-8 sm:pb-4 safe-area-bottom">
+
+Expected '</', got 'jsx text'
+
+Import traces:
+  Client Component Browser:
+    ./src/components/CheckoutModal.tsx [Client Component Browser]
+    ./src/components/MenuList.tsx [Client Component Browser]
+    ./src/components/MenuList.tsx [Server Component]
+    ./src/app/(client)/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./src/components/CheckoutModal.tsx [Client Component SSR]
+    ./src/components/MenuList.tsx [Client Component SSR]
+    ./src/components/MenuList.tsx [Server Component]
+    ./src/app/(client)/page.tsx [Server Component]
+[00:37:07.629] Browser ERROR   ./src/components/CheckoutModal.tsx:387:9
+Parsing ecmascript source code failed
+  385 |       </div>
+  386 |     )}
+> 387 |   </div>
+      |         ^
+> 388 | </div>
+      | ^
+  389 |
+  390 |           {/* --- FOOTER FLOTANTE --- */}
+  391 |           <div className="p-4 bg-white border-t border-gray-100 shrink-0 z-20 pb-8 sm:pb-4 safe-area-bottom">
+
+Expected '</', got 'jsx text'
+
+Import traces:
+  Client Component Browser:
+    ./src/components/CheckoutModal.tsx [Client Component Browser]
+    ./src/components/MenuList.tsx [Client Component Browser]
+    ./src/components/MenuList.tsx [Server Component]
+    ./src/app/(client)/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./src/components/CheckoutModal.tsx [Client Component SSR]
+    ./src/components/MenuList.tsx [Client Component SSR]
+    ./src/components/MenuList.tsx [Server Component]
+    ./src/app/(client)/page.tsx [Server Component]
+[00:38:57.730] Server  LOG     ✓ Compiled in 0ms
+[00:38:58.630] Browser ERROR   ./src/components/CheckoutModal.tsx:387:9
+Parsing ecmascript source code failed
+  385 |       </div>
+  386 |     )}
+> 387 |   </div>
+      |         ^
+> 388 | </div>
+      | ^
+  389 |
+  390 |           {/* --- FOOTER FLOTANTE --- */}
+  391 |           <div className="p-4 bg-white border-t border-gray-100 shrink-0 z-20 pb-8 sm:pb-4 safe-area-bottom">
+
+Expected '</', got 'jsx text'
+
+Import traces:
+  Client Component Browser:
+    ./src/components/CheckoutModal.tsx [Client Component Browser]
+    ./src/components/MenuList.tsx [Client Component Browser]
+    ./src/components/MenuList.tsx [Server Component]
+    ./src/app/(client)/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./src/components/CheckoutModal.tsx [Client Component SSR]
+    ./src/components/MenuList.tsx [Client Component SSR]
+    ./src/components/MenuList.tsx [Server Component]
+    ./src/app/(client)/page.tsx [Server Component]
+[00:39:29.759] Server  ERROR   {}
+[00:39:38.896] Browser INFO    %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
+[00:42:44.678] Server  LOG     ✓ Compiled in 89ms
+[00:42:49.006] Server  WARN    Image with src "https://images.unsplash.com/photo-1543353071-873f17a7a088?q=80&w=2070&auto=format&fit=crop" is using quality "90" which is not configured in images.qualities [75]. Please update your config to [75, 90].
+Read more: https://nextjs.org/docs/messages/next-image-unconfigured-qualities
+[00:42:49.151] Browser INFO    %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
+[00:42:49.268] Browser WARN    Image with src "https://images.unsplash.com/photo-1543353071-873f17a7a088?q=80&w=2070&auto=format&fit=crop" is using quality "90" which is not configured in images.qualities [75]. Please update your config to [75, 90].
+Read more: https://nextjs.org/docs/messages/next-image-unconfigured-qualities
+[00:43:57.482] Server  LOG     ✓ Compiled in 26ms
+[00:43:57.585] Browser ERROR   ./src/components/Header.tsx:3:10
+Ecmascript file had an error
+  1 | "use client";
+  2 | import { ChefHat } from "lucide-react";
+> 3 | import { ChefHat } from "lucide-react";
+    |          ^^^^^^^
+  4 | export default function Header() {
+  5 |   return (
+  6 |     // ID IMPORTANTE: "app-header" permite controlarlo desde CSS global
+
+the name `ChefHat` is defined multiple times
+
+Import trace:
+  Server Component:
+    ./src/components/Header.tsx
+    ./src/app/(client)/layout.tsx
+[00:43:57.630] Browser ERROR   ./src/components/Header.tsx:3:10
+Ecmascript file had an error
+  1 | "use client";
+  2 | import { ChefHat } from "lucide-react";
+> 3 | import { ChefHat } from "lucide-react";
+    |          ^^^^^^^
+  4 | export default function Header() {
+  5 |   return (
+  6 |     // ID IMPORTANTE: "app-header" permite controlarlo desde CSS global
+
+the name `ChefHat` is defined multiple times
+
+Import trace:
+  Server Component:
+    ./src/components/Header.tsx
+    ./src/app/(client)/layout.tsx
+[00:43:57.631] Browser ERROR   ./src/components/Header.tsx:3:10
+Ecmascript file had an error
+  1 | "use client";
+  2 | import { ChefHat } from "lucide-react";
+> 3 | import { ChefHat } from "lucide-react";
+    |          ^^^^^^^
+  4 | export default function Header() {
+  5 |   return (
+  6 |     // ID IMPORTANTE: "app-header" permite controlarlo desde CSS global
+
+the name `ChefHat` is defined multiple times
+
+Import trace:
+  Server Component:
+    ./src/components/Header.tsx
+    ./src/app/(client)/layout.tsx
+[00:44:22.653] Server  LOG     ✓ Compiled in 36ms
+[00:44:37.661] Server  WARN    Image with src "https://images.unsplash.com/photo-1543353071-873f17a7a088?q=80&w=2070&auto=format&fit=crop" is using quality "90" which is not configured in images.qualities [75]. Please update your config to [75, 90].
+Read more: https://nextjs.org/docs/messages/next-image-unconfigured-qualities
+[00:44:37.758] Browser INFO    %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
+[00:44:37.873] Browser WARN    Image with src "https://images.unsplash.com/photo-1543353071-873f17a7a088?q=80&w=2070&auto=format&fit=crop" is using quality "90" which is not configured in images.qualities [75]. Please update your config to [75, 90].
+Read more: https://nextjs.org/docs/messages/next-image-unconfigured-qualities
+[00:45:12.601] Browser ERROR   ./src/app/actions.ts:28:1
+Parsing ecmascript source code failed
+  26 | export async function createOrder(prevState: any, formData: FormData) {
+  27 |   const supabase = await getSupabase()
+> 28 | export async function createOrder(prevState: any, formData: FormData) {
+     | ^^^^^^
+  29 |   const supabase = await getSupabase()
+  30 |   
+  31 |   // Datos
+
+'import', and 'export' cannot be used outside of module code
+[00:45:12.630] Browser ERROR   ./src/app/actions.ts:28:1
+Parsing ecmascript source code failed
+  26 | export async function createOrder(prevState: any, formData: FormData) {
+  27 |   const supabase = await getSupabase()
+> 28 | export async function createOrder(prevState: any, formData: FormData) {
+     | ^^^^^^
+  29 |   const supabase = await getSupabase()
+  30 |   
+  31 |   // Datos
+
+'import', and 'export' cannot be used outside of module code
+[00:45:12.630] Browser ERROR   ./src/app/actions.ts:28:1
+Parsing ecmascript source code failed
+  26 | export async function createOrder(prevState: any, formData: FormData) {
+  27 |   const supabase = await getSupabase()
+> 28 | export async function createOrder(prevState: any, formData: FormData) {
+     | ^^^^^^
+  29 |   const supabase = await getSupabase()
+  30 |   
+  31 |   // Datos
+
+'import', and 'export' cannot be used outside of module code
+[00:45:17.093] Server  LOG     ✓ Compiled in 26ms
+[00:45:26.453] Server  LOG     ✓ Compiled in 32ms
+[00:45:26.555] Browser ERROR   ./src/app/actions.ts:103:23
+Ecmascript file had an error
+  101 | // ... imports ...
+  102 |
+> 103 | export async function createOrder(prevState: any, formData: FormData) {
+      |                       ^^^^^^^^^^^
+  104 |   const supabase = await getSupabase()
+  105 |   
+  106 |   // Recibir datos
+
+the name `createOrder` is defined multiple times
+[00:45:26.630] Browser ERROR   ./src/app/actions.ts:103:23
+Ecmascript file had an error
+  101 | // ... imports ...
+  102 |
+> 103 | export async function createOrder(prevState: any, formData: FormData) {
+      |                       ^^^^^^^^^^^
+  104 |   const supabase = await getSupabase()
+  105 |   
+  106 |   // Recibir datos
+
+the name `createOrder` is defined multiple times
+[00:45:26.630] Browser ERROR   ./src/app/actions.ts:103:23
+Ecmascript file had an error
+  101 | // ... imports ...
+  102 |
+> 103 | export async function createOrder(prevState: any, formData: FormData) {
+      |                       ^^^^^^^^^^^
+  104 |   const supabase = await getSupabase()
+  105 |   
+  106 |   // Recibir datos
+
+the name `createOrder` is defined multiple times
+[00:49:04.580] Server  LOG     ✓ Compiled in 38ms
+[00:49:09.161] Server  WARN    Image with src "https://images.unsplash.com/photo-1543353071-873f17a7a088?q=80&w=2070&auto=format&fit=crop" is using quality "90" which is not configured in images.qualities [75]. Please update your config to [75, 90].
+Read more: https://nextjs.org/docs/messages/next-image-unconfigured-qualities
+[00:49:09.263] Browser INFO    %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
+[00:49:09.630] Browser WARN    Image with src "https://images.unsplash.com/photo-1543353071-873f17a7a088?q=80&w=2070&auto=format&fit=crop" is using quality "90" which is not configured in images.qualities [75]. Please update your config to [75, 90].
+Read more: https://nextjs.org/docs/messages/next-image-unconfigured-qualities
+[00:49:11.730] Browser WARN    Image with src "https://images.unsplash.com/photo-1543353071-873f17a7a088?q=80&w=2070&auto=format&fit=crop" is using quality "90" which is not configured in images.qualities [75]. Please update your config to [75, 90].
+Read more: https://nextjs.org/docs/messages/next-image-unconfigured-qualities
+[00:49:23.631] Browser WARN    Image with src "https://images.unsplash.com/photo-1543353071-873f17a7a088?q=80&w=2070&auto=format&fit=crop" is using quality "90" which is not configured in images.qualities [75]. Please update your config to [75, 90].
+Read more: https://nextjs.org/docs/messages/next-image-unconfigured-qualities
+[00:50:19.464] Server  ERROR   Error actualizando cliente: {}
+[00:50:19.628] Server  ERROR   Error insertando pedido: {}
+[00:54:39.829] Server  ERROR   Error insertando pedido: {}
+[00:54:46.214] Browser INFO    %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
+[00:55:01.049] Server  ERROR   Error insertando pedido: {}
+[00:55:03.201] Browser INFO    %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
+[00:55:04.857] Browser INFO    %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
+[00:55:08.333] Browser INFO    %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
+[00:55:10.679] Browser INFO    %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
+[00:55:21.736] Server  ERROR   Error insertando pedido: {}
+[02:01:16.875] Browser WARN    Detected `scroll-behavior: smooth` on the `<html>` element. To disable smooth scrolling during route transitions, add `data-scroll-behavior="smooth"` to your <html> element. Learn more: https://nextjs.org/docs/messages/missing-data-scroll-behavior
+[02:01:22.384] Browser INFO    %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
+[02:01:47.288] Browser INFO    %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
+[02:05:22.654] Server  LOG     ✓ Compiled in 67ms
+[02:05:38.234] Browser INFO    %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
+[02:05:44.519] Browser INFO    %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
+[02:06:02.080] Browser INFO    %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
+[02:06:04.319] Browser WARN    Detected `scroll-behavior: smooth` on the `<html>` element. To disable smooth scrolling during route transitions, add `data-scroll-behavior="smooth"` to your <html> element. Learn more: https://nextjs.org/docs/messages/missing-data-scroll-behavior
+[02:11:20.828] Server  LOG     ✓ Compiled in 89ms
+[02:11:21.078] Server  LOG     ✓ Compiled in 28ms
+[02:11:59.719] Browser INFO    %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
+[02:12:07.650] Browser INFO    %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
+[02:12:12.573] Browser INFO    %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
+[02:12:15.864] Browser INFO    %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
+[02:12:35.572] Browser INFO    %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
+[02:13:51.616] Browser INFO    %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
+[02:19:04.467] Server  LOG     ✓ Compiled in 160ms
+[02:19:09.723] Browser INFO    %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
+[02:19:16.393] Browser INFO    %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
+[02:19:22.611] Browser INFO    %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
+[02:19:28.517] Browser INFO    %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
+[02:19:29.898] Browser INFO    %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
+[02:19:35.530] Browser INFO    %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
+[02:19:45.245] Browser INFO    %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
+[02:19:50.724] Browser INFO    %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
+[02:21:58.213] Server  LOG     ✓ Compiled in 29ms
+[02:22:01.032] Browser INFO    %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
+[02:22:12.430] Browser INFO    %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
+[02:24:44.857] Server  LOG     ✓ Compiled in 23ms
+[02:24:45.598] Server  LOG     ✓ Compiled in 33ms
+[02:24:48.294] Browser INFO    %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
+[02:26:02.339] Server  LOG     ✓ Compiled in 44ms
+[02:26:03.593] Server  LOG     ✓ Compiled in 19ms
+[02:27:58.853] Server  LOG     ✓ Compiled in 25ms
+[02:28:25.223] Server  LOG     ✓ Compiled in 44ms
+[02:28:34.317] Server  ERROR   Invalid hook call. Hooks can only be called inside of the body of a function component. This could happen for one of the following reasons:
+1. You might have mismatching versions of React and the renderer (such as React DOM)
+2. You might be breaking the Rules of Hooks
+3. You might have more than one copy of React in the same app
+See https://react.dev/link/invalid-hook-call for tips about how to debug and fix this problem.
+[02:28:34.547] Server  ERROR   ⨯ TypeError: Cannot read properties of null (reading 'useState')
+[02:28:34.558] Server  WARN    ⚠ Fast Refresh had to perform a full reload when ./src/app/(admin)/admin/dashboard/page.tsx changed. Read more: https://nextjs.org/docs/messages/fast-refresh-reload
+[02:28:34.699] Browser INFO    %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
+[02:28:34.821] Browser ERROR   uncaughtError: Error: Invalid hook call. Hooks can only be called inside of the body of a function component. This could happen for one of the following reasons:
+1. You might have mismatching versions of React and the renderer (such as React DOM)
+2. You might be breaking the Rules of Hooks
+3. You might have more than one copy of React in the same app
+See https://react.dev/link/invalid-hook-call for tips about how to debug and fix this problem.
+[02:28:56.066] Server  WARN    ⚠ Fast Refresh had to perform a full reload due to a runtime error.
+[02:28:56.066] Server  WARN    ⚠ Fast Refresh had to perform a full reload when ./src/app/(admin)/admin/dashboard/page.tsx changed. Read more: https://nextjs.org/docs/messages/fast-refresh-reload
+[02:28:56.066] Server  WARN    ⚠ Fast Refresh had to perform a full reload due to a runtime error.
+[02:28:56.135] Server  LOG     ✓ Compiled in 40ms
+[02:28:56.166] Server  ERROR   Invalid hook call. Hooks can only be called inside of the body of a function component. This could happen for one of the following reasons:
+1. You might have mismatching versions of React and the renderer (such as React DOM)
+2. You might be breaking the Rules of Hooks
+3. You might have more than one copy of React in the same app
+See https://react.dev/link/invalid-hook-call for tips about how to debug and fix this problem.
+[02:28:56.323] Server  ERROR   ⨯ TypeError: Cannot read properties of null (reading 'useState')
+[02:28:56.470] Browser INFO    %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
+[02:28:56.594] Browser ERROR   uncaughtError: Error: Invalid hook call. Hooks can only be called inside of the body of a function component. This could happen for one of the following reasons:
+1. You might have mismatching versions of React and the renderer (such as React DOM)
+2. You might be breaking the Rules of Hooks
+3. You might have more than one copy of React in the same app
+See https://react.dev/link/invalid-hook-call for tips about how to debug and fix this problem.
+[02:29:45.955] Server  WARN    ⚠ Fast Refresh had to perform a full reload due to a runtime error.
+[02:29:45.955] Server  WARN    ⚠ Fast Refresh had to perform a full reload when ./src/app/(admin)/admin/dashboard/page.tsx changed. Read more: https://nextjs.org/docs/messages/fast-refresh-reload
+[02:29:45.956] Server  WARN    ⚠ Fast Refresh had to perform a full reload due to a runtime error.
+[02:29:46.027] Server  LOG     ✓ Compiled in 19ms
+[02:29:46.060] Server  ERROR   Invalid hook call. Hooks can only be called inside of the body of a function component. This could happen for one of the following reasons:
+1. You might have mismatching versions of React and the renderer (such as React DOM)
+2. You might be breaking the Rules of Hooks
+3. You might have more than one copy of React in the same app
+See https://react.dev/link/invalid-hook-call for tips about how to debug and fix this problem.
+[02:29:46.226] Server  ERROR   ⨯ TypeError: Cannot read properties of null (reading 'useState')
+[02:29:46.390] Browser INFO    %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
+[02:29:46.517] Browser ERROR   uncaughtError: Error: Invalid hook call. Hooks can only be called inside of the body of a function component. This could happen for one of the following reasons:
+1. You might have mismatching versions of React and the renderer (such as React DOM)
+2. You might be breaking the Rules of Hooks
+3. You might have more than one copy of React in the same app
+See https://react.dev/link/invalid-hook-call for tips about how to debug and fix this problem.
+[02:32:02.654] Server  WARN    ⚠ Fast Refresh had to perform a full reload due to a runtime error.
+[02:32:02.654] Server  WARN    ⚠ Fast Refresh had to perform a full reload when ./src/app/(admin)/admin/dashboard/page.tsx changed. Read more: https://nextjs.org/docs/messages/fast-refresh-reload
+[02:32:02.655] Server  WARN    ⚠ Fast Refresh had to perform a full reload due to a runtime error.
+[02:32:02.756] Server  LOG     ✓ Compiled in 28ms
+[02:32:02.893] Browser INFO    %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
+[03:10:25.814] Browser INFO    %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
+[03:10:25.940] Browser WARN    Image with src "https://images.unsplash.com/photo-1543353071-873f17a7a088?q=80&w=2070&auto=format&fit=crop" is using quality "90" which is not configured in images.qualities [75]. Please update your config to [75, 90].
+Read more: https://nextjs.org/docs/messages/next-image-unconfigured-qualities
+[03:10:55.187] Browser INFO    %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
+[03:10:55.299] Browser WARN    Image with src "https://images.unsplash.com/photo-1543353071-873f17a7a088?q=80&w=2070&auto=format&fit=crop" is using quality "90" which is not configured in images.qualities [75]. Please update your config to [75, 90].
+Read more: https://nextjs.org/docs/messages/next-image-unconfigured-qualities
+[03:14:10.266] Browser INFO    %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
+[03:14:21.626] Server  WARN    Image with src "https://images.unsplash.com/photo-1543353071-873f17a7a088?q=80&w=2070&auto=format&fit=crop" is using quality "90" which is not configured in images.qualities [75]. Please update your config to [75, 90].
+Read more: https://nextjs.org/docs/messages/next-image-unconfigured-qualities
+[03:14:21.770] Browser INFO    %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
+[03:14:21.896] Browser WARN    Image with src "https://images.unsplash.com/photo-1543353071-873f17a7a088?q=80&w=2070&auto=format&fit=crop" is using quality "90" which is not configured in images.qualities [75]. Please update your config to [75, 90].
+Read more: https://nextjs.org/docs/messages/next-image-unconfigured-qualities
+[03:16:37.928] Browser INFO    %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
+[03:16:38.040] Browser WARN    Image with src "https://images.unsplash.com/photo-1543353071-873f17a7a088?q=80&w=2070&auto=format&fit=crop" is using quality "90" which is not configured in images.qualities [75]. Please update your config to [75, 90].
+Read more: https://nextjs.org/docs/messages/next-image-unconfigured-qualities
+[03:17:39.879] Browser INFO    %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
+[03:17:40.009] Browser WARN    Image with src "https://images.unsplash.com/photo-1543353071-873f17a7a088?q=80&w=2070&auto=format&fit=crop" is using quality "90" which is not configured in images.qualities [75]. Please update your config to [75, 90].
+Read more: https://nextjs.org/docs/messages/next-image-unconfigured-qualities
+[03:19:06.498] Browser INFO    %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
+[03:21:13.751] Server  LOG     ✓ Compiled in 33ms
+[03:21:17.105] Browser INFO    %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
+[03:23:14.536] Browser INFO    %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
+[03:24:37.231] Server  LOG     ✓ Compiled in 63ms
+[03:24:37.519] Server  LOG     ✓ Compiled in 40ms

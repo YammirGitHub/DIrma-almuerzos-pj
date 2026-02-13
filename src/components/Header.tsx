@@ -6,7 +6,8 @@ export default function Header() {
     // ID IMPORTANTE: "app-header" permite controlarlo desde CSS global
     <div
       id="app-header"
-      className="fixed top-5 left-0 right-0 z-40 flex justify-center px-4 pointer-events-none transition-all duration-500"
+      // CAMBIO: Agregamos 'pt-[env(safe-area-inset-top)]' para que respete el Notch
+      className="fixed top-0 left-0 right-0 z-40 flex justify-center px-4 pointer-events-none transition-all duration-500 pt-[calc(env(safe-area-inset-top)+1.25rem)]"
     >
       {/* HEADER ISLA FLOTANTE (Diseño Unificado)
           1. bg-white/80: Transparencia láctea premium.

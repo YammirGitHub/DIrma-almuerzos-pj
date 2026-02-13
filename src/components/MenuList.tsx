@@ -1,17 +1,8 @@
 "use client";
 
 import { useState, useMemo, useEffect } from "react";
-import {
-  Plus,
-  Minus,
-  Utensils,
-  X,
-  ChefHat,
-  Check,
-  Info,
-  Coffee,
-  Trash2,
-} from "lucide-react";
+import { createBrowserClient } from "@supabase/ssr"; // NECESARIO PARA REALTIME
+import { Plus, Minus, Utensils, X, ChefHat, Coffee } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import CheckoutModal from "./CheckoutModal";
 
@@ -26,7 +17,15 @@ const EXTRAS_OPTIONS = {
   cremas: ["Todas las cremas", "Solo Ají", "Sin cremas"],
 };
 
-export default function MenuList({ products }: { products: any[] }) {
+export default function MenuList({
+  products: initialProducts,
+}: {
+  products: any[];
+}) {
+  // 1. ESTADO LOCAL SINCRONIZADO
+  // Usamos los productos iniciales, pero permitimos que cambien en vivo
+  const [products, setProducts] = useState(initialProducts);
+
   const [cart, setCart] = useState<{ [key: string]: any }>({});
   const [filter, setFilter] = useState("all");
   const [isCheckoutOpen, setIsCheckoutOpen] = useState(false);
@@ -38,6 +37,41 @@ export default function MenuList({ products }: { products: any[] }) {
     bebida: "",
     cremas: "",
   });
+
+  // Cliente Supabase para escuchar cambios
+  const supabase = createBrowserClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+  );
+
+  // --- 2. EFECTO REAL-TIME (LA MAGIA) ---
+  useEffect(() => {
+    const channel = supabase
+      .channel("menu_updates_client")
+      .on(
+        "postgres_changes",
+        { event: "*", schema: "public", table: "products" },
+        (payload) => {
+          if (payload.eventType === "UPDATE") {
+            // Si actualizas stock o precio, se refleja al instante
+            setProducts((prev) =>
+              prev.map((p) => (p.id === payload.new.id ? payload.new : p)),
+            );
+          } else if (payload.eventType === "INSERT") {
+            // Si agregas un plato nuevo, aparece solo
+            setProducts((prev) => [payload.new, ...prev]);
+          } else if (payload.eventType === "DELETE") {
+            // Si borras un plato, desaparece
+            setProducts((prev) => prev.filter((p) => p.id !== payload.old.id));
+          }
+        },
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, []);
 
   // Bloquear scroll y ocultar header
   useEffect(() => {
@@ -51,14 +85,20 @@ export default function MenuList({ products }: { products: any[] }) {
     return () => document.body.classList.remove("modal-open");
   }, [selectedProduct, isCheckoutOpen]);
 
-  // --- AGRUPACIÓN ---
+  // --- AGRUPACIÓN CON FILTRO DE DISPONIBILIDAD ---
   const groupedProducts = useMemo(() => {
-    const menus = products.filter((p) => ["menu", "diet"].includes(p.category));
-    const extras = products.filter(
+    // FILTRO CLAVE: Solo mostramos lo que está disponible (is_available === true)
+    // Si quieres que aparezca "Agotado" pero visible, quita el .filter
+    const activeProducts = products.filter((p) => p.is_available === true);
+
+    const menus = activeProducts.filter((p) =>
+      ["menu", "diet"].includes(p.category),
+    );
+    const extras = activeProducts.filter(
       (p) => !["menu", "diet"].includes(p.category),
     );
     return { menus, extras };
-  }, [products]);
+  }, [products]); // Se recalcula cuando products cambia vía Real-time
 
   // --- LÓGICA CARRITO ---
   const addToCart = (product: any, options: any = null) => {
@@ -87,7 +127,6 @@ export default function MenuList({ products }: { products: any[] }) {
     });
   };
 
-  // Calcula cantidad total de UN producto específico en el carrito (para mostrar en la tarjeta)
   const getProductQty = (productId: string) => {
     return Object.values(cart)
       .filter((item: any) => item.product.id === productId)
@@ -103,14 +142,11 @@ export default function MenuList({ products }: { products: any[] }) {
     const isMenu = ["menu", "diet"].includes(product.category);
 
     if (action === "remove") {
-      // Solo para extras (directos), removemos usando el ID del producto
       removeFromCart(product.id);
       return;
     }
 
-    // Acción ADD
     if (isMenu) {
-      // Si es menú, SIEMPRE abre modal para opciones, no agrega directo
       setTempOptions({
         entrada: EXTRAS_OPTIONS.entrada[0],
         bebida: EXTRAS_OPTIONS.bebida[0],
@@ -118,7 +154,6 @@ export default function MenuList({ products }: { products: any[] }) {
       });
       setSelectedProduct(product);
     } else {
-      // Si es Extra, agrega directo
       if (isDirectClick) {
         addToCart(product);
       }
@@ -164,7 +199,7 @@ export default function MenuList({ products }: { products: any[] }) {
         </div>
       </div>
 
-      {/* --- CONTENIDO CON SECCIONES SEPARADAS --- */}
+      {/* --- CONTENIDO DINÁMICO --- */}
       <div className="space-y-12 pb-32 min-h-[300px]">
         {/* SECCIÓN MENÚS */}
         {(filter === "all" || filter === "menu") &&
@@ -190,7 +225,6 @@ export default function MenuList({ products }: { products: any[] }) {
                       handleProductAction(product, "add", false)
                     }
                     onAdd={() => handleProductAction(product, "add", true)}
-                    // Menús no usan remove directo desde la tarjeta porque tienen opciones complejas
                     onRemove={() => {}}
                   />
                 ))}
@@ -218,7 +252,7 @@ export default function MenuList({ products }: { products: any[] }) {
                     key={product.id}
                     product={product}
                     qty={getProductQty(product.id)}
-                    onClickCard={() => {}} // Click en tarjeta de extra no hace nada (para no confundir)
+                    onClickCard={() => {}}
                     onAdd={() => handleProductAction(product, "add", true)}
                     onRemove={() =>
                       handleProductAction(product, "remove", true)
@@ -229,13 +263,21 @@ export default function MenuList({ products }: { products: any[] }) {
             </div>
           )}
 
-        {/* EMPTY STATE */}
-        {((filter === "menu" && groupedProducts.menus.length === 0) ||
-          (filter === "extra" && groupedProducts.extras.length === 0)) && (
-          <div className="text-center py-10 text-gray-400 text-sm">
-            No hay productos en esta categoría.
-          </div>
-        )}
+        {/* EMPTY STATE (Si todo se agota) */}
+        {groupedProducts.menus.length === 0 &&
+          groupedProducts.extras.length === 0 && (
+            <div className="flex flex-col items-center justify-center py-20 text-center animate-in zoom-in">
+              <div className="bg-gray-100 p-6 rounded-full mb-4">
+                <Utensils size={40} className="text-gray-300" />
+              </div>
+              <h3 className="text-lg font-bold text-gray-500">
+                ¡Se acabó todo! 🙈
+              </h3>
+              <p className="text-sm text-gray-400">
+                Vuelve mañana para más sazón.
+              </p>
+            </div>
+          )}
       </div>
 
       {/* --- MODAL DETALLE --- */}
@@ -419,11 +461,13 @@ function ProductCard({ product, qty, onClickCard, onAdd, onRemove }: any) {
   return (
     <motion.div
       layout
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
+      initial={{ opacity: 0, scale: 0.9 }}
+      animate={{ opacity: 1, scale: 1 }}
+      exit={{ opacity: 0, scale: 0.9 }} // Animación de salida cuando se deshabilita
       onClick={onClickCard}
       className={`group bg-white rounded-[1.5rem] p-3 shadow-sm border border-gray-100 transition-all hover:shadow-xl hover:shadow-orange-500/5 hover:border-orange-200 flex gap-4 h-full relative overflow-hidden ${isMenu ? "cursor-pointer" : "cursor-default"}`}
     >
+      {/* ... (contenido de la tarjeta igual que antes) ... */}
       <div className="relative h-28 w-28 shrink-0 overflow-hidden rounded-xl bg-gray-100 shadow-inner">
         <img
           src={
@@ -439,7 +483,6 @@ function ProductCard({ product, qty, onClickCard, onAdd, onRemove }: any) {
           </div>
         )}
 
-        {/* Badge de Cantidad (Solo aparece si es Menú y tiene cantidad) */}
         {isMenu && qty > 0 && (
           <div className="absolute top-2 right-2 bg-orange-600 text-white w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold shadow-md animate-in zoom-in">
             {qty}
@@ -462,9 +505,7 @@ function ProductCard({ product, qty, onClickCard, onAdd, onRemove }: any) {
             S/ {product.price.toFixed(2)}
           </span>
 
-          {/* CONTROLES */}
           {isMenu ? (
-            // CASO MENÚ: Solo botón +, siempre abre modal
             <button
               onClick={(e) => {
                 e.stopPropagation();
@@ -474,9 +515,7 @@ function ProductCard({ product, qty, onClickCard, onAdd, onRemove }: any) {
             >
               <Plus size={18} strokeWidth={3} />
             </button>
-          ) : // CASO EXTRAS (GASEOSA): Contador inteligente
-          qty > 0 ? (
-            // --- CORRECCIÓN AQUÍ: CAMBIADO A NARANJA ---
+          ) : qty > 0 ? (
             <div
               className="flex items-center bg-orange-600 text-white rounded-full h-9 shadow-lg shadow-orange-200 animate-in fade-in zoom-in duration-200"
               onClick={(e) => e.stopPropagation()}
@@ -496,7 +535,6 @@ function ProductCard({ product, qty, onClickCard, onAdd, onRemove }: any) {
               </button>
             </div>
           ) : (
-            // Botón inicial normal
             <button
               onClick={(e) => {
                 e.stopPropagation();

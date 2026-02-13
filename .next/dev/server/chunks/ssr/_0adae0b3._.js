@@ -29,7 +29,7 @@ async function getSupabase() {
                 try {
                     cookiesToSet.forEach(({ name, value, options })=>cookieStore.set(name, value, options));
                 } catch  {
-                // Server Component context
+                // Contexto de Server Component
                 }
             }
         }
@@ -37,28 +37,48 @@ async function getSupabase() {
 }
 async function createOrder(prevState, formData) {
     const supabase = await getSupabase();
-    // 1. Extraer datos del FormData
+    // 1. EXTRAER DATOS DEL FORMULARIO
     const rawItems = formData.get('items');
     const items = JSON.parse(rawItems);
     const total = parseFloat(formData.get('total'));
-    const method = formData.get('payment_method');
-    const opCode = formData.get('operation_code');
-    const cashAmount = formData.get('cash_amount');
-    // Datos del Cliente (Podrían venir de cookies si ya pidió antes)
+    const method = formData.get('payment_method')// 'yape' | 'monthly'
+    ;
     const name = formData.get('name');
     const office = formData.get('office');
     const phone = formData.get('phone');
-    // 2. Definir estado inicial del pago
-    let paymentStatus = 'unpaid';
-    let changeNeeded = null;
-    if (method === 'yape') {
-        paymentStatus = 'verifying'; // A la cola de la señora
-    } else if (method === 'cash') {
-        if (cashAmount) {
-            changeNeeded = parseFloat(cashAmount) - total;
-        }
+    const opCode = formData.get('operation_code');
+    // 2. VALIDACIÓN DE SEGURIDAD (LISTA NEGRA)
+    // Buscamos si el cliente ya existe por su teléfono
+    const { data: customer } = await supabase.from('customers').select('is_blacklisted').eq('phone', phone).single();
+    // SI ESTÁ EN LISTA NEGRA: Bloqueamos todo tipo de pedido
+    if (customer?.is_blacklisted) {
+        return {
+            success: false,
+            message: 'Usuario con restricciones administrativas. Por favor contacte soporte.'
+        };
     }
-    // 3. Insertar en Supabase
+    // 3. REGISTRO/ACTUALIZACIÓN DE CLIENTE (CRÍTICO PARA EL REPORTE)
+    // Usamos 'upsert': Si no existe, lo crea. Si existe, actualiza nombre y oficina.
+    // Esto asegura que tu base de datos de clientes siempre tenga los datos frescos.
+    const { error: customerError } = await supabase.from('customers').upsert({
+        phone: phone,
+        full_name: name,
+        office: office
+    }, {
+        onConflict: 'phone'
+    });
+    if (customerError) {
+        console.error('Error actualizando cliente:', customerError);
+    // No detenemos el pedido, pero lo logueamos
+    }
+    // 4. DEFINIR ESTADO DEL PAGO
+    let paymentStatus = 'unpaid';
+    if (method === 'yape') {
+        paymentStatus = 'verifying'; // Requiere que revises el código de operación
+    } else if (method === 'monthly') {
+        paymentStatus = 'on_account'; // <--- ESTADO CLAVE PARA TU REPORTE DE DEUDA
+    }
+    // 5. INSERTAR EL PEDIDO EN SUPABASE
     const { data, error } = await supabase.from('orders').insert({
         customer_name: name,
         customer_phone: phone,
@@ -68,17 +88,17 @@ async function createOrder(prevState, formData) {
         payment_method: method,
         payment_status: paymentStatus,
         operation_code: opCode || null,
-        cash_change_amount: changeNeeded,
-        status: 'pending'
+        is_monthly_account: method === 'monthly',
+        status: 'pending' // Estado de la cocina (Pendiente, Cocinando, Entregado)
     }).select().single();
     if (error) {
-        console.error(error);
+        console.error('Error insertando pedido:', error);
         return {
             success: false,
-            message: 'Error guardando pedido'
+            message: 'Ocurrió un error al guardar el pedido. Inténtalo de nuevo.'
         };
     }
-    // 4. Redirigir a página de éxito
+    // 6. REDIRECCIÓN A PÁGINA DE ÉXITO
     (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$client$2f$components$2f$navigation$2e$react$2d$server$2e$js__$5b$app$2d$rsc$5d$__$28$ecmascript$29$__["redirect"])(`/pedido/${data.id}`);
 }
 ;

@@ -6,7 +6,6 @@ import {
   X,
   ShoppingBag,
   CreditCard,
-  Banknote,
   User,
   Phone,
   MapPin,
@@ -14,6 +13,8 @@ import {
   ChevronRight,
   Loader2,
   Trash2,
+  CalendarDays,
+  AlertCircle,
 } from "lucide-react";
 
 export default function CheckoutModal({
@@ -57,10 +58,7 @@ export default function CheckoutModal({
         onClick={close}
       />
 
-      {/* 2. EL MODAL (CONTENEDOR)
-          - h-[92vh]: En móvil dejamos un poquito de aire arriba para que se vea el fondo borroso.
-          - rounded-t-[2.5rem]: Curva suave estilo App moderna.
-      */}
+      {/* 2. EL MODAL (CONTENEDOR) */}
       <div className="relative w-full max-w-lg bg-[#F8F9FA] sm:rounded-[2.5rem] rounded-t-[2.5rem] shadow-2xl flex flex-col h-[92vh] sm:h-[85vh] overflow-hidden animate-in slide-in-from-bottom-12 duration-300 border border-white/40 ring-1 ring-black/5">
         {/* Barra de agarre visual (Affordance) */}
         <div className="absolute top-0 left-0 right-0 h-6 z-30 flex justify-center pt-2 pointer-events-none">
@@ -227,11 +225,14 @@ export default function CheckoutModal({
               <h3 className="text-xs font-black text-gray-400 uppercase tracking-widest pl-2">
                 Método de Pago
               </h3>
+
+              {/* GRID DE 2 COLUMNAS (YAPE y MENSUAL) */}
               <div className="grid grid-cols-2 gap-3">
+                {/* 1. YAPE */}
                 <button
                   type="button"
                   onClick={() => setMethod("yape")}
-                  className={`relative p-4 rounded-2xl border transition-all duration-300 flex flex-col items-center gap-2 ${
+                  className={`relative p-4 rounded-2xl border transition-all duration-300 flex flex-col items-center justify-center gap-2 ${
                     method === "yape"
                       ? "bg-purple-600 border-purple-600 text-white shadow-lg shadow-purple-200"
                       : "bg-white border-gray-200 text-gray-400 hover:border-purple-200 hover:bg-purple-50"
@@ -241,32 +242,34 @@ export default function CheckoutModal({
                     size={24}
                     className={method === "yape" ? "stroke-2" : "stroke-1"}
                   />
-                  <span className="text-[10px] font-black uppercase tracking-wider">
+                  <span className="text-[10px] font-black uppercase text-center leading-tight tracking-wider">
                     Yape / Plin
                   </span>
                 </button>
+
+                {/* 2. A FIN DE MES */}
                 <button
                   type="button"
-                  onClick={() => setMethod("cash")}
-                  className={`relative p-4 rounded-2xl border transition-all duration-300 flex flex-col items-center gap-2 ${
-                    method === "cash"
-                      ? "bg-emerald-600 border-emerald-600 text-white shadow-lg shadow-emerald-200"
-                      : "bg-white border-gray-200 text-gray-400 hover:border-emerald-200 hover:bg-emerald-50"
+                  onClick={() => setMethod("monthly")}
+                  className={`relative p-4 rounded-2xl border transition-all duration-300 flex flex-col items-center justify-center gap-2 ${
+                    method === "monthly"
+                      ? "bg-blue-600 border-blue-600 text-white shadow-lg shadow-blue-200"
+                      : "bg-white border-gray-200 text-gray-400 hover:border-blue-200 hover:bg-blue-50"
                   }`}
                 >
-                  <Banknote
+                  <CalendarDays
                     size={24}
-                    className={method === "cash" ? "stroke-2" : "stroke-1"}
+                    className={method === "monthly" ? "stroke-2" : "stroke-1"}
                   />
-                  <span className="text-[10px] font-black uppercase tracking-wider">
-                    Efectivo
+                  <span className="text-[10px] font-black uppercase text-center leading-tight tracking-wider">
+                    A Fin de Mes
                   </span>
                 </button>
               </div>
 
               {/* DETALLES DE PAGO */}
               <div className="animate-in fade-in slide-in-from-top-2 duration-300">
-                {method === "yape" ? (
+                {method === "yape" && (
                   <div className="bg-white p-5 rounded-3xl border border-purple-100 shadow-sm">
                     <div className="text-center mb-4">
                       <p className="text-xs text-purple-400 font-bold uppercase tracking-widest mb-1">
@@ -297,27 +300,43 @@ export default function CheckoutModal({
                       />
                     </div>
                   </div>
-                ) : (
-                  <div className="bg-white p-5 rounded-3xl border border-emerald-100 shadow-sm text-center">
-                    <p className="text-xs text-emerald-600 font-bold uppercase tracking-wider mb-2">
-                      ¿Con cuánto pagarás?
-                    </p>
-                    <div className="relative max-w-[150px] mx-auto">
-                      <span className="absolute left-3 top-1/2 -translate-y-1/2 text-emerald-600 font-bold">
-                        S/
-                      </span>
-                      {/* Input Efectivo - Safe Zoom */}
-                      <input
-                        name="cash_amount"
-                        type="number"
-                        step="0.10"
-                        placeholder="0.00"
-                        className="w-full pl-8 pr-4 py-2 bg-emerald-50 border-0 rounded-xl focus:ring-2 focus:ring-emerald-500 outline-none text-center font-black text-xl text-emerald-900 placeholder:text-emerald-300/50 text-base sm:text-xl"
-                      />
+                )}
+
+                {/* DETALLE A FIN DE MES */}
+                {method === "monthly" && (
+                  <div className="bg-white p-5 rounded-3xl border border-blue-100 shadow-sm text-center relative overflow-hidden">
+                    {/* Decoración de fondo */}
+                    <div className="absolute top-0 right-0 w-16 h-16 bg-blue-50 rounded-bl-full -mr-8 -mt-8 opacity-50"></div>
+
+                    <div className="relative z-10">
+                      <p className="text-xs text-blue-600 font-bold uppercase tracking-wider mb-2 flex items-center justify-center gap-1">
+                        <CalendarDays size={14} /> Pago Programado
+                      </p>
+
+                      <div className="bg-blue-50 rounded-xl p-3 mb-3 border border-blue-100">
+                        <p className="text-2xl font-black text-blue-900 tracking-tighter">
+                          S/ {total.toFixed(2)}
+                        </p>
+                        <p className="text-[10px] text-blue-400 font-bold uppercase">
+                          Se suma a tu cuenta
+                        </p>
+                      </div>
+
+                      <div className="flex items-start gap-2 text-left bg-gray-50 p-2.5 rounded-lg border border-gray-100">
+                        <AlertCircle
+                          size={14}
+                          className="text-gray-400 mt-0.5 shrink-0"
+                        />
+                        <p className="text-[10px] text-gray-500 leading-tight">
+                          Al confirmar, este monto se registrará en tu cuenta
+                          corriente asociada al celular{" "}
+                          <span className="font-bold text-gray-700">
+                            ingresado arriba
+                          </span>
+                          .
+                        </p>
+                      </div>
                     </div>
-                    <p className="text-[10px] text-gray-400 mt-2">
-                      Llevaremos tu vuelto exacto.
-                    </p>
                   </div>
                 )}
               </div>

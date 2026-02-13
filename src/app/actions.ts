@@ -19,7 +19,7 @@ async function getSupabase() {
               cookieStore.set(name, value, options)
             )
           } catch {
-            // Server Component context
+            // Contexto de Server Component
           }
         },
       },
@@ -30,32 +30,60 @@ async function getSupabase() {
 export async function createOrder(prevState: any, formData: FormData) {
   const supabase = await getSupabase()
   
-  // 1. Extraer datos del FormData
+  // 1. EXTRAER DATOS DEL FORMULARIO
   const rawItems = formData.get('items') as string
   const items = JSON.parse(rawItems)
   const total = parseFloat(formData.get('total') as string)
-  const method = formData.get('payment_method') as string
-  const opCode = formData.get('operation_code') as string
-  const cashAmount = formData.get('cash_amount') as string
+  const method = formData.get('payment_method') as string // 'yape' | 'monthly'
   
-  // Datos del Cliente (Podrían venir de cookies si ya pidió antes)
   const name = formData.get('name') as string
   const office = formData.get('office') as string
   const phone = formData.get('phone') as string
-
-  // 2. Definir estado inicial del pago
-  let paymentStatus = 'unpaid'
-  let changeNeeded = null
+  const opCode = formData.get('operation_code') as string
   
-  if (method === 'yape') {
-    paymentStatus = 'verifying' // A la cola de la señora
-  } else if (method === 'cash') {
-    if (cashAmount) {
-        changeNeeded = parseFloat(cashAmount) - total
+  // 2. VALIDACIÓN DE SEGURIDAD (LISTA NEGRA)
+  // Buscamos si el cliente ya existe por su teléfono
+  const { data: customer } = await supabase
+    .from('customers')
+    .select('is_blacklisted')
+    .eq('phone', phone)
+    .single()
+
+  // SI ESTÁ EN LISTA NEGRA: Bloqueamos todo tipo de pedido
+  if (customer?.is_blacklisted) {
+    return {
+      success: false,
+      message: 'Usuario con restricciones administrativas. Por favor contacte soporte.'
     }
   }
 
-  // 3. Insertar en Supabase
+  // 3. REGISTRO/ACTUALIZACIÓN DE CLIENTE (CRÍTICO PARA EL REPORTE)
+  // Usamos 'upsert': Si no existe, lo crea. Si existe, actualiza nombre y oficina.
+  // Esto asegura que tu base de datos de clientes siempre tenga los datos frescos.
+  const { error: customerError } = await supabase
+    .from('customers')
+    .upsert({ 
+      phone: phone, // Clave única
+      full_name: name, 
+      office: office
+      // Nota: No tocamos 'is_blacklisted', se mantiene su valor actual o false por defecto
+    }, { onConflict: 'phone' })
+
+  if (customerError) {
+    console.error('Error actualizando cliente:', customerError)
+    // No detenemos el pedido, pero lo logueamos
+  }
+
+  // 4. DEFINIR ESTADO DEL PAGO
+  let paymentStatus = 'unpaid'
+  
+  if (method === 'yape') {
+    paymentStatus = 'verifying' // Requiere que revises el código de operación
+  } else if (method === 'monthly') {
+    paymentStatus = 'on_account' // <--- ESTADO CLAVE PARA TU REPORTE DE DEUDA
+  }
+
+  // 5. INSERTAR EL PEDIDO EN SUPABASE
   const { data, error } = await supabase.from('orders').insert({
     customer_name: name,
     customer_phone: phone,
@@ -65,15 +93,15 @@ export async function createOrder(prevState: any, formData: FormData) {
     payment_method: method,
     payment_status: paymentStatus,
     operation_code: opCode || null,
-    cash_change_amount: changeNeeded,
-    status: 'pending'
+    is_monthly_account: method === 'monthly', // Flag útil para filtros rápidos
+    status: 'pending' // Estado de la cocina (Pendiente, Cocinando, Entregado)
   }).select().single()
 
   if (error) {
-    console.error(error)
-    return { success: false, message: 'Error guardando pedido' }
+    console.error('Error insertando pedido:', error)
+    return { success: false, message: 'Ocurrió un error al guardar el pedido. Inténtalo de nuevo.' }
   }
 
-  // 4. Redirigir a página de éxito
+  // 6. REDIRECCIÓN A PÁGINA DE ÉXITO
   redirect(`/pedido/${data.id}`)
 }

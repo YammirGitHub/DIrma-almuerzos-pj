@@ -1,56 +1,50 @@
 @import "tailwindcss";
 
-/* --- 1. CORE: CONFIGURACIÓN APP NATIVA --- */
+/* --- 1. CONFIGURACIÓN BASE APP NATIVA --- */
 html {
-  /* Scroll suave y físico */
   scroll-behavior: smooth;
-  /* IMPORTANTE: Permite que el contenido rebote suavemente (feeling nativo) */
-  /* Si no te gusta el rebote gris, usa 'none', pero para inmersión 'auto' es mejor si controlamos el color */
-  overscroll-behavior-y: auto;
+  overscroll-behavior-y: none;
+  /* Evita rebote blanco feo */
   touch-action: manipulation;
   -webkit-text-size-adjust: 100%;
   height: 100%;
-  /* Color de fondo base (Gris muy suave para que el rebote sea limpio) */
-  background-color: #F8F9FA;
+  background-color: #111827;
+  /* FONDO OSCURO (Clave para que el notch se vea negro) */
 }
 
 body {
   min-height: 100%;
   width: 100%;
   background-color: #F8F9FA;
+  /* El fondo real de la app */
 
-  /* UX: Renderizado de fuentes premium */
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-
-  /* Scroll rápido en iOS */
   -webkit-overflow-scrolling: touch;
 
-  /* Asegura que el contenido fluya detrás de las áreas seguras (Notch/Barra) */
-  padding-top: env(safe-area-inset-top);
+  /* --- ERROR CORREGIDO: --- */
+  /* Quitamos 'padding-top' para que el Hero entre en la zona de la hora/batería */
+  padding-top: 0;
   padding-bottom: env(safe-area-inset-bottom);
-}
 
-/* --- 2. MÁSCARA DE SCROLL INFINITO (EL EFECTO QUE PIDES) --- */
-/* Esta clase se aplicará al contenedor principal en layout.tsx */
-.scroll-mask-vignette {
-  /* Crea un degradado de transparencia arriba y abajo */
+  /* --- EFECTO VIGNETTE (Bordes Difuminados) --- */
+  /* Esto hace que el contenido se desvanezca al llegar muy arriba o muy abajo */
   mask-image: linear-gradient(to bottom,
       transparent 0%,
-      black 40px,
-      /* Empieza a verse bien después de la barra de estado */
+      black 15px,
+      /* Se empieza a ver suavemente después del borde superior */
       black calc(100% - 40px),
       transparent 100%
       /* Se desvanece al final */
     );
   -webkit-mask-image: linear-gradient(to bottom,
       transparent 0%,
-      black 40px,
+      black 15px,
       black calc(100% - 40px),
       transparent 100%);
 }
 
-/* --- 3. SCROLLBAR INVISIBLE --- */
+/* Scrollbar invisible */
 ::-webkit-scrollbar {
   display: none;
 }
@@ -59,12 +53,12 @@ html {
   scrollbar-width: none;
 }
 
-/* --- 4. UX TÁCTIL --- */
+/* UX Táctil */
 * {
   -webkit-tap-highlight-color: transparent;
 }
 
-/* --- 5. MODAL (BLOQUEO TOTAL) --- */
+/* Modal Block */
 body.modal-open {
   overflow: hidden !important;
   position: fixed;
