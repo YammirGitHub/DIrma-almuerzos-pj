@@ -129,7 +129,7 @@ export default async function Home() {
             </p>
           </div>
 
-          {/* 2. Tarjeta Cantidad (Solo Móvil - Naranja) */}
+          {/* 2. Tarjeta Cantidad (REGRESÓ LA TARJETA NARANJA EN MÓVIL) */}
           <div className="md:hidden col-span-1 bg-orange-500 text-white p-4 rounded-[1.5rem] shadow-xl shadow-orange-500/20 flex flex-col justify-center items-center text-center gap-1 border border-orange-400">
             <div className="flex items-center gap-1.5 mb-0.5 justify-center opacity-90">
               <div className="p-1 bg-white/20 rounded-lg">
@@ -147,14 +147,14 @@ export default async function Home() {
             </div>
           </div>
 
-          {/* 3. Tarjeta Fecha (Grande & Premium) */}
+          {/* 3. Tarjeta Fecha (Negra) */}
           <div className="col-span-2 bg-gradient-to-br from-[#111111] via-black to-[#050505] rounded-[1.5rem] md:rounded-[2rem] p-5 md:px-8 md:py-6 flex items-center justify-between text-white shadow-2xl shadow-gray-900/50 relative overflow-hidden group border border-white/5">
-            {/* EFECTO DE FONDO (Glow Naranja) */}
+            {/* EFECTO DE FONDO */}
             <div className="absolute -right-20 -top-20 w-64 h-64 bg-orange-600 rounded-full blur-[80px] opacity-[0.15] group-hover:opacity-25 transition-opacity duration-700 pointer-events-none"></div>
 
             {/* CONTENEDOR PRINCIPAL */}
             <div className="relative z-10 flex items-center justify-between w-full">
-              {/* --- GRUPO IZQUIERDA: Fecha + Títulos --- */}
+              {/* --- GRUPO IZQUIERDA --- */}
               <div className="flex items-center gap-4 md:gap-6">
                 <div className="bg-white/5 backdrop-blur-xl h-16 w-16 md:h-20 md:w-20 rounded-2xl md:rounded-3xl flex flex-col items-center justify-center border border-white/10 shadow-inner shrink-0 group-hover:bg-white/10 transition-colors">
                   <span className="text-2xl md:text-3xl font-black text-white leading-none tracking-tighter">
@@ -179,8 +179,8 @@ export default async function Home() {
               </div>
 
               {/* --- GRUPO DERECHA: Contador --- */}
-              {/* SOLUCIÓN AL ESPACIO VACÍO: Quitamos 'hidden' para que se vea en móvil también */}
-              <div className="flex flex-col items-end gap-1">
+              {/* CORRECCIÓN: 'hidden md:flex' para que SOLO aparezca en PC y NO en móvil */}
+              <div className="hidden md:flex flex-col items-end gap-1">
                 <div className="flex items-center gap-2 md:gap-3 bg-white/5 hover:bg-white/10 px-3 py-2 md:px-5 md:py-3 rounded-2xl border border-white/5 backdrop-blur-md transition-all shadow-lg shadow-black/20">
                   <div className="bg-orange-500/20 p-1.5 rounded-full">
                     <Sparkles
@@ -192,7 +192,6 @@ export default async function Home() {
                     <span className="text-lg md:text-2xl font-black text-white tracking-tight">
                       {products?.length || 0}
                     </span>
-                    {/* Texto pequeño visible en todos para mantener balance */}
                     <span className="text-[9px] font-bold text-gray-400 uppercase tracking-wider">
                       Disp.
                     </span>

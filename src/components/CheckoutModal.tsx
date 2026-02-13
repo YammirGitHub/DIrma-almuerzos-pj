@@ -148,7 +148,9 @@ export default function CheckoutModal({
                       </div>
                     </div>
 
-                    <div className="flex flex-col items-end gap-1">
+                    {/* 'hidden md:flex' asegura que en móvil NO se vea, porque ya está la tarjeta naranja arriba */}
+                    <div className="hidden md:flex flex-col items-end gap-1">
+                      {" "}
                       <span className="font-mono font-bold text-gray-900 text-sm">
                         S/ {(item.price * item.qty).toFixed(2)}
                       </span>
