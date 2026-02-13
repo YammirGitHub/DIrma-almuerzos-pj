@@ -1,28 +1,21 @@
 {
   "node": {
-    "60264bf2b03584915ec2fa767e0f7ccf8a9e332a9e": {
+    "60a26dccc6dfd1fb3040737112528aa700aae38268": {
       "workers": {
         "app/(client)/page": {
           "moduleId": "[project]/.next-internal/server/app/(client)/page/actions.js { ACTIONS_MODULE0 => \"[project]/src/app/actions.ts [app-rsc] (ecmascript)\" } [app-rsc] (server actions loader, ecmascript)",
           "async": false,
           "exportedName": "createOrder",
           "filename": "src/app/actions.ts"
-        },
-        "app/page": {
-          "moduleId": "[project]/.next-internal/server/app/page/actions.js { ACTIONS_MODULE0 => \"[project]/src/app/actions.ts [app-rsc] (ecmascript)\" } [app-rsc] (server actions loader, ecmascript)",
-          "async": false,
-          "exportedName": "createOrder",
-          "filename": "src/app/actions.ts"
         }
       },
       "layer": {
-        "app/(client)/page": "action-browser",
-        "app/page": "action-browser"
+        "app/(client)/page": "action-browser"
       },
       "filename": "src/app/actions.ts",
       "exportedName": "createOrder"
     }
   },
   "edge": {},
-  "encryptionKey": "/VG/Kiec2UwAlJwePWJaOXQ/fJqQod/9hYYAbV11d80="
+  "encryptionKey": "Q8pj//6M3rmBMCdgYKHtL6ZNSYTxUjTwZFgjGEh/d4Q="
 }

@@ -5,26 +5,36 @@ import "./globals.css";
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: "D' Irma",
-  description: "Sazón Judicial",
+  title: "D' Irma | Sazón Judicial",
+  description: "Gastronomía casera premium exclusiva para el Poder Judicial.",
+  // Agregamos iconos para que se vea bien al guardar en pantalla de inicio (iOS/Android)
+  icons: {
+    icon: "/favicon.ico", // Asegúrate de tener este archivo o bórralo si no
+    apple: "/apple-touch-icon.png",
+  },
 };
 
 export const viewport: Viewport = {
   width: "device-width",
   initialScale: 1,
-  maximumScale: 1,
-  userScalable: false,
+  maximumScale: 5, // Permitir zoom por accesibilidad (Mejor práctica UI/UX)
+  // interactiveWidget soluciona problemas cuando sale el teclado en el checkout
+  interactiveWidget: "resizes-content",
+  themeColor: "#F8F9FA", // El color de la barra de estado del navegador combina con tu fondo
 };
 
-// Este layout aplica a TANTO cliente COMO admin
 export default function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="es" className="antialiased">
-      <body className={`${inter.className} min-h-screen`}>{children}</body>
+    <html lang="es" className="antialiased scroll-smooth">
+      <body
+        className={`${inter.className} min-h-screen bg-[#F8F9FA] text-gray-900`}
+      >
+        {children}
+      </body>
     </html>
   );
 }
