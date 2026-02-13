@@ -1,50 +1,33 @@
 @import "tailwindcss";
 
-/* --- 1. CONFIGURACIÓN BASE APP NATIVA --- */
+/* --- CONFIGURACIÓN BASE APP NATIVA PREMIUM --- */
 html {
   scroll-behavior: smooth;
-  overscroll-behavior-y: none;
-  /* Evita rebote blanco feo */
+  /* El rebote elástico nativo de iOS se siente premium */
+  overscroll-behavior-y: auto;
   touch-action: manipulation;
   -webkit-text-size-adjust: 100%;
   height: 100%;
-  background-color: #111827;
-  /* FONDO OSCURO (Clave para que el notch se vea negro) */
+  /* Fondo negro profundo para que el 'overscroll' superior se vea integrado al Hero */
+  background-color: #0f172a;
 }
 
 body {
   min-height: 100%;
   width: 100%;
+  /* El fondo real del contenido */
   background-color: #F8F9FA;
-  /* El fondo real de la app */
 
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   -webkit-overflow-scrolling: touch;
 
-  /* --- ERROR CORREGIDO: --- */
-  /* Quitamos 'padding-top' para que el Hero entre en la zona de la hora/batería */
-  padding-top: 0;
+  /* Padding seguro para iPhone X+ (Notch y Home Bar) */
+  padding-top: env(safe-area-inset-top);
   padding-bottom: env(safe-area-inset-bottom);
-
-  /* --- EFECTO VIGNETTE (Bordes Difuminados) --- */
-  /* Esto hace que el contenido se desvanezca al llegar muy arriba o muy abajo */
-  mask-image: linear-gradient(to bottom,
-      transparent 0%,
-      black 15px,
-      /* Se empieza a ver suavemente después del borde superior */
-      black calc(100% - 40px),
-      transparent 100%
-      /* Se desvanece al final */
-    );
-  -webkit-mask-image: linear-gradient(to bottom,
-      transparent 0%,
-      black 15px,
-      black calc(100% - 40px),
-      transparent 100%);
 }
 
-/* Scrollbar invisible */
+/* --- SCROLLBAR INVISIBLE (UX Móvil) --- */
 ::-webkit-scrollbar {
   display: none;
 }
@@ -53,14 +36,25 @@ html {
   scrollbar-width: none;
 }
 
-/* UX Táctil */
+/* --- OPTIMIZACIONES --- */
 * {
   -webkit-tap-highlight-color: transparent;
 }
 
-/* Modal Block */
-body.modal-open {
-  overflow: hidden !important;
-  position: fixed;
-  width: 100%;
+img {
+  -webkit-user-drag: none;
+  user-select: none;
+}
+
+/* Bloqueo para modales */
+/* Esto hace que el Header suba y desaparezca suavemente cuando abres un plato o el checkout */
+body.modal-open #app-header {
+  transform: translateY(-150%);
+  /* Lo mueve hacia arriba fuera de la pantalla */
+  opacity: 0;
+  /* Lo hace invisible */
+  pointer-events: none;
+  /* Evita clicks accidentales */
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  /* Animación suave */
 }

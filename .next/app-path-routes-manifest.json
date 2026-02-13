@@ -1,9 +1,0 @@
-{
-  "/(admin)/admin/dashboard/page": "/admin/dashboard",
-  "/(admin)/admin/page": "/admin",
-  "/(client)/page": "/",
-  "/_global-error/page": "/_global-error",
-  "/_not-found/page": "/_not-found",
-  "/favicon.ico/route": "/favicon.ico",
-  "/pedido/[id]/page": "/pedido/[id]"
-}

@@ -24,6 +24,8 @@ import {
   Search,
   Coffee,
   Salad,
+  Soup,
+  GlassWater,
 } from "lucide-react";
 
 // Tipado estricto
@@ -62,8 +64,6 @@ export default function AdminDashboard() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [processingId, setProcessingId] = useState<string | null>(null);
   const [togglingId, setTogglingId] = useState<string | null>(null);
-
-  // Estados del Modal Eliminar
   const [isDeleteOpen, setIsDeleteOpen] = useState(false);
   const [orderToDelete, setOrderToDelete] = useState<string | null>(null);
 
@@ -85,6 +85,7 @@ export default function AdminDashboard() {
 
   // --- 2. EFECTOS ---
   useEffect(() => {
+    // Sonido de notificación
     audioRef.current = new Audio(
       "https://cdn.freesound.org/previews/536/536108_1415754-lq.mp3",
     );
@@ -95,14 +96,13 @@ export default function AdminDashboard() {
       } = await supabase.auth.getSession();
       if (!session) router.push("/admin");
     };
-
     checkSession();
     fetchOrders();
     fetchProducts();
 
-    // REAL-TIME
+    // --- REAL-TIME ENGINE ---
     const channel = supabase
-      .channel("admin_dashboard_realtime")
+      .channel("admin_realtime_v2") // Cambié el nombre para forzar reconexión limpia
       .on(
         "postgres_changes",
         { event: "*", schema: "public", table: "orders" },
@@ -120,35 +120,41 @@ export default function AdminDashboard() {
     };
   }, []);
 
-  // --- LOGICA REAL-TIME ---
+  // --- LÓGICA REAL-TIME PEDIDOS (CORREGIDA) ---
   const handleRealtimeOrder = (payload: any) => {
+    console.log("Cambio en Pedidos:", payload); // Para depuración
+
     if (payload.eventType === "INSERT") {
+      // NUEVO PEDIDO: Lo agregamos arriba y suena la campana
       setOrders((prev) => [payload.new, ...prev]);
       audioRef.current?.play().catch(() => {});
     } else if (payload.eventType === "UPDATE") {
+      // ACTUALIZACIÓN (Ej: Entregado): Buscamos y reemplazamos
       setOrders((prev) =>
         prev.map((o) =>
           o.id === payload.new.id ? { ...o, ...payload.new } : o,
         ),
       );
+    } else if (payload.eventType === "DELETE") {
+      // ELIMINACIÓN: Lo sacamos de la lista al instante
+      setOrders((prev) => prev.filter((o) => o.id !== payload.old.id));
     }
   };
 
+  // --- LÓGICA REAL-TIME PRODUCTOS ---
   const handleRealtimeProduct = (payload: any) => {
     if (payload.eventType === "INSERT") {
       setProducts((prev) => [payload.new, ...prev]);
     } else if (payload.eventType === "UPDATE") {
       setProducts((prev) =>
-        prev.map((p) =>
-          p.id === payload.new.id ? { ...p, ...payload.new } : p,
-        ),
+        prev.map((p) => (p.id === payload.new.id ? payload.new : p)),
       );
     } else if (payload.eventType === "DELETE") {
       setProducts((prev) => prev.filter((p) => p.id !== payload.old.id));
     }
   };
 
-  // --- FETCHING ---
+  // --- FETCHING INICIAL ---
   const fetchOrders = async () => {
     const { data } = await supabase
       .from("orders")
@@ -165,7 +171,7 @@ export default function AdminDashboard() {
     if (data) setProducts(data);
   };
 
-  // --- HANDLERS PRODUCTOS ---
+  // --- ACCIONES DE PRODUCTOS ---
   const handleAddProduct = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
@@ -197,20 +203,19 @@ export default function AdminDashboard() {
   const toggleProductStatus = async (id: string, currentStatus: boolean) => {
     setTogglingId(id);
     const newStatus = !currentStatus;
-    // Optimistic
+    // Optimistic Update
     setProducts(
       products.map((p) =>
         p.id === id ? { ...p, is_available: newStatus } : p,
       ),
     );
-    // DB
+
     const { error } = await supabase
       .from("products")
       .update({ is_available: newStatus })
       .eq("id", id);
-
     if (error) {
-      alert("Error actualizando stock.");
+      alert("Error. Revisa tu conexión.");
       // Rollback
       setProducts(
         products.map((p) =>
@@ -222,38 +227,39 @@ export default function AdminDashboard() {
   };
 
   const handleDeleteProduct = async (id: string) => {
-    if (!confirm("¿Seguro que quieres eliminar este plato?")) return;
+    if (!confirm("¿Borrar plato permanentemente?")) return;
     const prevProducts = [...products];
     setProducts(products.filter((p) => p.id !== id));
 
     const { error } = await supabase.from("products").delete().eq("id", id);
     if (error) {
-      alert("Error al eliminar: " + error.message);
+      alert("Error al eliminar");
       setProducts(prevProducts);
     }
   };
 
-  // --- HANDLERS PEDIDOS ---
+  // --- ACCIONES DE PEDIDOS ---
   const markOrderDelivered = async (id: string) => {
     setProcessingId(id);
+    // Optimistic Update
     const prevOrders = [...orders];
     setOrders(
       orders.map((o) => (o.id === id ? { ...o, status: "delivered" } : o)),
     );
+
     const { error } = await supabase
       .from("orders")
       .update({ status: "delivered" })
       .eq("id", id);
 
     if (error) {
-      console.error(error);
       alert("Error al despachar: " + error.message);
       setOrders(prevOrders);
     }
     setProcessingId(null);
   };
 
-  // --- HANDLERS ELIMINAR PEDIDO ---
+  // Modal Borrar Pedido
   const confirmDeleteOrder = (id: string) => {
     setOrderToDelete(id);
     setIsDeleteOpen(true);
@@ -262,8 +268,10 @@ export default function AdminDashboard() {
   const executeDeleteOrder = async () => {
     if (!orderToDelete) return;
     setIsSubmitting(true);
+
     const prevOrders = [...orders];
-    setOrders(orders.filter((o) => o.id !== orderToDelete));
+    setOrders(orders.filter((o) => o.id !== orderToDelete)); // Optimistic delete
+
     const { error } = await supabase
       .from("orders")
       .delete()
@@ -284,11 +292,12 @@ export default function AdminDashboard() {
     router.push("/admin");
   };
 
-  // --- HELPER PARA FILTRAR CATEGORÍAS ---
+  // --- RENDERIZADOR DE SECCIONES DE MENÚ ---
   const renderProductSection = (
     title: string,
     categoryFilter: string,
     icon: any,
+    colorClass: string,
   ) => {
     const filteredProducts = products.filter(
       (p) => p.category === categoryFilter,
@@ -296,15 +305,17 @@ export default function AdminDashboard() {
     if (filteredProducts.length === 0) return null;
 
     return (
-      <div className="mb-10">
-        <div className="flex items-center gap-3 mb-4 pl-1">
-          <div className="bg-white p-2 rounded-lg text-gray-400 shadow-sm border border-gray-100">
+      <div className="mb-10 animate-in fade-in slide-in-from-bottom-2 duration-500">
+        <div className="flex items-center gap-3 mb-5 pl-1">
+          <div
+            className={`p-2.5 rounded-xl ${colorClass} text-white shadow-sm`}
+          >
             {icon}
           </div>
           <h3 className="text-xl font-black text-gray-800 tracking-tight">
             {title}
           </h3>
-          <span className="bg-gray-100 text-gray-500 text-xs font-bold px-2 py-1 rounded-full">
+          <span className="bg-gray-100 text-gray-500 text-xs font-bold px-2.5 py-1 rounded-full border border-gray-200">
             {filteredProducts.length}
           </span>
         </div>
@@ -313,11 +324,8 @@ export default function AdminDashboard() {
           {filteredProducts.map((product) => (
             <div
               key={product.id}
-              className={`bg-white p-4 rounded-[2rem] shadow-sm border border-gray-100 flex items-center gap-5 transition-all duration-300 hover:shadow-lg ${
-                !product.is_available ? "opacity-60 bg-gray-50" : ""
-              }`}
+              className={`bg-white p-4 rounded-[2rem] shadow-sm border border-gray-100 flex items-center gap-5 transition-all duration-300 hover:shadow-lg ${!product.is_available ? "opacity-60 bg-gray-50" : ""}`}
             >
-              {/* Imagen del Producto */}
               <div className="relative w-24 h-24 shrink-0 bg-gray-100 rounded-2xl overflow-hidden shadow-inner group">
                 <img
                   src={
@@ -325,11 +333,7 @@ export default function AdminDashboard() {
                     "https://images.unsplash.com/photo-1546069901-ba9599a7e63c"
                   }
                   alt={product.name}
-                  className={`w-full h-full object-cover transition-transform duration-500 ${
-                    !product.is_available
-                      ? "grayscale"
-                      : "group-hover:scale-110"
-                  }`}
+                  className={`w-full h-full object-cover transition-transform duration-500 ${!product.is_available ? "grayscale" : "group-hover:scale-110"}`}
                 />
                 {!product.is_available && (
                   <div className="absolute inset-0 flex items-center justify-center bg-black/40 backdrop-blur-[1px]">
@@ -339,8 +343,6 @@ export default function AdminDashboard() {
                   </div>
                 )}
               </div>
-
-              {/* Info del Producto */}
               <div className="flex-1 min-w-0 py-1 flex flex-col h-full justify-between">
                 <div>
                   <div className="flex justify-between items-start">
@@ -360,26 +362,19 @@ export default function AdminDashboard() {
                     S/ {product.price}
                   </p>
                 </div>
-
                 <div className="flex items-end justify-between mt-2">
                   <span className="text-[9px] bg-gray-100 text-gray-500 px-2 py-0.5 rounded-lg uppercase font-bold tracking-wider border border-gray-200">
                     {product.category}
                   </span>
-
-                  {/* Switch */}
                   <button
                     onClick={() =>
                       toggleProductStatus(product.id, product.is_available)
                     }
                     disabled={togglingId === product.id}
-                    className={`relative w-12 h-7 rounded-full transition-colors duration-300 focus:outline-none shadow-inner ${
-                      product.is_available ? "bg-green-500" : "bg-gray-300"
-                    }`}
+                    className={`relative w-12 h-7 rounded-full transition-colors duration-300 focus:outline-none shadow-inner ${product.is_available ? "bg-green-500" : "bg-gray-300"}`}
                   >
                     <span
-                      className={`absolute top-1 left-1 bg-white w-5 h-5 rounded-full shadow-md transform transition-transform duration-300 flex items-center justify-center ${
-                        product.is_available ? "translate-x-5" : "translate-x-0"
-                      }`}
+                      className={`absolute top-1 left-1 bg-white w-5 h-5 rounded-full shadow-md transform transition-transform duration-300 flex items-center justify-center ${product.is_available ? "translate-x-5" : "translate-x-0"}`}
                     >
                       {togglingId === product.id ? (
                         <Loader2
@@ -445,7 +440,7 @@ export default function AdminDashboard() {
             <Bell
               size={18}
               className={activeTab === "orders" ? "text-orange-500" : ""}
-            />
+            />{" "}
             Pedidos
             {orders.filter((o) => o.status !== "delivered").length > 0 && (
               <span className="bg-orange-600 text-white text-[10px] px-1.5 py-0.5 rounded-full font-black shadow-sm ml-1">
@@ -460,13 +455,13 @@ export default function AdminDashboard() {
             <Utensils
               size={18}
               className={activeTab === "menu" ? "text-orange-500" : ""}
-            />
+            />{" "}
             Menú
           </button>
         </div>
       </div>
 
-      {/* CONTENIDO PRINCIPAL */}
+      {/* CONTENIDO */}
       <div className="max-w-7xl mx-auto px-4 sm:px-8 mt-8">
         {/* === VISTA PEDIDOS === */}
         {activeTab === "orders" && (
@@ -481,7 +476,6 @@ export default function AdminDashboard() {
                 </p>
               </div>
             )}
-
             <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
               {orders.map((order) => (
                 <div
@@ -491,7 +485,6 @@ export default function AdminDashboard() {
                   <div
                     className={`absolute left-0 top-0 bottom-0 w-1.5 ${order.status === "delivered" ? "bg-green-500" : "bg-orange-500"}`}
                   ></div>
-
                   <div className="pl-3">
                     <div className="flex justify-between items-start mb-4">
                       <div>
@@ -522,13 +515,11 @@ export default function AdminDashboard() {
                             confirmDeleteOrder(order.id);
                           }}
                           className="text-gray-300 hover:text-red-500 hover:bg-red-50 p-1.5 rounded-md transition-colors"
-                          title="Eliminar pedido"
                         >
                           <Trash2 size={16} />
                         </button>
                       </div>
                     </div>
-
                     <div className="space-y-3 mb-6 max-h-[220px] overflow-y-auto custom-scrollbar pr-2">
                       {order.items.map((item: any, i: number) => (
                         <div
@@ -561,7 +552,6 @@ export default function AdminDashboard() {
                       ))}
                     </div>
                   </div>
-
                   <div className="pl-3 mt-auto pt-4 border-t border-gray-100">
                     <div className="flex items-center justify-between mb-4">
                       <div>
@@ -572,7 +562,6 @@ export default function AdminDashboard() {
                           S/ {order.total_amount.toFixed(2)}
                         </div>
                       </div>
-
                       {order.payment_method === "yape" ? (
                         <div className="flex flex-col items-end">
                           <div className="flex items-center gap-1.5 bg-purple-100 text-purple-700 px-3 py-1 rounded-full border border-purple-200">
@@ -611,7 +600,6 @@ export default function AdminDashboard() {
                         </div>
                       )}
                     </div>
-
                     {order.status !== "delivered" ? (
                       <button
                         onClick={() => markOrderDelivered(order.id)}
@@ -639,10 +627,9 @@ export default function AdminDashboard() {
           </div>
         )}
 
-        {/* === VISTA MENÚ (SEPARADA POR CATEGORÍAS) === */}
+        {/* === VISTA MENÚ SEPARADA === */}
         {activeTab === "menu" && (
           <div className="animate-in fade-in slide-in-from-bottom-4 duration-500 pb-20">
-            {/* BOTÓN GRANDE PARA AGREGAR */}
             <div className="mb-8">
               <button
                 onClick={() => setIsAddOpen(true)}
@@ -662,31 +649,42 @@ export default function AdminDashboard() {
               </button>
             </div>
 
-            {/* SECCIÓN 1: MENÚ EJECUTIVO (PLATOS DE FONDO) */}
+            {/* SECCIONES */}
             {renderProductSection(
-              "Platos de Fondo",
+              "Menú Ejecutivo",
               "menu",
-              <ChefHat size={20} />,
+              <ChefHat size={20} strokeWidth={2.5} />,
+              "bg-orange-500",
             )}
-
-            {/* SECCIÓN 2: DIETAS */}
-            {renderProductSection("Dietas", "diet", <Salad size={20} />)}
-
-            {/* SECCIÓN 3: EXTRAS Y BEBIDAS */}
+            {renderProductSection(
+              "Platos a la Carta",
+              "plato",
+              <Soup size={20} strokeWidth={2.5} />,
+              "bg-red-500",
+            )}
+            {renderProductSection(
+              "Dietas Saludables",
+              "diet",
+              <Salad size={20} strokeWidth={2.5} />,
+              "bg-green-500",
+            )}
             {renderProductSection(
               "Extras y Bebidas",
               "extra",
-              <Coffee size={20} />,
+              <Coffee size={20} strokeWidth={2.5} />,
+              "bg-blue-500",
+            )}
+            {renderProductSection(
+              "Bebidas",
+              "bebida",
+              <GlassWater size={20} strokeWidth={2.5} />,
+              "bg-cyan-500",
             )}
 
-            {/* MENSAJE SI NO HAY NADA */}
             {products.length === 0 && (
               <div className="text-center py-20 opacity-50">
                 <p className="text-xl font-bold text-gray-400">
                   La carta está vacía.
-                </p>
-                <p className="text-sm text-gray-300">
-                  Agrega platos para empezar a vender.
                 </p>
               </div>
             )}
@@ -694,7 +692,7 @@ export default function AdminDashboard() {
         )}
       </div>
 
-      {/* MODAL AGREGAR PLATO */}
+      {/* MODAL AGREGAR */}
       {isAddOpen && (
         <div className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-gray-900/60 backdrop-blur-md transition-opacity animate-in fade-in">
           <div className="bg-white w-full max-w-lg rounded-[2.5rem] p-8 shadow-2xl animate-in zoom-in-95 duration-300 border border-white/20">
@@ -766,11 +764,13 @@ export default function AdminDashboard() {
                     onChange={(e) =>
                       setNewProduct({ ...newProduct, category: e.target.value })
                     }
-                    className="w-full pl-4 py-4 bg-gray-50 border-2 border-transparent focus:bg-white focus:border-orange-500 rounded-2xl font-bold text-gray-900 outline-none cursor-pointer"
+                    className="w-full pl-4 py-4 bg-gray-50 border-2 border-transparent focus:bg-white focus:border-orange-500 rounded-2xl font-bold text-gray-900 outline-none cursor-pointer appearance-none"
                   >
-                    <option value="menu">Menú (Plato de Fondo)</option>
+                    <option value="menu">Menú Ejecutivo</option>
+                    <option value="plato">Plato a la Carta</option>
                     <option value="diet">Dieta</option>
-                    <option value="extra">Extra / Bebida</option>
+                    <option value="extra">Extra</option>
+                    <option value="bebida">Bebida</option>
                   </select>
                 </div>
               </div>
@@ -807,7 +807,7 @@ export default function AdminDashboard() {
         </div>
       )}
 
-      {/* MODAL CONFIRMACIÓN DE ELIMINACIÓN */}
+      {/* MODAL ELIMINAR */}
       {isDeleteOpen && (
         <div className="fixed inset-0 z-[70] flex items-center justify-center p-4 isolate">
           <div
@@ -825,10 +825,7 @@ export default function AdminDashboard() {
               ¿Eliminar Pedido?
             </h3>
             <p className="text-sm text-gray-500 font-medium leading-relaxed px-4 mb-8">
-              Estás a punto de borrar este pedido de forma permanente. <br />
-              <span className="text-red-500 font-bold">
-                Esta acción no se puede deshacer.
-              </span>
+              Esta acción no se puede deshacer.
             </p>
             <div className="grid grid-cols-2 gap-3 w-full">
               <button
