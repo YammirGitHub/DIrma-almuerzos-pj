@@ -26,7 +26,7 @@ export default function Header() {
               D' Irma
             </h1>
             <p className="font-bold text-[9px] text-gray-400 uppercase tracking-[0.2em] mt-0.5 group-hover:text-orange-400 transition-colors">
-              Esencia y sazón
+              Sazón Norteña
             </p>
           </div>
         </div>
@@ -42,7 +42,7 @@ export default function Header() {
               Pedidos Abiertos
             </span>
             <span className="text-[10px] font-bold text-emerald-800 uppercase tracking-wide sm:hidden">
-              ON
+              Abierto
             </span>
           </div>
         </div>

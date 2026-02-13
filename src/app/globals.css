@@ -1,65 +1,92 @@
 @import "tailwindcss";
 
-/* --- 1. CONFIGURACIÓN BASE & COMPORTAMIENTO --- */
-:root {
+/* --- 1. CONFIGURACIÓN BASE (SCROLL SUAVE & PREMIUM) --- */
+html {
+  /* ESTO ES LA MAGIA: Hace que cualquier navegación interna se deslice suavemente */
   scroll-behavior: smooth;
-  /* 'none' evita el efecto rebote (rubber-banding) en Mac/iOS.
-     Da una sensación más sólida y de "App Nativa". */
+
+  /* Evita el rebote blanco en Mac/iOS (Efecto App Sólida) */
   overscroll-behavior-y: none;
 }
 
-/* --- 2. SCROLLBAR FANTASMA (CROSS-BROWSER) --- */
-/* Ocultar scrollbar visualmente pero permitir funcionalidad */
+body {
+  /* Asegura que el contenido ocupe al menos toda la pantalla */
+  min-height: 100vh;
+  width: 100%;
+
+  /* COLORES & FUENTES */
+  background-color: #F8F9FA;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+
+  /* --- FISICA DE SCROLL MÓVIL (MUY IMPORTANTE) --- */
+  /* Activa la inercia nativa "con peso" en iOS/Android */
+  -webkit-overflow-scrolling: touch;
+
+  /* Bloquea el rebote elástico dentro del cuerpo también */
+  overscroll-behavior-y: none;
+
+  /* Evita scroll horizontal accidental */
+  overflow-x: hidden;
+  /* El scroll vertical debe ser automático (esto arregla tu bug anterior) */
+  overflow-y: auto;
+}
+
+/* --- 2. SCROLLBAR FANTASMA (INVISIBLE) --- */
+/* El usuario puede hacer scroll, pero no ve la barra fea */
 
 /* Chrome, Safari, Edge, Opera */
 ::-webkit-scrollbar {
   width: 0px;
-  height: 0px;
   background: transparent;
+  display: none;
 }
 
-* {
-  /* Firefox */
+/* Firefox */
+html {
   scrollbar-width: none;
-  /* IE 10+ */
-  -ms-overflow-style: none;
+}
 
-  /* UX PREMIUM MÓVIL: 
-     Elimina el recuadro azul/gris que parpadea al tocar un botón en Android/iOS.
-     Hace que la web se sienta 100% como una App nativa. */
+/* --- 3. UX TÁCTIL (FEEDBACK INSTANTÁNEO) --- */
+* {
+  /* Elimina el parpadeo azul al tocar botones en Android */
   -webkit-tap-highlight-color: transparent;
 }
 
-/* --- 3. CUERPO & RENDIMIENTO --- */
-body {
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  background-color: #F8F9FA;
-  /* Evita desplazamientos horizontales accidentales */
-  overflow-x: hidden;
-  position: relative;
+/* Permitir seleccionar texto solo en contenido relevante */
+p,
+h1,
+h2,
+h3,
+h4,
+span,
+div {
+  user-select: text;
 }
 
-/* --- 4. UTILIDADES SEGURAS (IPHONE NOTCH/HOME BAR) --- */
-/* Esta clase la usamos en los modales y botones flotantes para 
-   que no se peguen a la barra de inicio del iPhone */
+/* --- 4. UTILIDADES SEGURAS (IPHONE) --- */
 .safe-area-bottom {
   padding-bottom: env(safe-area-inset-bottom, 20px);
 }
 
-/* --- 5. MAGIA UI: OCULTAR HEADER (FOCUS MODE) --- */
+/* --- 5. ANIMACIONES UI --- */
+/* Animación del Header al hacer scroll */
 #app-header {
-  /* Usamos 'cubic-bezier' para una animación física y suave (Apple style) */
-  transition: transform 0.5s cubic-bezier(0.32, 0.72, 0, 1), opacity 0.3s ease;
-  transform: translateY(0);
-  opacity: 1;
-  /* Optimización: Avisa al navegador que esto va a cambiar para usar GPU */
+  transition: transform 0.6s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.4s ease;
   will-change: transform, opacity;
+  z-index: 50;
 }
 
-/* Estado: Cuando el usuario está eligiendo un plato (Modal Abierto) */
+/* Cuando el modal se abre, el header se esconde suavemente */
 body.modal-open #app-header {
   transform: translateY(-150%);
   opacity: 0;
   pointer-events: none;
+}
+
+/* Bloqueo seguro del scroll SOLO cuando el modal está abierto */
+body.modal-open {
+  overflow: hidden !important;
+  touch-action: none;
+  /* Evita gestos táctiles fuera del modal */
 }

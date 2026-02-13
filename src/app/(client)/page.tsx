@@ -1,6 +1,7 @@
 import { createServerClient } from "@supabase/ssr";
 import { cookies } from "next/headers";
 import MenuList from "@/components/MenuList";
+import SplashScreen from "@/components/SplashScreen";
 import { Suspense } from "react";
 import Image from "next/image";
 import {
@@ -12,7 +13,6 @@ import {
   Utensils,
 } from "lucide-react";
 
-// Cache Strategy: Revalidación en 0 para datos siempre frescos
 export const revalidate = 0;
 
 export default async function Home() {
@@ -62,8 +62,10 @@ export default async function Home() {
 
   return (
     <main className="w-full pb-32 bg-[#F8F9FA] min-h-screen font-sans selection:bg-orange-100 selection:text-orange-900">
+      <SplashScreen />
+
       {/* --- HERO SECTION --- */}
-      <div className="relative w-full bg-gray-900 overflow-hidden rounded-b-[2.5rem] md:rounded-b-[4rem] shadow-2xl shadow-gray-300 z-0 h-[55vh] min-h-[450px] md:h-[65vh] md:min-h-[600px]">
+      <div className="relative w-full bg-gray-900 overflow-hidden rounded-b-[2.5rem] md:rounded-b-[4rem] shadow-2xl shadow-gray-300 z-0 h-[60vh] min-h-[500px] md:h-[70vh] md:min-h-[650px]">
         <div className="absolute inset-0">
           <Image
             src="https://images.unsplash.com/photo-1543353071-873f17a7a088?q=80&w=2070&auto=format&fit=crop"
@@ -71,15 +73,14 @@ export default async function Home() {
             fill
             priority
             sizes="100vw"
-            // 'transform-gpu' mejora el rendimiento en iOS
             className="object-cover opacity-50 transform-gpu"
             quality={90}
           />
           <div className="absolute inset-0 bg-gradient-to-t from-gray-900 via-gray-900/50 to-black/40" />
         </div>
 
-        {/* ALINEACIÓN HERO: Mobile (Bottom) / Desktop (Center) */}
-        <div className="relative z-10 h-full flex flex-col items-center text-center px-4 max-w-5xl mx-auto justify-end pt-28 pb-24 md:justify-center md:pb-32">
+        {/* --- ALINEACIÓN HERO --- */}
+        <div className="relative z-10 h-full flex flex-col items-center text-center px-4 max-w-5xl mx-auto justify-end pb-28 pt-32 md:justify-center md:pb-32 md:pt-20">
           <div className="inline-flex items-center gap-2 py-2 px-5 rounded-full bg-white/10 backdrop-blur-md border border-white/20 text-white/90 text-[10px] font-bold tracking-[0.2em] uppercase mb-4 shadow-lg animate-in fade-in slide-in-from-top-4 duration-700">
             <MapPin size={12} className="text-orange-400" /> Exclusivo Poder
             Judicial
@@ -93,9 +94,13 @@ export default async function Home() {
           </h1>
 
           <p className="text-lg sm:text-xl text-gray-200 font-medium max-w-xl leading-relaxed opacity-90 animate-in fade-in slide-in-from-bottom-4 duration-700 delay-100 px-4 text-balance">
-            Gastronomía casera premium en tu despacho.{" "}
+            Dale a tu día el gusto que merece.{" "}
             <br className="hidden sm:block" />
-            Ingredientes selectos, sabor auténtico y entrega puntual.
+            Sazón norteña auténtica, ingredientes frescos y una experiencia que{" "}
+            <span className="text-orange-300 font-bold tracking-wide">
+              querrás repetir mañana
+            </span>
+            .
           </p>
         </div>
       </div>
@@ -124,7 +129,7 @@ export default async function Home() {
             </p>
           </div>
 
-          {/* 2. Tarjeta Cantidad (Solo Móvil) */}
+          {/* 2. Tarjeta Cantidad (Solo Móvil - Naranja) */}
           <div className="md:hidden col-span-1 bg-orange-500 text-white p-4 rounded-[1.5rem] shadow-xl shadow-orange-500/20 flex flex-col justify-center items-center text-center gap-1 border border-orange-400">
             <div className="flex items-center gap-1.5 mb-0.5 justify-center opacity-90">
               <div className="p-1 bg-white/20 rounded-lg">
@@ -142,47 +147,56 @@ export default async function Home() {
             </div>
           </div>
 
-          {/* 3. Tarjeta Fecha (Grande) */}
-          <div className="col-span-2 bg-gradient-to-br from-[#151515] to-black rounded-[1.5rem] md:rounded-[2rem] p-5 md:p-8 flex items-center justify-between text-white shadow-2xl shadow-gray-900/20 relative overflow-hidden group border border-white/5">
-            <div className="absolute -right-10 -top-10 w-32 md:w-64 h-32 md:h-64 bg-orange-600 rounded-full blur-[60px] md:blur-[100px] opacity-20 group-hover:opacity-30 transition-opacity"></div>
+          {/* 3. Tarjeta Fecha (Grande & Premium) */}
+          <div className="col-span-2 bg-gradient-to-br from-[#111111] via-black to-[#050505] rounded-[1.5rem] md:rounded-[2rem] p-5 md:px-8 md:py-6 flex items-center justify-between text-white shadow-2xl shadow-gray-900/50 relative overflow-hidden group border border-white/5">
+            {/* EFECTO DE FONDO (Glow Naranja) */}
+            <div className="absolute -right-20 -top-20 w-64 h-64 bg-orange-600 rounded-full blur-[80px] opacity-[0.15] group-hover:opacity-25 transition-opacity duration-700 pointer-events-none"></div>
 
-            <div className="relative z-10 flex gap-4 md:gap-8 items-center w-full">
-              {/* Bloque Día */}
-              {/* shrink-0 evita deformación en móviles pequeños */}
-              <div className="bg-white/10 backdrop-blur-md h-16 w-16 md:h-24 md:w-24 rounded-2xl md:rounded-3xl flex flex-col items-center justify-center border border-white/10 shadow-inner shrink-0">
-                <span className="text-2xl md:text-4xl font-black text-white leading-none">
-                  {dayNumber}
-                </span>
-                <span className="text-[9px] md:text-[10px] font-bold text-orange-400 uppercase tracking-wider mt-0.5 md:mt-1">
-                  {monthName.slice(0, 3)}
-                </span>
-              </div>
-
-              {/* Bloque Texto */}
-              <div className="flex-1 min-w-0 flex flex-col justify-center pl-2 md:pl-4">
-                <div className="flex items-center gap-2 mb-1 md:mb-2 opacity-90">
-                  <CalendarDays className="w-3 h-3 md:w-4 md:h-4 text-orange-500" />
-                  <span className="text-[10px] md:text-xs font-bold text-orange-400 uppercase tracking-[0.25em] leading-none truncate">
-                    Menú de Hoy
+            {/* CONTENEDOR PRINCIPAL */}
+            <div className="relative z-10 flex items-center justify-between w-full">
+              {/* --- GRUPO IZQUIERDA: Fecha + Títulos --- */}
+              <div className="flex items-center gap-4 md:gap-6">
+                <div className="bg-white/5 backdrop-blur-xl h-16 w-16 md:h-20 md:w-20 rounded-2xl md:rounded-3xl flex flex-col items-center justify-center border border-white/10 shadow-inner shrink-0 group-hover:bg-white/10 transition-colors">
+                  <span className="text-2xl md:text-3xl font-black text-white leading-none tracking-tighter">
+                    {dayNumber}
+                  </span>
+                  <span className="text-[9px] md:text-[10px] font-bold text-orange-400 uppercase tracking-wider mt-0.5">
+                    {monthName.slice(0, 3)}
                   </span>
                 </div>
-                {/* truncate: Corta el texto si el nombre del día es muy largo en móvil */}
-                <h2 className="text-3xl sm:text-4xl md:text-5xl font-black text-white leading-none tracking-tight capitalize truncate">
-                  {dayName}
-                </h2>
 
-                {/* Contador Píldora (Solo PC) */}
-                <div className="hidden md:flex items-center gap-2 mt-3 bg-white/10 w-fit px-4 py-1.5 rounded-full border border-white/5 backdrop-blur-md shadow-inner transition-transform hover:scale-105 cursor-default">
-                  <Sparkles
-                    size={12}
-                    className="text-orange-400 fill-orange-400"
-                  />
-                  <p className="text-[11px] font-medium text-gray-300 leading-none">
-                    <span className="text-white font-bold text-xs mr-1">
+                <div className="flex flex-col justify-center">
+                  <div className="flex items-center gap-2 mb-1 opacity-80">
+                    <CalendarDays className="w-3 h-3 text-orange-500" />
+                    <span className="text-[10px] font-bold text-gray-300 uppercase tracking-[0.2em] leading-none">
+                      Menú de Hoy
+                    </span>
+                  </div>
+                  <h2 className="text-3xl md:text-5xl font-black text-white leading-none tracking-tight capitalize truncate">
+                    {dayName}
+                  </h2>
+                </div>
+              </div>
+
+              {/* --- GRUPO DERECHA: Contador --- */}
+              {/* SOLUCIÓN AL ESPACIO VACÍO: Quitamos 'hidden' para que se vea en móvil también */}
+              <div className="flex flex-col items-end gap-1">
+                <div className="flex items-center gap-2 md:gap-3 bg-white/5 hover:bg-white/10 px-3 py-2 md:px-5 md:py-3 rounded-2xl border border-white/5 backdrop-blur-md transition-all shadow-lg shadow-black/20">
+                  <div className="bg-orange-500/20 p-1.5 rounded-full">
+                    <Sparkles
+                      size={14}
+                      className="text-orange-400 fill-orange-400 animate-pulse"
+                    />
+                  </div>
+                  <div className="flex flex-col items-start leading-none">
+                    <span className="text-lg md:text-2xl font-black text-white tracking-tight">
                       {products?.length || 0}
                     </span>
-                    opciones disponibles
-                  </p>
+                    {/* Texto pequeño visible en todos para mantener balance */}
+                    <span className="text-[9px] font-bold text-gray-400 uppercase tracking-wider">
+                      Disp.
+                    </span>
+                  </div>
                 </div>
               </div>
             </div>
