@@ -324,9 +324,8 @@ function CheckoutModal({ close, cart, removeFromCart, total }) {
                                                                 columnNumber: 21
                                                             }, this),
                                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
-                                                                className: "hidden md:flex flex-col items-end gap-1",
+                                                                className: "flex flex-col items-end gap-1",
                                                                 children: [
-                                                                    " ",
                                                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
                                                                         className: "font-mono font-bold text-gray-900 text-sm",
                                                                         children: [
@@ -335,7 +334,7 @@ function CheckoutModal({ close, cart, removeFromCart, total }) {
                                                                         ]
                                                                     }, void 0, true, {
                                                                         fileName: "[project]/src/components/CheckoutModal.tsx",
-                                                                        lineNumber: 154,
+                                                                        lineNumber: 152,
                                                                         columnNumber: 23
                                                                     }, this),
                                                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("button", {
@@ -346,18 +345,18 @@ function CheckoutModal({ close, cart, removeFromCart, total }) {
                                                                             size: 14
                                                                         }, void 0, false, {
                                                                             fileName: "[project]/src/components/CheckoutModal.tsx",
-                                                                            lineNumber: 163,
+                                                                            lineNumber: 161,
                                                                             columnNumber: 25
                                                                         }, this)
                                                                     }, void 0, false, {
                                                                         fileName: "[project]/src/components/CheckoutModal.tsx",
-                                                                        lineNumber: 158,
+                                                                        lineNumber: 156,
                                                                         columnNumber: 23
                                                                     }, this)
                                                                 ]
                                                             }, void 0, true, {
                                                                 fileName: "[project]/src/components/CheckoutModal.tsx",
-                                                                lineNumber: 152,
+                                                                lineNumber: 151,
                                                                 columnNumber: 21
                                                             }, this)
                                                         ]
@@ -379,7 +378,7 @@ function CheckoutModal({ close, cart, removeFromCart, total }) {
                                                         children: "Total a Pagar"
                                                     }, void 0, false, {
                                                         fileName: "[project]/src/components/CheckoutModal.tsx",
-                                                        lineNumber: 172,
+                                                        lineNumber: 170,
                                                         columnNumber: 17
                                                     }, this),
                                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
@@ -390,13 +389,13 @@ function CheckoutModal({ close, cart, removeFromCart, total }) {
                                                         ]
                                                     }, void 0, true, {
                                                         fileName: "[project]/src/components/CheckoutModal.tsx",
-                                                        lineNumber: 175,
+                                                        lineNumber: 173,
                                                         columnNumber: 17
                                                     }, this)
                                                 ]
                                             }, void 0, true, {
                                                 fileName: "[project]/src/components/CheckoutModal.tsx",
-                                                lineNumber: 171,
+                                                lineNumber: 169,
                                                 columnNumber: 15
                                             }, this)
                                         ]
@@ -413,7 +412,7 @@ function CheckoutModal({ close, cart, removeFromCart, total }) {
                                                 children: "Datos de Entrega"
                                             }, void 0, false, {
                                                 fileName: "[project]/src/components/CheckoutModal.tsx",
-                                                lineNumber: 183,
+                                                lineNumber: 181,
                                                 columnNumber: 15
                                             }, this),
                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -427,23 +426,23 @@ function CheckoutModal({ close, cart, removeFromCart, total }) {
                                                                 size: 18
                                                             }, void 0, false, {
                                                                 fileName: "[project]/src/components/CheckoutModal.tsx",
-                                                                lineNumber: 188,
+                                                                lineNumber: 186,
                                                                 columnNumber: 19
                                                             }, this),
                                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("input", {
                                                                 name: "name",
                                                                 required: true,
                                                                 placeholder: "Tu Nombre Completo",
-                                                                className: "w-full pl-11 pr-4 py-3.5 bg-gray-50 border border-transparent rounded-2xl focus:bg-white focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 outline-none transition-all placeholder:text-gray-400 text-sm font-medium"
+                                                                className: "w-full pl-11 pr-4 py-3.5 bg-gray-50 border border-transparent rounded-2xl focus:bg-white focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 outline-none transition-all placeholder:text-gray-400 text-base sm:text-sm font-medium"
                                                             }, void 0, false, {
                                                                 fileName: "[project]/src/components/CheckoutModal.tsx",
-                                                                lineNumber: 193,
+                                                                lineNumber: 191,
                                                                 columnNumber: 19
                                                             }, this)
                                                         ]
                                                     }, void 0, true, {
                                                         fileName: "[project]/src/components/CheckoutModal.tsx",
-                                                        lineNumber: 187,
+                                                        lineNumber: 185,
                                                         columnNumber: 17
                                                     }, this),
                                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -454,7 +453,7 @@ function CheckoutModal({ close, cart, removeFromCart, total }) {
                                                                 size: 18
                                                             }, void 0, false, {
                                                                 fileName: "[project]/src/components/CheckoutModal.tsx",
-                                                                lineNumber: 201,
+                                                                lineNumber: 199,
                                                                 columnNumber: 19
                                                             }, this),
                                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("input", {
@@ -462,16 +461,16 @@ function CheckoutModal({ close, cart, removeFromCart, total }) {
                                                                 required: true,
                                                                 type: "tel",
                                                                 placeholder: "Celular / WhatsApp",
-                                                                className: "w-full pl-11 pr-4 py-3.5 bg-gray-50 border border-transparent rounded-2xl focus:bg-white focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 outline-none transition-all placeholder:text-gray-400 text-sm font-medium"
+                                                                className: "w-full pl-11 pr-4 py-3.5 bg-gray-50 border border-transparent rounded-2xl focus:bg-white focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 outline-none transition-all placeholder:text-gray-400 text-base sm:text-sm font-medium"
                                                             }, void 0, false, {
                                                                 fileName: "[project]/src/components/CheckoutModal.tsx",
-                                                                lineNumber: 205,
+                                                                lineNumber: 204,
                                                                 columnNumber: 19
                                                             }, this)
                                                         ]
                                                     }, void 0, true, {
                                                         fileName: "[project]/src/components/CheckoutModal.tsx",
-                                                        lineNumber: 200,
+                                                        lineNumber: 198,
                                                         columnNumber: 17
                                                     }, this),
                                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -482,14 +481,14 @@ function CheckoutModal({ close, cart, removeFromCart, total }) {
                                                                 size: 18
                                                             }, void 0, false, {
                                                                 fileName: "[project]/src/components/CheckoutModal.tsx",
-                                                                lineNumber: 214,
+                                                                lineNumber: 213,
                                                                 columnNumber: 19
                                                             }, this),
                                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("input", {
                                                                 name: "office",
                                                                 required: true,
                                                                 placeholder: "Oficina / Juzgado (Ej: Civil 2)",
-                                                                className: "w-full pl-11 pr-4 py-3.5 bg-gray-50 border border-transparent rounded-2xl focus:bg-white focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 outline-none transition-all placeholder:text-gray-400 text-sm font-medium"
+                                                                className: "w-full pl-11 pr-4 py-3.5 bg-gray-50 border border-transparent rounded-2xl focus:bg-white focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 outline-none transition-all placeholder:text-gray-400 text-base sm:text-sm font-medium"
                                                             }, void 0, false, {
                                                                 fileName: "[project]/src/components/CheckoutModal.tsx",
                                                                 lineNumber: 218,
@@ -498,19 +497,19 @@ function CheckoutModal({ close, cart, removeFromCart, total }) {
                                                         ]
                                                     }, void 0, true, {
                                                         fileName: "[project]/src/components/CheckoutModal.tsx",
-                                                        lineNumber: 213,
+                                                        lineNumber: 212,
                                                         columnNumber: 17
                                                     }, this)
                                                 ]
                                             }, void 0, true, {
                                                 fileName: "[project]/src/components/CheckoutModal.tsx",
-                                                lineNumber: 186,
+                                                lineNumber: 184,
                                                 columnNumber: 15
                                             }, this)
                                         ]
                                     }, void 0, true, {
                                         fileName: "[project]/src/components/CheckoutModal.tsx",
-                                        lineNumber: 182,
+                                        lineNumber: 180,
                                         columnNumber: 13
                                     }, this),
                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -659,10 +658,10 @@ function CheckoutModal({ close, cart, removeFromCart, total }) {
                                                                 name: "operation_code",
                                                                 required: true,
                                                                 placeholder: "Ingresa el Código de Operación",
-                                                                className: "w-full p-3 bg-white border-2 border-purple-100 rounded-xl focus:border-purple-500 focus:ring-4 focus:ring-purple-500/10 outline-none text-center font-bold text-purple-900 placeholder:text-gray-300 text-sm"
+                                                                className: "w-full p-3 bg-white border-2 border-purple-100 rounded-xl focus:border-purple-500 focus:ring-4 focus:ring-purple-500/10 outline-none text-center font-bold text-purple-900 placeholder:text-gray-300 text-base sm:text-sm"
                                                             }, void 0, false, {
                                                                 fileName: "[project]/src/components/CheckoutModal.tsx",
-                                                                lineNumber: 294,
+                                                                lineNumber: 295,
                                                                 columnNumber: 23
                                                             }, this)
                                                         }, void 0, false, {
@@ -683,7 +682,7 @@ function CheckoutModal({ close, cart, removeFromCart, total }) {
                                                             children: "¿Con cuánto pagarás?"
                                                         }, void 0, false, {
                                                             fileName: "[project]/src/components/CheckoutModal.tsx",
-                                                            lineNumber: 304,
+                                                            lineNumber: 305,
                                                             columnNumber: 21
                                                         }, this),
                                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -694,7 +693,7 @@ function CheckoutModal({ close, cart, removeFromCart, total }) {
                                                                     children: "S/"
                                                                 }, void 0, false, {
                                                                     fileName: "[project]/src/components/CheckoutModal.tsx",
-                                                                    lineNumber: 308,
+                                                                    lineNumber: 309,
                                                                     columnNumber: 23
                                                                 }, this),
                                                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("input", {
@@ -702,16 +701,16 @@ function CheckoutModal({ close, cart, removeFromCart, total }) {
                                                                     type: "number",
                                                                     step: "0.10",
                                                                     placeholder: "0.00",
-                                                                    className: "w-full pl-8 pr-4 py-2 bg-emerald-50 border-0 rounded-xl focus:ring-2 focus:ring-emerald-500 outline-none text-center font-black text-xl text-emerald-900 placeholder:text-emerald-300/50"
+                                                                    className: "w-full pl-8 pr-4 py-2 bg-emerald-50 border-0 rounded-xl focus:ring-2 focus:ring-emerald-500 outline-none text-center font-black text-xl text-emerald-900 placeholder:text-emerald-300/50 text-base sm:text-xl"
                                                                 }, void 0, false, {
                                                                     fileName: "[project]/src/components/CheckoutModal.tsx",
-                                                                    lineNumber: 311,
+                                                                    lineNumber: 313,
                                                                     columnNumber: 23
                                                                 }, this)
                                                             ]
                                                         }, void 0, true, {
                                                             fileName: "[project]/src/components/CheckoutModal.tsx",
-                                                            lineNumber: 307,
+                                                            lineNumber: 308,
                                                             columnNumber: 21
                                                         }, this),
                                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
@@ -719,13 +718,13 @@ function CheckoutModal({ close, cart, removeFromCart, total }) {
                                                             children: "Llevaremos tu vuelto exacto."
                                                         }, void 0, false, {
                                                             fileName: "[project]/src/components/CheckoutModal.tsx",
-                                                            lineNumber: 319,
+                                                            lineNumber: 321,
                                                             columnNumber: 21
                                                         }, this)
                                                     ]
                                                 }, void 0, true, {
                                                     fileName: "[project]/src/components/CheckoutModal.tsx",
-                                                    lineNumber: 303,
+                                                    lineNumber: 304,
                                                     columnNumber: 19
                                                 }, this)
                                             }, void 0, false, {
@@ -744,7 +743,7 @@ function CheckoutModal({ close, cart, removeFromCart, total }) {
                                         children: state.message
                                     }, void 0, false, {
                                         fileName: "[project]/src/components/CheckoutModal.tsx",
-                                        lineNumber: 329,
+                                        lineNumber: 331,
                                         columnNumber: 15
                                     }, this)
                                 ]
@@ -767,14 +766,14 @@ function CheckoutModal({ close, cart, removeFromCart, total }) {
                                                 size: 18
                                             }, void 0, false, {
                                                 fileName: "[project]/src/components/CheckoutModal.tsx",
-                                                lineNumber: 345,
+                                                lineNumber: 347,
                                                 columnNumber: 19
                                             }, this),
                                             " Procesando Pedido..."
                                         ]
                                     }, void 0, true, {
                                         fileName: "[project]/src/components/CheckoutModal.tsx",
-                                        lineNumber: 344,
+                                        lineNumber: 346,
                                         columnNumber: 17
                                     }, this) : /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["Fragment"], {
                                         children: [
@@ -788,13 +787,13 @@ function CheckoutModal({ close, cart, removeFromCart, total }) {
                                                         className: "group-hover:translate-x-1 transition-transform"
                                                     }, void 0, false, {
                                                         fileName: "[project]/src/components/CheckoutModal.tsx",
-                                                        lineNumber: 352,
+                                                        lineNumber: 354,
                                                         columnNumber: 21
                                                     }, this)
                                                 ]
                                             }, void 0, true, {
                                                 fileName: "[project]/src/components/CheckoutModal.tsx",
-                                                lineNumber: 350,
+                                                lineNumber: 352,
                                                 columnNumber: 19
                                             }, this),
                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
@@ -805,19 +804,19 @@ function CheckoutModal({ close, cart, removeFromCart, total }) {
                                                 ]
                                             }, void 0, true, {
                                                 fileName: "[project]/src/components/CheckoutModal.tsx",
-                                                lineNumber: 357,
+                                                lineNumber: 359,
                                                 columnNumber: 19
                                             }, this)
                                         ]
                                     }, void 0, true)
                                 }, void 0, false, {
                                     fileName: "[project]/src/components/CheckoutModal.tsx",
-                                    lineNumber: 338,
+                                    lineNumber: 340,
                                     columnNumber: 13
                                 }, this)
                             }, void 0, false, {
                                 fileName: "[project]/src/components/CheckoutModal.tsx",
-                                lineNumber: 337,
+                                lineNumber: 339,
                                 columnNumber: 11
                             }, this)
                         ]

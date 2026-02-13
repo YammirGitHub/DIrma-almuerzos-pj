@@ -148,9 +148,7 @@ export default function CheckoutModal({
                       </div>
                     </div>
 
-                    {/* 'hidden md:flex' asegura que en móvil NO se vea, porque ya está la tarjeta naranja arriba */}
-                    <div className="hidden md:flex flex-col items-end gap-1">
-                      {" "}
+                    <div className="flex flex-col items-end gap-1">
                       <span className="font-mono font-bold text-gray-900 text-sm">
                         S/ {(item.price * item.qty).toFixed(2)}
                       </span>
@@ -189,12 +187,12 @@ export default function CheckoutModal({
                     className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-orange-500 transition-colors"
                     size={18}
                   />
-                  {/* Focus Ring NARANJA */}
+                  {/* Focus Ring NARANJA - INPUT CORREGIDO (text-base) */}
                   <input
                     name="name"
                     required
                     placeholder="Tu Nombre Completo"
-                    className="w-full pl-11 pr-4 py-3.5 bg-gray-50 border border-transparent rounded-2xl focus:bg-white focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 outline-none transition-all placeholder:text-gray-400 text-sm font-medium"
+                    className="w-full pl-11 pr-4 py-3.5 bg-gray-50 border border-transparent rounded-2xl focus:bg-white focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 outline-none transition-all placeholder:text-gray-400 text-base sm:text-sm font-medium"
                   />
                 </div>
                 <div className="relative group">
@@ -202,12 +200,13 @@ export default function CheckoutModal({
                     className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-orange-500 transition-colors"
                     size={18}
                   />
+                  {/* INPUT CORREGIDO (text-base) */}
                   <input
                     name="phone"
                     required
                     type="tel"
                     placeholder="Celular / WhatsApp"
-                    className="w-full pl-11 pr-4 py-3.5 bg-gray-50 border border-transparent rounded-2xl focus:bg-white focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 outline-none transition-all placeholder:text-gray-400 text-sm font-medium"
+                    className="w-full pl-11 pr-4 py-3.5 bg-gray-50 border border-transparent rounded-2xl focus:bg-white focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 outline-none transition-all placeholder:text-gray-400 text-base sm:text-sm font-medium"
                   />
                 </div>
                 <div className="relative group">
@@ -215,11 +214,12 @@ export default function CheckoutModal({
                     className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-orange-500 transition-colors"
                     size={18}
                   />
+                  {/* INPUT CORREGIDO (text-base) */}
                   <input
                     name="office"
                     required
                     placeholder="Oficina / Juzgado (Ej: Civil 2)"
-                    className="w-full pl-11 pr-4 py-3.5 bg-gray-50 border border-transparent rounded-2xl focus:bg-white focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 outline-none transition-all placeholder:text-gray-400 text-sm font-medium"
+                    className="w-full pl-11 pr-4 py-3.5 bg-gray-50 border border-transparent rounded-2xl focus:bg-white focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 outline-none transition-all placeholder:text-gray-400 text-base sm:text-sm font-medium"
                   />
                 </div>
               </div>
@@ -291,11 +291,12 @@ export default function CheckoutModal({
                       </div>
                     </div>
                     <div className="relative">
+                      {/* INPUT CORREGIDO (text-base) */}
                       <input
                         name="operation_code"
                         required
                         placeholder="Ingresa el Código de Operación"
-                        className="w-full p-3 bg-white border-2 border-purple-100 rounded-xl focus:border-purple-500 focus:ring-4 focus:ring-purple-500/10 outline-none text-center font-bold text-purple-900 placeholder:text-gray-300 text-sm"
+                        className="w-full p-3 bg-white border-2 border-purple-100 rounded-xl focus:border-purple-500 focus:ring-4 focus:ring-purple-500/10 outline-none text-center font-bold text-purple-900 placeholder:text-gray-300 text-base sm:text-sm"
                       />
                     </div>
                   </div>
@@ -308,12 +309,13 @@ export default function CheckoutModal({
                       <span className="absolute left-3 top-1/2 -translate-y-1/2 text-emerald-600 font-bold">
                         S/
                       </span>
+                      {/* INPUT CORREGIDO (text-base) */}
                       <input
                         name="cash_amount"
                         type="number"
                         step="0.10"
                         placeholder="0.00"
-                        className="w-full pl-8 pr-4 py-2 bg-emerald-50 border-0 rounded-xl focus:ring-2 focus:ring-emerald-500 outline-none text-center font-black text-xl text-emerald-900 placeholder:text-emerald-300/50"
+                        className="w-full pl-8 pr-4 py-2 bg-emerald-50 border-0 rounded-xl focus:ring-2 focus:ring-emerald-500 outline-none text-center font-black text-xl text-emerald-900 placeholder:text-emerald-300/50 text-base sm:text-xl"
                       />
                     </div>
                     <p className="text-[10px] text-gray-400 mt-2">

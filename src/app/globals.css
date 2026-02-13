@@ -2,11 +2,14 @@
 
 /* --- 1. CONFIGURACIÓN BASE (SCROLL SUAVE & PREMIUM) --- */
 html {
-  /* ESTO ES LA MAGIA: Hace que cualquier navegación interna se deslice suavemente */
   scroll-behavior: smooth;
-
-  /* Evita el rebote blanco en Mac/iOS (Efecto App Sólida) */
   overscroll-behavior-y: none;
+
+  /* ESTO ES NUEVO: Bloquea gestos de zoom del navegador pero permite scroll */
+  touch-action: manipulation;
+
+  /* Evita que iOS haga zoom al rotar la pantalla */
+  -webkit-text-size-adjust: 100%;
 }
 
 body {
