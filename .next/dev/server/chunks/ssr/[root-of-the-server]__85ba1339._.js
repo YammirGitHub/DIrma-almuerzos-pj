@@ -45,10 +45,14 @@ var __TURBOPACK__imported__module__$5b$next$5d2f$internal$2f$font$2f$google$2f$i
 const metadata = {
     title: "D' Irma | Sazón Judicial",
     description: "Gastronomía casera premium exclusiva para el Poder Judicial.",
-    // Agregamos iconos para que se vea bien al guardar en pantalla de inicio (iOS/Android)
     icons: {
         icon: "/favicon.ico",
         apple: "/apple-touch-icon.png"
+    },
+    appleWebApp: {
+        capable: true,
+        statusBarStyle: "black-translucent",
+        title: "D' Irma"
     }
 };
 const viewport = {
@@ -56,24 +60,25 @@ const viewport = {
     initialScale: 1,
     maximumScale: 1,
     userScalable: false,
+    viewportFit: "cover",
     interactiveWidget: "resizes-content",
-    themeColor: "#F8F9FA"
+    themeColor: "transparent"
 };
 function RootLayout({ children }) {
     return /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$rsc$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$rsc$5d$__$28$ecmascript$29$__["jsxDEV"])("html", {
         lang: "es",
         className: "antialiased scroll-smooth",
         children: /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$rsc$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$rsc$5d$__$28$ecmascript$29$__["jsxDEV"])("body", {
-            className: `${__TURBOPACK__imported__module__$5b$next$5d2f$internal$2f$font$2f$google$2f$inter_5972bc34$2e$js__$5b$app$2d$rsc$5d$__$28$ecmascript$29$__["default"].className} min-h-screen bg-[#F8F9FA] text-gray-900`,
+            className: `${__TURBOPACK__imported__module__$5b$next$5d2f$internal$2f$font$2f$google$2f$inter_5972bc34$2e$js__$5b$app$2d$rsc$5d$__$28$ecmascript$29$__["default"].className} min-h-screen bg-gray-900 text-gray-900`,
             children: children
         }, void 0, false, {
             fileName: "[project]/src/app/layout.tsx",
-            lineNumber: 33,
+            lineNumber: 39,
             columnNumber: 7
         }, this)
     }, void 0, false, {
         fileName: "[project]/src/app/layout.tsx",
-        lineNumber: 32,
+        lineNumber: 37,
         columnNumber: 5
     }, this);
 }

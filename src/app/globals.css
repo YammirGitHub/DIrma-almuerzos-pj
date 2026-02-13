@@ -1,62 +1,58 @@
 @import "tailwindcss";
 
-/* --- 1. CONFIGURACIÓN BASE (SCROLL SUAVE & PREMIUM) --- */
+/* --- 1. CONFIGURACIÓN BASE APP NATIVA --- */
 html {
   scroll-behavior: smooth;
+  /* Bloquea el rebote elástico exagerado, pero permite el deslizamiento suave */
   overscroll-behavior-y: none;
-
-  /* ESTO ES NUEVO: Bloquea gestos de zoom del navegador pero permite scroll */
+  /* Evita gestos de navegación lateral (atrás/adelante) en Mac/iOS */
+  overscroll-behavior-x: none;
   touch-action: manipulation;
-
-  /* Evita que iOS haga zoom al rotar la pantalla */
   -webkit-text-size-adjust: 100%;
+
+  /* Asegura que el HTML ocupe todo el alto real */
+  height: 100%;
+  background-color: #111827;
+  /* Color de fondo base (Negro Hero) */
 }
 
 body {
-  /* Asegura que el contenido ocupe al menos toda la pantalla */
-  min-height: 100vh;
+  min-height: 100%;
   width: 100%;
 
-  /* COLORES & FUENTES */
-  background-color: #F8F9FA;
+  /* --- FONDO DUAL INTELIGENTE (Magia Visual) --- */
+  /* Mitad superior: Negra (#111827) para que al bajar, la barra de estado se vea negra.
+     Mitad inferior: Blanca (#F8F9FA) para que al subir, la barra inferior se vea blanca. */
+  background: linear-gradient(to bottom, #111827 0%, #111827 40%, #F8F9FA 40%, #F8F9FA 100%) fixed;
+
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 
-  /* --- FISICA DE SCROLL MÓVIL (MUY IMPORTANTE) --- */
-  /* Activa la inercia nativa "con peso" en iOS/Android */
+  /* Física de scroll nativa */
   -webkit-overflow-scrolling: touch;
 
-  /* Bloquea el rebote elástico dentro del cuerpo también */
-  overscroll-behavior-y: none;
-
-  /* Evita scroll horizontal accidental */
-  overflow-x: hidden;
-  /* El scroll vertical debe ser automático (esto arregla tu bug anterior) */
-  overflow-y: auto;
+  /* Padding seguro para que el contenido no quede tapado por el Notch/Barra */
+  padding-top: env(safe-area-inset-top);
+  padding-bottom: env(safe-area-inset-bottom);
 }
 
-/* --- 2. SCROLLBAR FANTASMA (INVISIBLE) --- */
-/* El usuario puede hacer scroll, pero no ve la barra fea */
-
-/* Chrome, Safari, Edge, Opera */
+/* --- 2. SCROLLBAR FANTASMA --- */
 ::-webkit-scrollbar {
+  display: none;
   width: 0px;
   background: transparent;
-  display: none;
 }
 
-/* Firefox */
 html {
   scrollbar-width: none;
 }
 
-/* --- 3. UX TÁCTIL (FEEDBACK INSTANTÁNEO) --- */
+/* --- 3. UX TÁCTIL --- */
 * {
-  /* Elimina el parpadeo azul al tocar botones en Android */
   -webkit-tap-highlight-color: transparent;
 }
 
-/* Permitir seleccionar texto solo en contenido relevante */
+/* Permitir seleccionar texto solo donde importa */
 p,
 h1,
 h2,
@@ -67,29 +63,34 @@ div {
   user-select: text;
 }
 
-/* --- 4. UTILIDADES SEGURAS (IPHONE) --- */
+img {
+  user-select: none;
+  -webkit-user-drag: none;
+}
+
+/* --- 4. UTILIDADES SEGURAS --- */
+/* Úsala en elementos fijos abajo (como el botón de pagar) */
 .safe-area-bottom {
-  padding-bottom: env(safe-area-inset-bottom, 20px);
+  padding-bottom: calc(env(safe-area-inset-bottom) + 1rem);
 }
 
 /* --- 5. ANIMACIONES UI --- */
-/* Animación del Header al hacer scroll */
 #app-header {
   transition: transform 0.6s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.4s ease;
   will-change: transform, opacity;
   z-index: 50;
+  /* Ajuste para que el Header no se pegue al Notch */
+  top: max(1.25rem, env(safe-area-inset-top));
 }
 
-/* Cuando el modal se abre, el header se esconde suavemente */
 body.modal-open #app-header {
-  transform: translateY(-150%);
+  transform: translateY(-200%);
+  /* Mover más arriba para asegurar que salga */
   opacity: 0;
   pointer-events: none;
 }
 
-/* Bloqueo seguro del scroll SOLO cuando el modal está abierto */
 body.modal-open {
   overflow: hidden !important;
   touch-action: none;
-  /* Evita gestos táctiles fuera del modal */
 }

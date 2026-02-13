@@ -1,10 +1,13 @@
-[00:00:00.642] Server  LOG     ✓ Ready in 478ms
-[00:00:04.872] Server  WARN    Image with src "https://images.unsplash.com/photo-1543353071-873f17a7a088?q=80&w=2070&auto=format&fit=crop" is using quality "90" which is not configured in images.qualities [75]. Please update your config to [75, 90].
+[00:00:00.963] Server  LOG     ✓ Ready in 729ms
+[00:00:03.625] Server  WARN    Image with src "https://images.unsplash.com/photo-1543353071-873f17a7a088?q=80&w=2070&auto=format&fit=crop" is using quality "90" which is not configured in images.qualities [75]. Please update your config to [75, 90].
 Read more: https://nextjs.org/docs/messages/next-image-unconfigured-qualities
-[00:00:05.743] Browser WARN    Image with src "https://images.unsplash.com/photo-1543353071-873f17a7a088?q=80&w=2070&auto=format&fit=crop" is using quality "90" which is not configured in images.qualities [75]. Please update your config to [75, 90].
+[00:00:03.757] Browser INFO    %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
+[00:00:03.884] Browser WARN    Image with src "https://images.unsplash.com/photo-1543353071-873f17a7a088?q=80&w=2070&auto=format&fit=crop" is using quality "90" which is not configured in images.qualities [75]. Please update your config to [75, 90].
 Read more: https://nextjs.org/docs/messages/next-image-unconfigured-qualities
-[00:00:06.049] Browser INFO    %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
-[00:00:06.741] Browser WARN    Image with src "https://images.unsplash.com/photo-1543353071-873f17a7a088?q=80&w=2070&auto=format&fit=crop" is using quality "90" which is not configured in images.qualities [75]. Please update your config to [75, 90].
+[00:01:36.520] Browser WARN    Image with src "https://images.unsplash.com/photo-1543353071-873f17a7a088?q=80&w=2070&auto=format&fit=crop" is using quality "90" which is not configured in images.qualities [75]. Please update your config to [75, 90].
 Read more: https://nextjs.org/docs/messages/next-image-unconfigured-qualities
-[00:05:16.982] Server  LOG     ✓ Compiled in 78ms
-[00:09:40.448] Server  LOG     ✓ Compiled in 65ms
+[00:02:13.091] Browser WARN    Image with src "https://images.unsplash.com/photo-1543353071-873f17a7a088?q=80&w=2070&auto=format&fit=crop" is using quality "90" which is not configured in images.qualities [75]. Please update your config to [75, 90].
+Read more: https://nextjs.org/docs/messages/next-image-unconfigured-qualities
+[00:02:27.587] Browser WARN    Image with src "https://images.unsplash.com/photo-1543353071-873f17a7a088?q=80&w=2070&auto=format&fit=crop" is using quality "90" which is not configured in images.qualities [75]. Please update your config to [75, 90].
+Read more: https://nextjs.org/docs/messages/next-image-unconfigured-qualities
+[00:03:12.404] Server  LOG     ✓ Compiled in 301ms

@@ -1,17 +1,15 @@
 import Header from "@/components/Header";
 
-// Este layout SOLO aplica a la tienda, no al admin
+// Este layout SOLO aplica a la tienda
 export default function ClientLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
   return (
-    <div className="bg-gray-50 min-h-screen flex flex-col">
-      {/* Aquí va el Header que solo el cliente debe ver */}
+    // 'bg-transparent' para que se vea el gradiente del body
+    <div className="bg-transparent min-h-screen flex flex-col">
       <Header />
-
-      {/* Contenido de la tienda */}
       <div className="flex-1 w-full">{children}</div>
     </div>
   );

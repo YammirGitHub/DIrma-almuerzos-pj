@@ -1683,6 +1683,10 @@
     background-color: var(--color-red-50);
   }
 
+  .bg-transparent {
+    background-color: #0000;
+  }
+
   .bg-white {
     background-color: var(--color-white);
   }
@@ -3568,19 +3572,22 @@
 html {
   scroll-behavior: smooth;
   overscroll-behavior-y: none;
+  overscroll-behavior-x: none;
   touch-action: manipulation;
   -webkit-text-size-adjust: 100%;
+  background-color: #111827;
+  height: 100%;
 }
 
 body {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   -webkit-overflow-scrolling: touch;
-  overscroll-behavior-y: none;
-  background-color: #f8f9fa;
   width: 100%;
-  min-height: 100vh;
-  overflow: hidden auto;
+  min-height: 100%;
+  padding-top: env(safe-area-inset-top);
+  padding-bottom: env(safe-area-inset-bottom);
+  background: linear-gradient(#111827 0% 40%, #f8f9fa 40% 100%) fixed;
 }
 
 ::-webkit-scrollbar {
@@ -3602,20 +3609,27 @@ p, h1, h2, h3, h4, span, div {
   user-select: text;
 }
 
+img {
+  -webkit-user-select: none;
+  user-select: none;
+  -webkit-user-drag: none;
+}
+
 .safe-area-bottom {
-  padding-bottom: env(safe-area-inset-bottom, 20px);
+  padding-bottom: calc(env(safe-area-inset-bottom)  + 1rem);
 }
 
 #app-header {
   will-change: transform, opacity;
   z-index: 50;
+  top: max(1.25rem, env(safe-area-inset-top));
   transition: transform .6s cubic-bezier(.16, 1, .3, 1), opacity .4s;
 }
 
 body.modal-open #app-header {
   opacity: 0;
   pointer-events: none;
-  transform: translateY(-150%);
+  transform: translateY(-200%);
 }
 
 body.modal-open {

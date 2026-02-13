@@ -7,20 +7,25 @@ const inter = Inter({ subsets: ["latin"] });
 export const metadata: Metadata = {
   title: "D' Irma | Sazón Judicial",
   description: "Gastronomía casera premium exclusiva para el Poder Judicial.",
-  // Agregamos iconos para que se vea bien al guardar en pantalla de inicio (iOS/Android)
   icons: {
-    icon: "/favicon.ico", // Asegúrate de tener este archivo o bórralo si no
+    icon: "/favicon.ico",
     apple: "/apple-touch-icon.png",
+  },
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: "black-translucent", // HACE LA BARRA TRANSPARENTE
+    title: "D' Irma",
   },
 };
 
 export const viewport: Viewport = {
   width: "device-width",
   initialScale: 1,
-  maximumScale: 1, // BLOQUEA el zoom manual (pellizco)
-  userScalable: false, // BLOQUEA el zoom del usuario
-  interactiveWidget: "resizes-content", // Evita que el teclado rompa el layout
-  themeColor: "#F8F9FA",
+  maximumScale: 1,
+  userScalable: false,
+  viewportFit: "cover", // ESTO ES LA CLAVE PARA EL EFECTO INMERSIVO
+  interactiveWidget: "resizes-content",
+  themeColor: "transparent", // Permite que el fondo de la web se vea en la barra
 };
 
 export default function RootLayout({
@@ -30,8 +35,9 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="es" className="antialiased scroll-smooth">
+      {/* bg-gray-900 asegura que si hay rebote arriba, sea oscuro (coincide con tu Hero) */}
       <body
-        className={`${inter.className} min-h-screen bg-[#F8F9FA] text-gray-900`}
+        className={`${inter.className} min-h-screen bg-gray-900 text-gray-900`}
       >
         {children}
       </body>
