@@ -25,9 +25,10 @@ export default function CheckoutModal({
   const [method, setMethod] = useState("yape");
   const [state, formAction, isPending] = useActionState(createOrder, null);
 
-  // Bloquear scroll del body al abrir el modal y activar el modo Focus (ocultar Header)
+  // Bloquear scroll del body al abrir el modal
   useEffect(() => {
     document.body.style.overflow = "hidden";
+    // Esta clase ayuda a ocultar el header en layout
     document.body.classList.add("modal-open");
 
     return () => {
@@ -50,20 +51,23 @@ export default function CheckoutModal({
 
   return (
     <div className="fixed inset-0 z-[9999] flex items-end sm:items-center justify-center isolate">
-      {/* 1. BACKDROP (Fondo Oscuro) */}
+      {/* Fondo negro suave con blur potente para tapar la web de atrás */}
       <div
-        className="absolute inset-0 bg-gray-900/60 backdrop-blur-sm transition-opacity animate-in fade-in duration-300"
+        className="absolute inset-0 bg-black/40 backdrop-blur-xl transition-opacity animate-in fade-in duration-500"
         onClick={close}
       />
 
-      {/* 2. EL MODAL (Contenedor Principal) */}
-      <div className="relative w-full max-w-lg bg-[#F8F9FA] sm:rounded-[2.5rem] rounded-t-[2.5rem] shadow-2xl flex flex-col h-[95vh] sm:h-[85vh] overflow-hidden animate-in slide-in-from-bottom-12 duration-300 border border-white/20">
-        {/* Barra de agarre para móvil (Visual) */}
+      {/* 2. EL MODAL (CONTENEDOR)
+          - h-[92vh]: En móvil dejamos un poquito de aire arriba para que se vea el fondo borroso.
+          - rounded-t-[2.5rem]: Curva suave estilo App moderna.
+      */}
+      <div className="relative w-full max-w-lg bg-[#F8F9FA] sm:rounded-[2.5rem] rounded-t-[2.5rem] shadow-2xl flex flex-col h-[92vh] sm:h-[85vh] overflow-hidden animate-in slide-in-from-bottom-12 duration-300 border border-white/40 ring-1 ring-black/5">
+        {/* Barra de agarre visual (Affordance) */}
         <div className="absolute top-0 left-0 right-0 h-6 z-30 flex justify-center pt-2 pointer-events-none">
           <div className="w-12 h-1.5 bg-gray-300/50 rounded-full backdrop-blur-sm"></div>
         </div>
 
-        {/* --- HEADER --- */}
+        {/* --- HEADER DEL MODAL --- */}
         <div className="relative z-20 flex items-center justify-between px-6 py-4 bg-white/80 backdrop-blur-xl border-b border-gray-100/50 shrink-0">
           <div className="flex items-center gap-3 mt-2">
             <div className="bg-orange-500 text-white p-2.5 rounded-xl shadow-lg shadow-orange-500/20">
@@ -91,7 +95,7 @@ export default function CheckoutModal({
           action={formAction}
           className="flex flex-col flex-1 min-h-0 overflow-hidden"
         >
-          {/* Inputs Ocultos para enviar al Server Action */}
+          {/* Inputs Ocultos */}
           <input type="hidden" name="items" value={JSON.stringify(cartItems)} />
           <input type="hidden" name="total" value={total} />
           <input type="hidden" name="payment_method" value={method} />
@@ -100,7 +104,6 @@ export default function CheckoutModal({
           <div className="flex-1 overflow-y-auto p-4 sm:p-6 space-y-6 custom-scrollbar bg-[#F8F9FA]">
             {/* SECCIÓN A: TICKET DETALLADO */}
             <div className="bg-white p-5 rounded-3xl border border-gray-100 shadow-sm relative overflow-hidden">
-              {/* Decoración Ticket */}
               <div className="absolute top-0 bottom-0 left-0 w-1.5 bg-orange-500"></div>
 
               <div className="flex items-center gap-2 mb-4 text-orange-600/80">
@@ -117,18 +120,13 @@ export default function CheckoutModal({
                     className="flex justify-between items-start text-sm group/item border-b border-dashed border-gray-50 pb-3 last:border-0 last:pb-0"
                   >
                     <div className="flex gap-3 flex-1">
-                      {/* Cantidad */}
                       <span className="font-bold text-gray-900 min-w-[24px] bg-gray-100 h-6 w-6 flex items-center justify-center rounded text-xs mt-0.5">
                         {item.qty}
                       </span>
-
                       <div className="flex flex-col">
-                        {/* Nombre Producto */}
                         <span className="text-gray-900 font-bold leading-tight text-base">
                           {item.name}
                         </span>
-
-                        {/* Opciones (Entrada, Bebida) */}
                         {item.options && (
                           <div className="text-xs text-gray-500 mt-1 flex flex-col gap-0.5">
                             {item.options.entrada && (
@@ -147,12 +145,10 @@ export default function CheckoutModal({
                         )}
                       </div>
                     </div>
-
                     <div className="flex flex-col items-end gap-1">
                       <span className="font-mono font-bold text-gray-900 text-sm">
                         S/ {(item.price * item.qty).toFixed(2)}
                       </span>
-                      {/* Botón Eliminar */}
                       <button
                         type="button"
                         onClick={() => removeFromCart(item.cartId)}
@@ -165,7 +161,6 @@ export default function CheckoutModal({
                 ))}
               </div>
 
-              {/* Total */}
               <div className="mt-4 pt-4 border-t border-dashed border-gray-200 flex justify-between items-end pl-2">
                 <span className="text-xs font-bold text-gray-500 uppercase tracking-widest">
                   Total a Pagar
@@ -182,12 +177,12 @@ export default function CheckoutModal({
                 Datos de Entrega
               </h3>
               <div className="bg-white p-4 rounded-3xl shadow-sm border border-gray-100 space-y-3">
+                {/* NOMBRE - Input 'Safe Zoom' */}
                 <div className="relative group">
                   <User
                     className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-orange-500 transition-colors"
                     size={18}
                   />
-                  {/* Focus Ring NARANJA - INPUT CORREGIDO (text-base) */}
                   <input
                     name="name"
                     required
@@ -195,12 +190,13 @@ export default function CheckoutModal({
                     className="w-full pl-11 pr-4 py-3.5 bg-gray-50 border border-transparent rounded-2xl focus:bg-white focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 outline-none transition-all placeholder:text-gray-400 text-base sm:text-sm font-medium"
                   />
                 </div>
+
+                {/* TELÉFONO - Input 'Safe Zoom' */}
                 <div className="relative group">
                   <Phone
                     className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-orange-500 transition-colors"
                     size={18}
                   />
-                  {/* INPUT CORREGIDO (text-base) */}
                   <input
                     name="phone"
                     required
@@ -209,12 +205,13 @@ export default function CheckoutModal({
                     className="w-full pl-11 pr-4 py-3.5 bg-gray-50 border border-transparent rounded-2xl focus:bg-white focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 outline-none transition-all placeholder:text-gray-400 text-base sm:text-sm font-medium"
                   />
                 </div>
+
+                {/* OFICINA - Input 'Safe Zoom' */}
                 <div className="relative group">
                   <MapPin
                     className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-orange-500 transition-colors"
                     size={18}
                   />
-                  {/* INPUT CORREGIDO (text-base) */}
                   <input
                     name="office"
                     required
@@ -267,7 +264,7 @@ export default function CheckoutModal({
                 </button>
               </div>
 
-              {/* DETALLES DE PAGO DINÁMICOS */}
+              {/* DETALLES DE PAGO */}
               <div className="animate-in fade-in slide-in-from-top-2 duration-300">
                 {method === "yape" ? (
                   <div className="bg-white p-5 rounded-3xl border border-purple-100 shadow-sm">
@@ -290,8 +287,8 @@ export default function CheckoutModal({
                         Irma Cerna Hoyos
                       </div>
                     </div>
+                    {/* Input Código - Safe Zoom */}
                     <div className="relative">
-                      {/* INPUT CORREGIDO (text-base) */}
                       <input
                         name="operation_code"
                         required
@@ -309,7 +306,7 @@ export default function CheckoutModal({
                       <span className="absolute left-3 top-1/2 -translate-y-1/2 text-emerald-600 font-bold">
                         S/
                       </span>
-                      {/* INPUT CORREGIDO (text-base) */}
+                      {/* Input Efectivo - Safe Zoom */}
                       <input
                         name="cash_amount"
                         type="number"
@@ -335,7 +332,6 @@ export default function CheckoutModal({
           </div>
 
           {/* --- FOOTER FLOTANTE --- */}
-          {/* Botón en NARANJA para mantener la identidad de marca */}
           <div className="p-4 bg-white border-t border-gray-100 shrink-0 z-20 pb-8 sm:pb-4 safe-area-bottom">
             <button
               type="submit"
@@ -344,8 +340,7 @@ export default function CheckoutModal({
             >
               {isPending ? (
                 <span className="flex items-center gap-2 mx-auto text-sm">
-                  <Loader2 className="animate-spin" size={18} /> Procesando
-                  Pedido...
+                  <Loader2 className="animate-spin" size={18} /> Procesando...
                 </span>
               ) : (
                 <>

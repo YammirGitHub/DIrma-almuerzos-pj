@@ -6,14 +6,10 @@ const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
   title: "D' Irma | Sazón Judicial",
-  description: "Gastronomía casera premium exclusiva para el Poder Judicial.",
-  icons: {
-    icon: "/favicon.ico",
-    apple: "/apple-touch-icon.png",
-  },
+  description: "Gastronomía casera premium.",
   appleWebApp: {
     capable: true,
-    statusBarStyle: "black-translucent", // HACE LA BARRA TRANSPARENTE
+    statusBarStyle: "black-translucent", // Barra transparente para ver el fondo
     title: "D' Irma",
   },
 };
@@ -23,9 +19,8 @@ export const viewport: Viewport = {
   initialScale: 1,
   maximumScale: 1,
   userScalable: false,
-  viewportFit: "cover", // ESTO ES LA CLAVE PARA EL EFECTO INMERSIVO
-  interactiveWidget: "resizes-content",
-  themeColor: "transparent", // Permite que el fondo de la web se vea en la barra
+  viewportFit: "cover", // CLAVE: Usa toda la pantalla, incluso detrás del Notch
+  themeColor: "transparent",
 };
 
 export default function RootLayout({
@@ -35,10 +30,18 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="es" className="antialiased scroll-smooth">
-      {/* bg-gray-900 asegura que si hay rebote arriba, sea oscuro (coincide con tu Hero) */}
       <body
-        className={`${inter.className} min-h-screen bg-gray-900 text-gray-900`}
+        className={`${inter.className} min-h-screen bg-[#F8F9FA] text-gray-900 relative`}
       >
+        {/* --- 1. DEGRADADO SUPERIOR (STATUS BAR) --- */}
+        {/* Oscuro suave para que la hora blanca se lea siempre, pero difuminado */}
+        <div className="fixed top-0 left-0 right-0 h-12 z-[40] bg-gradient-to-b from-black/40 to-transparent pointer-events-none backdrop-blur-[1px]" />
+
+        {/* --- 2. DEGRADADO INFERIOR (HOME BAR) --- */}
+        {/* Blanco suave para que el contenido se pierda al bajar */}
+        <div className="fixed bottom-0 left-0 right-0 h-12 z-[40] bg-gradient-to-t from-[#F8F9FA] via-[#F8F9FA]/80 to-transparent pointer-events-none backdrop-blur-[2px]" />
+
+        {/* --- CONTENIDO --- */}
         {children}
       </body>
     </html>

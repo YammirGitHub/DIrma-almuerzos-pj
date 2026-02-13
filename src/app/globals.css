@@ -1,96 +1,72 @@
 @import "tailwindcss";
 
-/* --- 1. CONFIGURACIÓN BASE APP NATIVA --- */
+/* --- 1. CORE: CONFIGURACIÓN APP NATIVA --- */
 html {
+  /* Scroll suave y físico */
   scroll-behavior: smooth;
-  /* Bloquea el rebote elástico exagerado, pero permite el deslizamiento suave */
-  overscroll-behavior-y: none;
-  /* Evita gestos de navegación lateral (atrás/adelante) en Mac/iOS */
-  overscroll-behavior-x: none;
+  /* IMPORTANTE: Permite que el contenido rebote suavemente (feeling nativo) */
+  /* Si no te gusta el rebote gris, usa 'none', pero para inmersión 'auto' es mejor si controlamos el color */
+  overscroll-behavior-y: auto;
   touch-action: manipulation;
   -webkit-text-size-adjust: 100%;
-
-  /* Asegura que el HTML ocupe todo el alto real */
   height: 100%;
-  background-color: #111827;
-  /* Color de fondo base (Negro Hero) */
+  /* Color de fondo base (Gris muy suave para que el rebote sea limpio) */
+  background-color: #F8F9FA;
 }
 
 body {
   min-height: 100%;
   width: 100%;
+  background-color: #F8F9FA;
 
-  /* --- FONDO DUAL INTELIGENTE (Magia Visual) --- */
-  /* Mitad superior: Negra (#111827) para que al bajar, la barra de estado se vea negra.
-     Mitad inferior: Blanca (#F8F9FA) para que al subir, la barra inferior se vea blanca. */
-  background: linear-gradient(to bottom, #111827 0%, #111827 40%, #F8F9FA 40%, #F8F9FA 100%) fixed;
-
+  /* UX: Renderizado de fuentes premium */
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 
-  /* Física de scroll nativa */
+  /* Scroll rápido en iOS */
   -webkit-overflow-scrolling: touch;
 
-  /* Padding seguro para que el contenido no quede tapado por el Notch/Barra */
+  /* Asegura que el contenido fluya detrás de las áreas seguras (Notch/Barra) */
   padding-top: env(safe-area-inset-top);
   padding-bottom: env(safe-area-inset-bottom);
 }
 
-/* --- 2. SCROLLBAR FANTASMA --- */
+/* --- 2. MÁSCARA DE SCROLL INFINITO (EL EFECTO QUE PIDES) --- */
+/* Esta clase se aplicará al contenedor principal en layout.tsx */
+.scroll-mask-vignette {
+  /* Crea un degradado de transparencia arriba y abajo */
+  mask-image: linear-gradient(to bottom,
+      transparent 0%,
+      black 40px,
+      /* Empieza a verse bien después de la barra de estado */
+      black calc(100% - 40px),
+      transparent 100%
+      /* Se desvanece al final */
+    );
+  -webkit-mask-image: linear-gradient(to bottom,
+      transparent 0%,
+      black 40px,
+      black calc(100% - 40px),
+      transparent 100%);
+}
+
+/* --- 3. SCROLLBAR INVISIBLE --- */
 ::-webkit-scrollbar {
   display: none;
-  width: 0px;
-  background: transparent;
 }
 
 html {
   scrollbar-width: none;
 }
 
-/* --- 3. UX TÁCTIL --- */
+/* --- 4. UX TÁCTIL --- */
 * {
   -webkit-tap-highlight-color: transparent;
 }
 
-/* Permitir seleccionar texto solo donde importa */
-p,
-h1,
-h2,
-h3,
-h4,
-span,
-div {
-  user-select: text;
-}
-
-img {
-  user-select: none;
-  -webkit-user-drag: none;
-}
-
-/* --- 4. UTILIDADES SEGURAS --- */
-/* Úsala en elementos fijos abajo (como el botón de pagar) */
-.safe-area-bottom {
-  padding-bottom: calc(env(safe-area-inset-bottom) + 1rem);
-}
-
-/* --- 5. ANIMACIONES UI --- */
-#app-header {
-  transition: transform 0.6s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.4s ease;
-  will-change: transform, opacity;
-  z-index: 50;
-  /* Ajuste para que el Header no se pegue al Notch */
-  top: max(1.25rem, env(safe-area-inset-top));
-}
-
-body.modal-open #app-header {
-  transform: translateY(-200%);
-  /* Mover más arriba para asegurar que salga */
-  opacity: 0;
-  pointer-events: none;
-}
-
+/* --- 5. MODAL (BLOQUEO TOTAL) --- */
 body.modal-open {
   overflow: hidden !important;
-  touch-action: none;
+  position: fixed;
+  width: 100%;
 }
