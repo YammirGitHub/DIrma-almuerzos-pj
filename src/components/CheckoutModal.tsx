@@ -177,7 +177,7 @@ export default function CheckoutModal({
                   />
                 </div>
 
-                {/* TELÉFONO - Input 'Safe Zoom' */}
+                {/* TELÉFONO - VALIDADO */}
                 <div className="relative group">
                   <Phone
                     className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-orange-500 transition-colors"
@@ -187,7 +187,18 @@ export default function CheckoutModal({
                     name="phone"
                     required
                     type="tel"
-                    placeholder="Celular / WhatsApp"
+                    inputMode="numeric"
+                    maxLength={9} // Límite físico
+                    pattern="9[0-9]{8}" // Regla: Empieza con 9, siguen 8 números
+                    title="Debe ser un celular válido de 9 dígitos empezando con 9"
+                    placeholder="Celular (9 Digitos)"
+                    // Esto evita que escriban letras
+                    onInput={(e) => {
+                      e.currentTarget.value = e.currentTarget.value.replace(
+                        /[^0-9]/g,
+                        "",
+                      );
+                    }}
                     className="w-full pl-11 pr-4 py-3.5 bg-gray-50 border border-transparent rounded-2xl focus:bg-white focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 outline-none transition-all placeholder:text-gray-400 text-base sm:text-sm font-medium"
                   />
                 </div>

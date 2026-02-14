@@ -1,10 +1,9 @@
 'use server'
 
 import { createServerClient } from '@supabase/ssr'
-import { cookies } from 'next/headers'
+import { cookies, headers } from 'next/headers' // IMPORTAR HEADERS
 import { redirect } from 'next/navigation'
 
-// Crear cliente seguro en servidor
 async function getSupabase() {
   const cookieStore = await cookies()
   return createServerClient(
@@ -18,9 +17,7 @@ async function getSupabase() {
             cookiesToSet.forEach(({ name, value, options }) =>
               cookieStore.set(name, value, options)
             )
-          } catch {
-            // Contexto de Server Component
-          }
+          } catch {}
         },
       },
     }
@@ -29,61 +26,54 @@ async function getSupabase() {
 
 export async function createOrder(prevState: any, formData: FormData) {
   const supabase = await getSupabase()
+  const headerStore = await headers()
+
+  // --- 1. CAPTURAR HUELLA DIGITAL (SEGURIDAD) ---
+  // Esto nos dice desde qué IP y qué celular (iPhone, Android, etc.) se hizo el pedido
+  const ip = headerStore.get('x-forwarded-for') || 'IP Desconocida';
+  const userAgent = headerStore.get('user-agent') || 'Dispositivo Desconocido';
   
-  // 1. EXTRAER DATOS DEL FORMULARIO
+  // EXTRAER DATOS DEL FORM
   const rawItems = formData.get('items') as string
   const items = JSON.parse(rawItems)
   const total = parseFloat(formData.get('total') as string)
-  const method = formData.get('payment_method') as string // 'yape' | 'monthly'
+  const method = formData.get('payment_method') as string
   
   const name = formData.get('name') as string
   const office = formData.get('office') as string
   const phone = formData.get('phone') as string
   const opCode = formData.get('operation_code') as string
   
-  // 2. VALIDACIÓN DE SEGURIDAD (LISTA NEGRA)
-  // Buscamos si el cliente ya existe por su teléfono
+  // 2. SEGURIDAD: VERIFICAR SI ESTÁ EN LISTA NEGRA
   const { data: customer } = await supabase
     .from('customers')
     .select('is_blacklisted')
     .eq('phone', phone)
     .single()
 
-  // SI ESTÁ EN LISTA NEGRA: Bloqueamos todo tipo de pedido
+  // SI ESTÁ BLOQUEADO, RECHAZAMOS EL PEDIDO AL INSTANTE
   if (customer?.is_blacklisted) {
     return {
       success: false,
-      message: 'Usuario con restricciones administrativas. Por favor contacte soporte.'
+      message: 'Lo sentimos, este número tiene restricciones administrativas. Contacte con soporte.'
     }
   }
 
-  // 3. REGISTRO/ACTUALIZACIÓN DE CLIENTE (CRÍTICO PARA EL REPORTE)
-  // Usamos 'upsert': Si no existe, lo crea. Si existe, actualiza nombre y oficina.
-  // Esto asegura que tu base de datos de clientes siempre tenga los datos frescos.
-  const { error: customerError } = await supabase
+  // 3. ACTUALIZAR O CREAR CLIENTE
+  await supabase
     .from('customers')
     .upsert({ 
-      phone: phone, // Clave única
+      phone: phone, 
       full_name: name, 
       office: office
-      // Nota: No tocamos 'is_blacklisted', se mantiene su valor actual o false por defecto
     }, { onConflict: 'phone' })
 
-  if (customerError) {
-    console.error('Error actualizando cliente:', customerError)
-    // No detenemos el pedido, pero lo logueamos
-  }
-
-  // 4. DEFINIR ESTADO DEL PAGO
+  // 4. ESTADO DEL PAGO
   let paymentStatus = 'unpaid'
-  
-  if (method === 'yape') {
-    paymentStatus = 'verifying' // Requiere que revises el código de operación
-  } else if (method === 'monthly') {
-    paymentStatus = 'on_account' // <--- ESTADO CLAVE PARA TU REPORTE DE DEUDA
-  }
+  if (method === 'yape') paymentStatus = 'verifying'
+  else if (method === 'monthly') paymentStatus = 'on_account'
 
-  // 5. INSERTAR EL PEDIDO EN SUPABASE
+  // 5. GUARDAR PEDIDO CON LA EVIDENCIA
   const { data, error } = await supabase.from('orders').insert({
     customer_name: name,
     customer_phone: phone,
@@ -93,15 +83,20 @@ export async function createOrder(prevState: any, formData: FormData) {
     payment_method: method,
     payment_status: paymentStatus,
     operation_code: opCode || null,
-    is_monthly_account: method === 'monthly', // Flag útil para filtros rápidos
-    status: 'pending' // Estado de la cocina (Pendiente, Cocinando, Entregado)
+    is_monthly_account: method === 'monthly',
+    status: 'pending',
+    // AQUÍ GUARDAMOS LA EVIDENCIA OCULTA
+    metadata: { 
+       ip: ip,
+       device: userAgent,
+       timestamp: new Date().toISOString()
+    }
   }).select().single()
 
   if (error) {
-    console.error('Error insertando pedido:', error)
-    return { success: false, message: 'Ocurrió un error al guardar el pedido. Inténtalo de nuevo.' }
+    console.error('Error:', error)
+    return { success: false, message: 'Error al procesar. Intenta de nuevo.' }
   }
 
-  // 6. REDIRECCIÓN A PÁGINA DE ÉXITO
-  redirect(`/pedido/${data.id}`)
+  redirect(`/pedido/${data.id}`) // Redirige a la boleta
 }

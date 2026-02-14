@@ -26,9 +26,14 @@ import {
   Salad,
   Soup,
   GlassWater,
+  ShieldAlert,
+  ShieldCheck,
+  UserPlus,
+  Ban,
+  Smartphone,
 } from "lucide-react";
 
-// Tipado estricto
+// Tipos actualizados
 type Order = {
   id: string;
   customer_name: string;
@@ -41,6 +46,7 @@ type Order = {
   status: string;
   operation_code?: string;
   created_at: string;
+  metadata?: { device: string; ip: string }; // Nueva metadata
 };
 
 type Product = {
@@ -54,12 +60,12 @@ type Product = {
 };
 
 export default function AdminDashboard() {
-  // --- 1. ESTADOS (HOOKS) ---
   const [activeTab, setActiveTab] = useState("orders");
   const [orders, setOrders] = useState<Order[]>([]);
   const [products, setProducts] = useState<Product[]>([]);
+  const [deliveredHistory, setDeliveredHistory] = useState<string[]>([]); // Lista de clientes confiables
 
-  // Estados de carga UI
+  // Estados UI
   const [isAddOpen, setIsAddOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [processingId, setProcessingId] = useState<string | null>(null);
@@ -67,7 +73,7 @@ export default function AdminDashboard() {
   const [isDeleteOpen, setIsDeleteOpen] = useState(false);
   const [orderToDelete, setOrderToDelete] = useState<string | null>(null);
 
-  // Formulario Nuevo Plato
+  // Form
   const [newProduct, setNewProduct] = useState({
     name: "",
     description: "",
@@ -83,13 +89,10 @@ export default function AdminDashboard() {
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
   );
 
-  // --- 2. EFECTOS ---
   useEffect(() => {
-    // Sonido de notificación
     audioRef.current = new Audio(
       "https://cdn.freesound.org/previews/536/536108_1415754-lq.mp3",
     );
-
     const checkSession = async () => {
       const {
         data: { session },
@@ -97,12 +100,10 @@ export default function AdminDashboard() {
       if (!session) router.push("/admin");
     };
     checkSession();
-    fetchOrders();
-    fetchProducts();
+    fetchData();
 
-    // --- REAL-TIME ENGINE ---
     const channel = supabase
-      .channel("admin_realtime_v2") // Cambié el nombre para forzar reconexión limpia
+      .channel("admin_realtime_v3")
       .on(
         "postgres_changes",
         { event: "*", schema: "public", table: "orders" },
@@ -120,179 +121,145 @@ export default function AdminDashboard() {
     };
   }, []);
 
-  // --- LÓGICA REAL-TIME PEDIDOS (CORREGIDA) ---
-  const handleRealtimeOrder = (payload: any) => {
-    console.log("Cambio en Pedidos:", payload); // Para depuración
+  // --- CARGA INTELIGENTE ---
+  const fetchData = async () => {
+    // 1. Cargar Pedidos Activos
+    const { data: ordersData } = await supabase
+      .from("orders")
+      .select("*")
+      .order("created_at", { ascending: false });
+    if (ordersData) setOrders(ordersData);
 
+    // 2. Cargar Productos
+    const { data: productsData } = await supabase
+      .from("products")
+      .select("*")
+      .order("created_at", { ascending: false });
+    if (productsData) setProducts(productsData);
+
+    // 3. HISTORIAL DE CONFIANZA: Traemos todos los teléfonos que han completado pedidos antes
+    // Esto nos permite saber quién es "Cliente Frecuente"
+    const { data: historyData } = await supabase
+      .from("orders")
+      .select("customer_phone")
+      .eq("status", "delivered"); // Solo entregados
+
+    if (historyData) {
+      // Creamos un Set (lista única) de teléfonos confiables
+      const trustedPhones = new Set(
+        historyData.map((o: any) => o.customer_phone),
+      );
+      setDeliveredHistory(Array.from(trustedPhones));
+    }
+  };
+
+  const handleRealtimeOrder = (payload: any) => {
     if (payload.eventType === "INSERT") {
-      // NUEVO PEDIDO: Lo agregamos arriba y suena la campana
       setOrders((prev) => [payload.new, ...prev]);
       audioRef.current?.play().catch(() => {});
     } else if (payload.eventType === "UPDATE") {
-      // ACTUALIZACIÓN (Ej: Entregado): Buscamos y reemplazamos
       setOrders((prev) =>
         prev.map((o) =>
           o.id === payload.new.id ? { ...o, ...payload.new } : o,
         ),
       );
     } else if (payload.eventType === "DELETE") {
-      // ELIMINACIÓN: Lo sacamos de la lista al instante
       setOrders((prev) => prev.filter((o) => o.id !== payload.old.id));
     }
   };
 
-  // --- LÓGICA REAL-TIME PRODUCTOS ---
   const handleRealtimeProduct = (payload: any) => {
-    if (payload.eventType === "INSERT") {
+    if (payload.eventType === "INSERT")
       setProducts((prev) => [payload.new, ...prev]);
-    } else if (payload.eventType === "UPDATE") {
+    else if (payload.eventType === "UPDATE")
       setProducts((prev) =>
         prev.map((p) => (p.id === payload.new.id ? payload.new : p)),
       );
-    } else if (payload.eventType === "DELETE") {
+    else if (payload.eventType === "DELETE")
       setProducts((prev) => prev.filter((p) => p.id !== payload.old.id));
-    }
   };
 
-  // --- FETCHING INICIAL ---
-  const fetchOrders = async () => {
-    const { data } = await supabase
-      .from("orders")
-      .select("*")
-      .order("created_at", { ascending: false });
-    if (data) setOrders(data);
+  // --- FUNCIÓN DE BLOQUEO (LISTA NEGRA) ---
+  const blockUser = async (phone: string, name: string) => {
+    if (
+      !confirm(
+        `⚠️ ¿BLOQUEAR PERMANENTEMENTE a ${name} (${phone})?\n\nNunca más podrá hacer pedidos en el sistema.`,
+      )
+    )
+      return;
+
+    const { error } = await supabase
+      .from("customers")
+      .update({ is_blacklisted: true })
+      .eq("phone", phone);
+
+    if (error) alert("Error al bloquear: " + error.message);
+    else alert(`✅ Usuario ${phone} bloqueado exitosamente.`);
   };
 
-  const fetchProducts = async () => {
-    const { data } = await supabase
-      .from("products")
-      .select("*")
-      .order("created_at", { ascending: false });
-    if (data) setProducts(data);
-  };
-
-  // --- ACCIONES DE PRODUCTOS ---
+  // --- PROCESOS ---
   const handleAddProduct = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
-    const { error } = await supabase.from("products").insert([
-      {
-        name: newProduct.name,
-        description: newProduct.description,
-        price: parseFloat(newProduct.price),
-        category: newProduct.category,
-        image_url: newProduct.image_url || null,
-        is_available: true,
-      },
-    ]);
-
-    if (error) alert("Error al guardar: " + error.message);
-    else {
-      setIsAddOpen(false);
-      setNewProduct({
-        name: "",
-        description: "",
-        price: "",
-        category: "menu",
-        image_url: "",
-      });
-    }
+    await supabase
+      .from("products")
+      .insert([
+        {
+          ...newProduct,
+          price: parseFloat(newProduct.price),
+          is_available: true,
+        },
+      ]);
+    setIsAddOpen(false);
+    setNewProduct({
+      name: "",
+      description: "",
+      price: "",
+      category: "menu",
+      image_url: "",
+    });
     setIsSubmitting(false);
   };
 
   const toggleProductStatus = async (id: string, currentStatus: boolean) => {
     setTogglingId(id);
-    const newStatus = !currentStatus;
-    // Optimistic Update
     setProducts(
       products.map((p) =>
-        p.id === id ? { ...p, is_available: newStatus } : p,
+        p.id === id ? { ...p, is_available: !currentStatus } : p,
       ),
     );
-
-    const { error } = await supabase
+    await supabase
       .from("products")
-      .update({ is_available: newStatus })
+      .update({ is_available: !currentStatus })
       .eq("id", id);
-    if (error) {
-      alert("Error. Revisa tu conexión.");
-      // Rollback
-      setProducts(
-        products.map((p) =>
-          p.id === id ? { ...p, is_available: currentStatus } : p,
-        ),
-      );
-    }
     setTogglingId(null);
   };
 
   const handleDeleteProduct = async (id: string) => {
-    if (!confirm("¿Borrar plato permanentemente?")) return;
-    const prevProducts = [...products];
+    if (!confirm("¿Borrar plato?")) return;
     setProducts(products.filter((p) => p.id !== id));
-
-    const { error } = await supabase.from("products").delete().eq("id", id);
-    if (error) {
-      alert("Error al eliminar");
-      setProducts(prevProducts);
-    }
+    await supabase.from("products").delete().eq("id", id);
   };
 
-  // --- ACCIONES DE PEDIDOS ---
   const markOrderDelivered = async (id: string) => {
     setProcessingId(id);
-    // Optimistic Update
-    const prevOrders = [...orders];
     setOrders(
       orders.map((o) => (o.id === id ? { ...o, status: "delivered" } : o)),
     );
-
-    const { error } = await supabase
-      .from("orders")
-      .update({ status: "delivered" })
-      .eq("id", id);
-
-    if (error) {
-      alert("Error al despachar: " + error.message);
-      setOrders(prevOrders);
-    }
+    await supabase.from("orders").update({ status: "delivered" }).eq("id", id);
     setProcessingId(null);
-  };
-
-  // Modal Borrar Pedido
-  const confirmDeleteOrder = (id: string) => {
-    setOrderToDelete(id);
-    setIsDeleteOpen(true);
   };
 
   const executeDeleteOrder = async () => {
     if (!orderToDelete) return;
     setIsSubmitting(true);
-
-    const prevOrders = [...orders];
-    setOrders(orders.filter((o) => o.id !== orderToDelete)); // Optimistic delete
-
-    const { error } = await supabase
-      .from("orders")
-      .delete()
-      .eq("id", orderToDelete);
-
-    if (error) {
-      alert("Error al eliminar: " + error.message);
-      setOrders(prevOrders);
-    }
+    setOrders(orders.filter((o) => o.id !== orderToDelete));
+    await supabase.from("orders").delete().eq("id", orderToDelete);
     setIsSubmitting(false);
     setIsDeleteOpen(false);
     setOrderToDelete(null);
   };
 
-  const handleLogout = async () => {
-    if (!window.confirm("¿Cerrar sesión?")) return;
-    await supabase.auth.signOut();
-    router.push("/admin");
-  };
-
-  // --- RENDERIZADOR DE SECCIONES DE MENÚ ---
   const renderProductSection = (
     title: string,
     categoryFilter: string,
@@ -303,7 +270,6 @@ export default function AdminDashboard() {
       (p) => p.category === categoryFilter,
     );
     if (filteredProducts.length === 0) return null;
-
     return (
       <div className="mb-10 animate-in fade-in slide-in-from-bottom-2 duration-500">
         <div className="flex items-center gap-3 mb-5 pl-1">
@@ -319,12 +285,11 @@ export default function AdminDashboard() {
             {filteredProducts.length}
           </span>
         </div>
-
         <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
           {filteredProducts.map((product) => (
             <div
               key={product.id}
-              className={`bg-white p-4 rounded-[2rem] shadow-sm border border-gray-100 flex items-center gap-5 transition-all duration-300 hover:shadow-lg ${!product.is_available ? "opacity-60 bg-gray-50" : ""}`}
+              className={`bg-white p-4 rounded-[2rem] shadow-sm border border-gray-100 flex items-center gap-5 transition-all hover:shadow-lg ${!product.is_available ? "opacity-60 bg-gray-50" : ""}`}
             >
               <div className="relative w-24 h-24 shrink-0 bg-gray-100 rounded-2xl overflow-hidden shadow-inner group">
                 <img
@@ -333,11 +298,11 @@ export default function AdminDashboard() {
                     "https://images.unsplash.com/photo-1546069901-ba9599a7e63c"
                   }
                   alt={product.name}
-                  className={`w-full h-full object-cover transition-transform duration-500 ${!product.is_available ? "grayscale" : "group-hover:scale-110"}`}
+                  className={`w-full h-full object-cover ${!product.is_available ? "grayscale" : ""}`}
                 />
                 {!product.is_available && (
-                  <div className="absolute inset-0 flex items-center justify-center bg-black/40 backdrop-blur-[1px]">
-                    <span className="text-[9px] font-black text-white bg-black/50 px-2 py-1 rounded uppercase tracking-widest border border-white/20">
+                  <div className="absolute inset-0 flex items-center justify-center bg-black/40">
+                    <span className="text-[9px] font-black text-white bg-black/50 px-2 py-1 rounded border border-white/20">
                       Agotado
                     </span>
                   </div>
@@ -346,14 +311,12 @@ export default function AdminDashboard() {
               <div className="flex-1 min-w-0 py-1 flex flex-col h-full justify-between">
                 <div>
                   <div className="flex justify-between items-start">
-                    <h3
-                      className={`font-bold text-base text-gray-900 leading-tight truncate pr-2 ${!product.is_available && "line-through text-gray-400"}`}
-                    >
+                    <h3 className="font-bold text-base text-gray-900 truncate pr-2">
                       {product.name}
                     </h3>
                     <button
                       onClick={() => handleDeleteProduct(product.id)}
-                      className="text-gray-300 hover:text-red-500 p-1.5 -mr-1.5 rounded-full hover:bg-red-50 transition-colors"
+                      className="text-gray-300 hover:text-red-500 p-1.5 -mr-1.5 rounded-full hover:bg-red-50"
                     >
                       <Trash2 size={16} />
                     </button>
@@ -371,7 +334,7 @@ export default function AdminDashboard() {
                       toggleProductStatus(product.id, product.is_available)
                     }
                     disabled={togglingId === product.id}
-                    className={`relative w-12 h-7 rounded-full transition-colors duration-300 focus:outline-none shadow-inner ${product.is_available ? "bg-green-500" : "bg-gray-300"}`}
+                    className={`relative w-12 h-7 rounded-full transition-colors duration-300 shadow-inner ${product.is_available ? "bg-green-500" : "bg-gray-300"}`}
                   >
                     <span
                       className={`absolute top-1 left-1 bg-white w-5 h-5 rounded-full shadow-md transform transition-transform duration-300 flex items-center justify-center ${product.is_available ? "translate-x-5" : "translate-x-0"}`}
@@ -399,7 +362,6 @@ export default function AdminDashboard() {
 
   return (
     <div className="min-h-screen bg-[#F8F9FA] pb-32 font-sans text-gray-900 selection:bg-orange-100 selection:text-orange-900">
-      {/* HEADER */}
       <div className="sticky top-0 z-40 bg-white/80 backdrop-blur-xl border-b border-gray-200/50 px-4 sm:px-8 py-4 flex items-center justify-between shadow-sm">
         <div className="flex items-center gap-3">
           <div className="bg-orange-600 p-2.5 rounded-xl text-white shadow-lg shadow-orange-600/30">
@@ -417,20 +379,24 @@ export default function AdminDashboard() {
         <div className="flex gap-2">
           <button
             onClick={() => window.location.reload()}
-            className="p-3 text-gray-500 hover:text-gray-900 hover:bg-white rounded-xl transition-all border border-transparent hover:border-gray-200"
+            className="p-3 text-gray-500 hover:text-gray-900 hover:bg-white rounded-xl border border-transparent hover:border-gray-200"
           >
             <RefreshCw size={20} />
           </button>
           <button
-            onClick={handleLogout}
-            className="p-3 text-red-400 hover:text-red-600 hover:bg-red-50 rounded-xl transition-all border border-transparent hover:border-red-100"
+            onClick={() => {
+              if (confirm("¿Salir?")) {
+                supabase.auth.signOut();
+                router.push("/admin");
+              }
+            }}
+            className="p-3 text-red-400 hover:text-red-600 hover:bg-red-50 rounded-xl border border-transparent hover:border-red-100"
           >
             <LogOut size={20} />
           </button>
         </div>
       </div>
 
-      {/* TABS */}
       <div className="max-w-7xl mx-auto px-4 sm:px-8 mt-6">
         <div className="flex p-1.5 bg-gray-200/50 backdrop-blur-sm rounded-2xl border border-gray-200/50 max-w-md mx-auto sm:mx-0 relative">
           <button
@@ -441,7 +407,7 @@ export default function AdminDashboard() {
               size={18}
               className={activeTab === "orders" ? "text-orange-500" : ""}
             />{" "}
-            Pedidos
+            Pedidos{" "}
             {orders.filter((o) => o.status !== "delivered").length > 0 && (
               <span className="bg-orange-600 text-white text-[10px] px-1.5 py-0.5 rounded-full font-black shadow-sm ml-1">
                 {orders.filter((o) => o.status !== "delivered").length}
@@ -461,9 +427,7 @@ export default function AdminDashboard() {
         </div>
       </div>
 
-      {/* CONTENIDO */}
       <div className="max-w-7xl mx-auto px-4 sm:px-8 mt-8">
-        {/* === VISTA PEDIDOS === */}
         {activeTab === "orders" && (
           <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
             {orders.length === 0 && (
@@ -477,157 +441,221 @@ export default function AdminDashboard() {
               </div>
             )}
             <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
-              {orders.map((order) => (
-                <div
-                  key={order.id}
-                  className={`relative bg-white rounded-[2rem] p-6 shadow-sm border border-gray-100 flex flex-col justify-between transition-all hover:shadow-xl ${order.status === "delivered" ? "opacity-60 grayscale bg-gray-50/50" : ""}`}
-                >
+              {orders.map((order) => {
+                // ANÁLISIS DE CONFIANZA: ¿Está en la lista de históricos?
+                const isTrustedClient = deliveredHistory.includes(
+                  order.customer_phone,
+                );
+
+                return (
                   <div
-                    className={`absolute left-0 top-0 bottom-0 w-1.5 ${order.status === "delivered" ? "bg-green-500" : "bg-orange-500"}`}
-                  ></div>
-                  <div className="pl-3">
-                    <div className="flex justify-between items-start mb-4">
-                      <div>
-                        <h3 className="font-black text-xl text-gray-900 leading-none">
-                          {order.customer_name}
-                        </h3>
-                        <div className="flex flex-col gap-1 mt-2">
-                          <div className="flex items-center gap-2 text-sm text-gray-600 font-bold bg-gray-50 w-fit px-2 py-1 rounded-lg">
-                            <MapPin size={14} className="text-orange-500" />
-                            {order.customer_office}
-                          </div>
-                          <div className="flex items-center gap-2 text-xs text-gray-400 font-mono pl-1">
-                            <Search size={10} />
-                            {order.customer_phone}
-                          </div>
-                        </div>
-                      </div>
-                      <div className="flex flex-col items-end gap-2">
-                        <span className="text-[10px] font-black text-gray-400 bg-gray-50 px-2 py-1.5 rounded-lg border border-gray-100 uppercase tracking-wide">
-                          {new Date(order.created_at).toLocaleTimeString([], {
-                            hour: "2-digit",
-                            minute: "2-digit",
-                          })}
-                        </span>
-                        <button
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            confirmDeleteOrder(order.id);
-                          }}
-                          className="text-gray-300 hover:text-red-500 hover:bg-red-50 p-1.5 rounded-md transition-colors"
-                        >
-                          <Trash2 size={16} />
-                        </button>
-                      </div>
-                    </div>
-                    <div className="space-y-3 mb-6 max-h-[220px] overflow-y-auto custom-scrollbar pr-2">
-                      {order.items.map((item: any, i: number) => (
-                        <div
-                          key={i}
-                          className="flex gap-3 text-sm items-start border-b border-dashed border-gray-100 pb-2 last:border-0"
-                        >
-                          <span className="font-black text-xs bg-gray-900 text-white px-2 py-1 rounded-md min-w-[28px] text-center shadow-sm">
-                            {item.qty}x
-                          </span>
-                          <div className="flex flex-col">
-                            <span className="text-gray-800 font-bold leading-tight pt-0.5">
-                              {item.name}
-                            </span>
-                            {item.options && (
-                              <div className="flex flex-wrap gap-1 mt-1.5">
-                                {item.options.entrada && (
-                                  <span className="text-[9px] bg-orange-50 text-orange-700 px-1.5 py-0.5 rounded border border-orange-100 font-medium">
-                                    {item.options.entrada}
-                                  </span>
-                                )}
-                                {item.options.bebida && (
-                                  <span className="text-[9px] bg-blue-50 text-blue-700 px-1.5 py-0.5 rounded border border-blue-100 font-medium">
-                                    {item.options.bebida}
-                                  </span>
-                                )}
-                              </div>
+                    key={order.id}
+                    className={`relative bg-white rounded-[2rem] p-6 shadow-sm border border-gray-100 flex flex-col justify-between transition-all hover:shadow-xl ${order.status === "delivered" ? "opacity-60 grayscale bg-gray-50/50" : ""}`}
+                  >
+                    <div
+                      className={`absolute left-0 top-0 bottom-0 w-1.5 ${order.status === "delivered" ? "bg-green-500" : "bg-orange-500"}`}
+                    ></div>
+
+                    <div className="pl-3">
+                      <div className="flex justify-between items-start mb-4">
+                        <div>
+                          {/* INDICADOR DE CONFIANZA */}
+                          <div className="flex items-center gap-2 mb-1">
+                            {isTrustedClient ? (
+                              <span className="bg-green-100 text-green-700 px-2 py-0.5 rounded-md text-[9px] font-black border border-green-200 flex items-center gap-1 uppercase tracking-wider">
+                                <ShieldCheck size={10} /> Cliente Frecuente
+                              </span>
+                            ) : (
+                              <span className="bg-yellow-100 text-yellow-700 px-2 py-0.5 rounded-md text-[9px] font-black border border-yellow-200 flex items-center gap-1 uppercase tracking-wider animate-pulse">
+                                <UserPlus size={10} /> Nuevo Cliente
+                              </span>
                             )}
                           </div>
+
+                          <h3 className="font-black text-xl text-gray-900 leading-none">
+                            {order.customer_name}
+                          </h3>
+                          <div className="flex flex-col gap-1 mt-2">
+                            <div className="flex items-center gap-2 text-sm text-gray-600 font-bold bg-gray-50 w-fit px-2 py-1 rounded-lg">
+                              <MapPin size={14} className="text-orange-500" />
+                              {order.customer_office}
+                            </div>
+                            <div className="flex items-center gap-2 text-xs text-gray-400 font-mono pl-1">
+                              <Search size={10} />
+                              {order.customer_phone}
+                            </div>
+                          </div>
                         </div>
-                      ))}
-                    </div>
-                  </div>
-                  <div className="pl-3 mt-auto pt-4 border-t border-gray-100">
-                    <div className="flex items-center justify-between mb-4">
-                      <div>
-                        <span className="text-[10px] text-gray-400 font-bold uppercase tracking-widest">
-                          Total
-                        </span>
-                        <div className="text-2xl font-black text-gray-900 leading-none mt-0.5">
-                          S/ {order.total_amount.toFixed(2)}
+                        <div className="flex flex-col items-end gap-2">
+                          <span className="text-[10px] font-black text-gray-400 bg-gray-50 px-2 py-1.5 rounded-lg border border-gray-100 uppercase tracking-wide">
+                            {new Date(order.created_at).toLocaleTimeString([], {
+                              hour: "2-digit",
+                              minute: "2-digit",
+                            })}
+                          </span>
+
+                          {/* BOTONES ACCIÓN */}
+                          <div className="flex gap-1">
+                            {/* BLOQUEAR USUARIO */}
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                blockUser(
+                                  order.customer_phone,
+                                  order.customer_name,
+                                );
+                              }}
+                              className="text-gray-300 hover:text-red-600 hover:bg-red-50 p-1.5 rounded-md transition-colors"
+                              title="Bloquear Usuario (Fraude)"
+                            >
+                              <Ban size={16} />
+                            </button>
+                            {/* BORRAR PEDIDO */}
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                setOrderToDelete(order.id);
+                                setIsDeleteOpen(true);
+                              }}
+                              className="text-gray-300 hover:text-orange-500 hover:bg-orange-50 p-1.5 rounded-md transition-colors"
+                              title="Eliminar pedido"
+                            >
+                              <Trash2 size={16} />
+                            </button>
+                          </div>
                         </div>
                       </div>
-                      {order.payment_method === "yape" ? (
-                        <div className="flex flex-col items-end">
-                          <div className="flex items-center gap-1.5 bg-purple-100 text-purple-700 px-3 py-1 rounded-full border border-purple-200">
-                            <CreditCard
-                              size={14}
-                              className="fill-purple-700/20"
-                            />
-                            <span className="text-[10px] font-black uppercase tracking-wide">
-                              YAPE
+
+                      <div className="space-y-3 mb-6 max-h-[220px] overflow-y-auto custom-scrollbar pr-2">
+                        {order.items.map((item: any, i: number) => (
+                          <div
+                            key={i}
+                            className="flex gap-3 text-sm items-start border-b border-dashed border-gray-100 pb-2 last:border-0"
+                          >
+                            <span className="font-black text-xs bg-gray-900 text-white px-2 py-1 rounded-md min-w-[28px] text-center shadow-sm">
+                              {item.qty}x
                             </span>
+                            <div className="flex flex-col">
+                              <span className="text-gray-800 font-bold leading-tight pt-0.5">
+                                {item.name}
+                              </span>
+                              {item.options && (
+                                <div className="flex flex-wrap gap-1 mt-1.5">
+                                  {item.options.entrada && (
+                                    <span className="text-[9px] bg-orange-50 text-orange-700 px-1.5 py-0.5 rounded border border-orange-100 font-medium">
+                                      {item.options.entrada}
+                                    </span>
+                                  )}
+                                  {item.options.bebida && (
+                                    <span className="text-[9px] bg-blue-50 text-blue-700 px-1.5 py-0.5 rounded border border-blue-100 font-medium">
+                                      {item.options.bebida}
+                                    </span>
+                                  )}
+                                </div>
+                              )}
+                            </div>
                           </div>
-                          {order.operation_code ? (
-                            <span className="text-[10px] font-mono text-purple-500 mt-1 flex items-center gap-1 bg-white px-1.5 py-0.5 rounded border border-purple-100">
-                              <Hash size={10} /> {order.operation_code}
-                            </span>
-                          ) : (
-                            <span className="text-[10px] text-red-400 font-bold mt-1 animate-pulse">
-                              Sin código ⚠️
-                            </span>
-                          )}
+                        ))}
+                      </div>
+                    </div>
+
+                    <div className="pl-3 mt-auto pt-4 border-t border-gray-100">
+                      <div className="flex items-center justify-between mb-4">
+                        <div>
+                          <span className="text-[10px] text-gray-400 font-bold uppercase tracking-widest">
+                            Total
+                          </span>
+                          <div className="text-2xl font-black text-gray-900 leading-none mt-0.5">
+                            S/ {order.total_amount.toFixed(2)}
+                          </div>
                         </div>
-                      ) : (
-                        <div className="flex flex-col items-end">
-                          <div className="flex items-center gap-1.5 bg-blue-100 text-blue-700 px-3 py-1 rounded-full border border-blue-200">
-                            <CalendarDays
-                              size={14}
-                              className="fill-blue-700/20"
-                            />
-                            <span className="text-[10px] font-black uppercase tracking-wide">
-                              CUENTA
+                        {order.payment_method === "yape" ? (
+                          <div className="flex flex-col items-end">
+                            <div className="flex items-center gap-1.5 bg-purple-100 text-purple-700 px-3 py-1 rounded-full border border-purple-200">
+                              <CreditCard
+                                size={14}
+                                className="fill-purple-700/20"
+                              />
+                              <span className="text-[10px] font-black uppercase tracking-wide">
+                                YAPE
+                              </span>
+                            </div>
+                            {order.operation_code ? (
+                              <span className="text-[10px] font-mono text-purple-500 mt-1 flex items-center gap-1 bg-white px-1.5 py-0.5 rounded border border-purple-100">
+                                <Hash size={10} /> {order.operation_code}
+                              </span>
+                            ) : (
+                              <span className="text-[10px] text-red-400 font-bold mt-1 animate-pulse">
+                                Sin código ⚠️
+                              </span>
+                            )}
+                          </div>
+                        ) : (
+                          <div className="flex flex-col items-end">
+                            <div className="flex items-center gap-1.5 bg-blue-100 text-blue-700 px-3 py-1 rounded-full border border-blue-200">
+                              <CalendarDays
+                                size={14}
+                                className="fill-blue-700/20"
+                              />
+                              <span className="text-[10px] font-black uppercase tracking-wide">
+                                CUENTA
+                              </span>
+                            </div>
+                            <span className="text-[10px] text-blue-400 mt-1 font-medium">
+                              Fin de Mes
                             </span>
                           </div>
-                          <span className="text-[10px] text-blue-400 mt-1 font-medium">
-                            Fin de Mes
+                        )}
+                      </div>
+
+                      {/* INFO TÉCNICA (Dispositivo) */}
+                      {order.metadata && (
+                        <div className="flex items-center gap-1 mb-3 text-[10px] text-gray-400 bg-gray-50 px-2 py-1 rounded border border-gray-100 w-fit">
+                          <Smartphone size={10} />
+                          <span
+                            className="truncate max-w-[150px]"
+                            title={order.metadata.device}
+                          >
+                            {order.metadata.device.includes("iPhone")
+                              ? "iPhone"
+                              : order.metadata.device.includes("Android")
+                                ? "Android"
+                                : "Web"}
+                            {" • "}
+                            {order.metadata.ip.split(",")[0]}
                           </span>
                         </div>
                       )}
+
+                      {order.status !== "delivered" ? (
+                        <button
+                          onClick={() => markOrderDelivered(order.id)}
+                          disabled={processingId === order.id}
+                          className="w-full bg-orange-600 text-white py-4 rounded-2xl font-bold text-sm flex items-center justify-center gap-2 transition-all shadow-xl shadow-orange-200 hover:bg-orange-700 active:scale-[0.98] disabled:opacity-70 disabled:cursor-not-allowed"
+                        >
+                          {processingId === order.id ? (
+                            <Loader2 size={20} className="animate-spin" />
+                          ) : (
+                            <>
+                              <CheckCircle size={20} /> DESPACHAR PEDIDO
+                            </>
+                          )}
+                        </button>
+                      ) : (
+                        <div className="w-full bg-green-50 text-green-700 py-3.5 rounded-2xl font-bold text-xs uppercase flex items-center justify-center gap-2 border border-green-100 cursor-not-allowed opacity-80">
+                          <CheckCircle size={16} className="fill-green-200" />{" "}
+                          Entregado
+                        </div>
+                      )}
                     </div>
-                    {order.status !== "delivered" ? (
-                      <button
-                        onClick={() => markOrderDelivered(order.id)}
-                        disabled={processingId === order.id}
-                        className="w-full bg-orange-600 text-white py-4 rounded-2xl font-bold text-sm flex items-center justify-center gap-2 transition-all shadow-xl shadow-orange-200 hover:bg-orange-700 active:scale-[0.98] disabled:opacity-70 disabled:cursor-not-allowed"
-                      >
-                        {processingId === order.id ? (
-                          <Loader2 size={20} className="animate-spin" />
-                        ) : (
-                          <>
-                            <CheckCircle size={20} /> DESPACHAR PEDIDO
-                          </>
-                        )}
-                      </button>
-                    ) : (
-                      <div className="w-full bg-green-50 text-green-700 py-3.5 rounded-2xl font-bold text-xs uppercase flex items-center justify-center gap-2 border border-green-100 cursor-not-allowed opacity-80">
-                        <CheckCircle size={16} className="fill-green-200" />{" "}
-                        Entregado
-                      </div>
-                    )}
                   </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
           </div>
         )}
 
-        {/* === VISTA MENÚ SEPARADA === */}
+        {/* VISTA MENÚ (Igual que antes) */}
         {activeTab === "menu" && (
           <div className="animate-in fade-in slide-in-from-bottom-4 duration-500 pb-20">
             <div className="mb-8">
@@ -648,8 +676,6 @@ export default function AdminDashboard() {
                 </div>
               </button>
             </div>
-
-            {/* SECCIONES */}
             {renderProductSection(
               "Menú Ejecutivo",
               "menu",
@@ -680,7 +706,6 @@ export default function AdminDashboard() {
               <GlassWater size={20} strokeWidth={2.5} />,
               "bg-cyan-500",
             )}
-
             {products.length === 0 && (
               <div className="text-center py-20 opacity-50">
                 <p className="text-xl font-bold text-gray-400">
@@ -692,7 +717,7 @@ export default function AdminDashboard() {
         )}
       </div>
 
-      {/* MODAL AGREGAR */}
+      {/* MODALES AGREGAR Y ELIMINAR (Igual que antes) */}
       {isAddOpen && (
         <div className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-gray-900/60 backdrop-blur-md transition-opacity animate-in fade-in">
           <div className="bg-white w-full max-w-lg rounded-[2.5rem] p-8 shadow-2xl animate-in zoom-in-95 duration-300 border border-white/20">
@@ -712,80 +737,116 @@ export default function AdminDashboard() {
                 <label className="text-xs font-black text-gray-400 uppercase tracking-widest ml-1">
                   Nombre
                 </label>
-                <input
-                  required
-                  value={newProduct.name}
-                  onChange={(e) =>
-                    setNewProduct({ ...newProduct, name: e.target.value })
-                  }
-                  className="w-full pl-4 py-4 bg-gray-50 border-2 border-transparent focus:bg-white focus:border-orange-500 rounded-2xl font-bold text-gray-900 outline-none transition-all text-lg"
-                  placeholder="Ej: Seco de Cabrito"
-                />
+                <div className="relative group">
+                  <Utensils
+                    className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-orange-500 transition-colors"
+                    size={20}
+                  />
+                  <input
+                    required
+                    value={newProduct.name}
+                    onChange={(e) =>
+                      setNewProduct({ ...newProduct, name: e.target.value })
+                    }
+                    className="w-full pl-12 pr-4 py-4 bg-gray-50 border-2 border-transparent focus:bg-white focus:border-orange-500 rounded-2xl font-bold text-gray-900 outline-none transition-all text-lg"
+                    placeholder="Ej: Seco de Cabrito"
+                  />
+                </div>
               </div>
               <div className="space-y-2">
                 <label className="text-xs font-black text-gray-400 uppercase tracking-widest ml-1">
                   Ingredientes
                 </label>
-                <input
-                  value={newProduct.description}
-                  onChange={(e) =>
-                    setNewProduct({
-                      ...newProduct,
-                      description: e.target.value,
-                    })
-                  }
-                  className="w-full pl-4 py-4 bg-gray-50 border-2 border-transparent focus:bg-white focus:border-orange-500 rounded-2xl font-medium text-gray-900 outline-none transition-all"
-                  placeholder="Con frejoles y arroz..."
-                />
+                <div className="relative group">
+                  <AlignLeft
+                    className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-orange-500 transition-colors"
+                    size={20}
+                  />
+                  <input
+                    value={newProduct.description}
+                    onChange={(e) =>
+                      setNewProduct({
+                        ...newProduct,
+                        description: e.target.value,
+                      })
+                    }
+                    className="w-full pl-12 pr-4 py-4 bg-gray-50 border-2 border-transparent focus:bg-white focus:border-orange-500 rounded-2xl font-medium text-gray-900 outline-none transition-all"
+                    placeholder="Con frejoles y arroz..."
+                  />
+                </div>
               </div>
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <label className="text-xs font-black text-gray-400 uppercase tracking-widest ml-1">
                     Precio
                   </label>
-                  <input
-                    required
-                    type="number"
-                    step="0.10"
-                    value={newProduct.price}
-                    onChange={(e) =>
-                      setNewProduct({ ...newProduct, price: e.target.value })
-                    }
-                    className="w-full pl-4 py-4 bg-gray-50 border-2 border-transparent focus:bg-white focus:border-orange-500 rounded-2xl font-bold text-gray-900 outline-none transition-all"
-                    placeholder="0.00"
-                  />
+                  <div className="relative group">
+                    <DollarSign
+                      className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-orange-500 transition-colors"
+                      size={20}
+                    />
+                    <input
+                      required
+                      type="number"
+                      step="0.10"
+                      value={newProduct.price}
+                      onChange={(e) =>
+                        setNewProduct({ ...newProduct, price: e.target.value })
+                      }
+                      className="w-full pl-12 pr-4 py-4 bg-gray-50 border-2 border-transparent focus:bg-white focus:border-orange-500 rounded-2xl font-bold text-gray-900 outline-none transition-all"
+                      placeholder="0.00"
+                    />
+                  </div>
                 </div>
                 <div className="space-y-2">
                   <label className="text-xs font-black text-gray-400 uppercase tracking-widest ml-1">
                     Categoría
                   </label>
-                  <select
-                    value={newProduct.category}
-                    onChange={(e) =>
-                      setNewProduct({ ...newProduct, category: e.target.value })
-                    }
-                    className="w-full pl-4 py-4 bg-gray-50 border-2 border-transparent focus:bg-white focus:border-orange-500 rounded-2xl font-bold text-gray-900 outline-none cursor-pointer appearance-none"
-                  >
-                    <option value="menu">Menú Ejecutivo</option>
-                    <option value="plato">Plato a la Carta</option>
-                    <option value="diet">Dieta</option>
-                    <option value="extra">Extra</option>
-                    <option value="bebida">Bebida</option>
-                  </select>
+                  <div className="relative group">
+                    <Tag
+                      className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-orange-500 transition-colors"
+                      size={20}
+                    />
+                    <select
+                      value={newProduct.category}
+                      onChange={(e) =>
+                        setNewProduct({
+                          ...newProduct,
+                          category: e.target.value,
+                        })
+                      }
+                      className="w-full pl-12 pr-4 py-4 bg-gray-50 border-2 border-transparent focus:bg-white focus:border-orange-500 rounded-2xl font-bold text-gray-900 outline-none cursor-pointer appearance-none"
+                    >
+                      <option value="menu">Menú Ejecutivo</option>
+                      <option value="plato">Plato a la Carta</option>
+                      <option value="diet">Dieta</option>
+                      <option value="extra">Extra</option>
+                      <option value="bebida">Bebida</option>
+                    </select>
+                  </div>
                 </div>
               </div>
               <div className="space-y-2">
                 <label className="text-xs font-black text-gray-400 uppercase tracking-widest ml-1">
                   Foto URL
                 </label>
-                <input
-                  value={newProduct.image_url}
-                  onChange={(e) =>
-                    setNewProduct({ ...newProduct, image_url: e.target.value })
-                  }
-                  className="w-full pl-4 py-4 bg-gray-50 border-2 border-transparent focus:bg-white focus:border-orange-500 rounded-2xl font-medium text-gray-900 outline-none transition-all text-sm"
-                  placeholder="https://..."
-                />
+                <div className="relative group">
+                  <ImageIcon
+                    className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-orange-500 transition-colors"
+                    size={20}
+                  />
+                  <input
+                    value={newProduct.image_url}
+                    onChange={(e) =>
+                      setNewProduct({
+                        ...newProduct,
+                        image_url: e.target.value,
+                      })
+                    }
+                    className="w-full pl-12 pr-4 py-4 bg-gray-50 border-2 border-transparent focus:bg-white focus:border-orange-500 rounded-2xl font-medium text-gray-900 outline-none transition-all text-sm"
+                    placeholder="https://..."
+                  />
+                </div>
               </div>
               <button
                 type="submit"
@@ -807,7 +868,6 @@ export default function AdminDashboard() {
         </div>
       )}
 
-      {/* MODAL ELIMINAR */}
       {isDeleteOpen && (
         <div className="fixed inset-0 z-[70] flex items-center justify-center p-4 isolate">
           <div
