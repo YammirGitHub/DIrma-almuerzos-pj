@@ -8,7 +8,6 @@ import { motion } from "framer-motion";
 export default function BottomNav() {
   const pathname = usePathname();
 
-  // Ocultar en admin
   if (pathname.startsWith("/admin")) return null;
 
   const navItems = [
@@ -19,17 +18,33 @@ export default function BottomNav() {
   return (
     <div
       id="app-bottom-nav"
-      // Agregamos padding inferior seguro para iPhone
-      className="fixed bottom-0 left-0 right-0 z-40 flex justify-center pointer-events-none transition-transform duration-500 ease-in-out pb-safe"
+      className="fixed bottom-0 left-0 right-0 z-40 flex justify-center pointer-events-none transition-transform duration-500 ease-in-out"
     >
-      {/* DISEÑO PREMIUM "ISLA FLOTANTE" CON SOMBRA DEFINIDA:
-         - bg-white/90: Fondo más sólido para contraste.
-         - border-gray-200/40: Borde sutil para definir el límite.
-         - shadow-xl shadow-black/5: Sombra suave pero oscura para elevar.
-         - ring-1 ring-black/5: Anillo exterior para nitidez extra.
-      */}
-      <nav className="pointer-events-auto w-full max-w-[320px] mx-4 mb-4 bg-white/90 backdrop-blur-xl border border-gray-200/40 rounded-full shadow-xl shadow-black/5 ring-1 ring-black/5 px-2 py-2">
-        <ul className="flex items-center justify-between px-6 h-14 relative">
+      <nav
+        className="
+          pointer-events-auto 
+          /* EFECTO CRISTAL (IGUAL AL HEADER) */
+          bg-white/80 backdrop-blur-2xl border border-white/50
+          
+          /* SOMBRA PREMIUM (Clave para diferenciarse del fondo) */
+          /* Sombra oscura sutil hacia arriba + Anillo interno de luz */
+          shadow-[0_-8px_30px_rgba(0,0,0,0.08)] ring-1 ring-white/60
+
+          /* --- MOVIL (Nativo Fusionado) --- */
+          w-full 
+          rounded-t-[2.5rem] /* Curva suave arriba */
+          pb-[calc(env(safe-area-inset-bottom)+1rem)] /* Padding dinámico para iPhone */
+          pt-4 px-6 
+
+          /* --- PC/TABLET (Isla Flotante) --- */
+          md:w-auto 
+          md:min-w-[340px] 
+          md:rounded-full /* Píldora completa */
+          md:mb-8 md:pb-3 md:pt-3 md:px-10
+          md:shadow-2xl md:shadow-orange-900/10 /* Sombra cálida en PC */
+        "
+      >
+        <ul className="flex items-center justify-around md:gap-16 h-12 relative">
           {navItems.map((item) => {
             const isActive = pathname === item.href;
             const Icon = item.icon;
@@ -41,17 +56,17 @@ export default function BottomNav() {
               >
                 <Link
                   href={item.href}
-                  className={`flex flex-col items-center gap-1 w-full transition-colors duration-300 ${
+                  className={`flex flex-col items-center gap-1 w-full transition-all duration-300 ${
                     isActive
-                      ? "text-orange-600"
+                      ? "text-orange-600 scale-105"
                       : "text-gray-400 hover:text-gray-600"
                   }`}
                 >
+                  {/* Pill de fondo (Sutil y elegante) */}
                   {isActive && (
                     <motion.div
                       layoutId="nav-pill"
-                      // Pill más suave detrás del icono
-                      className="absolute -top-1 w-12 h-10 bg-orange-100/50 rounded-2xl -z-10"
+                      className="absolute -top-3 w-12 h-12 bg-gradient-to-b from-orange-100/80 to-transparent rounded-2xl -z-10 blur-[2px]"
                       transition={{
                         type: "spring",
                         bounce: 0.2,
@@ -61,11 +76,11 @@ export default function BottomNav() {
                   )}
 
                   <Icon
-                    size={24}
+                    size={26} // Icono ligeramente más grande para tacto
                     strokeWidth={isActive ? 2.5 : 2}
-                    className={`transition-transform duration-300 ${isActive ? "scale-110" : "scale-100"}`}
+                    className="drop-shadow-sm"
                   />
-                  <span className="text-[10px] font-bold tracking-tight leading-none mt-0.5">
+                  <span className="text-[9px] font-bold tracking-tight leading-none mt-0.5">
                     {item.name}
                   </span>
                 </Link>

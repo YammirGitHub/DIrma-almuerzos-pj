@@ -428,15 +428,15 @@ export default function MenuList({
       <AnimatePresence>
         {totalItems > 0 && (
           <motion.div
-            id="floating-cart-btn" // ID PARA CSS GLOBAL
+            id="floating-cart-btn"
             initial={{ y: 100, opacity: 0 }}
             animate={{ y: 0, opacity: 1 }}
             exit={{ y: 100, opacity: 0 }}
             transition={{ type: "spring", stiffness: 260, damping: 20 }}
-            // CLASES RESPONSIVAS CLAVE:
-            // Móvil: bottom-24 (encima del nav), left-0 right-0 (ancho completo con px-4)
-            // PC (md): bottom-8 right-8 (esquina flotante), width auto (max-w-md), left-auto (no centrado)
-            className="fixed bottom-24 left-0 right-0 md:bottom-8 md:right-8 md:left-auto z-50 flex justify-center md:justify-end pointer-events-none px-4 safe-area-bottom transition-all duration-300"
+            // CORRECCIÓN SENIOR DE POSICIONAMIENTO:
+            // bottom-28: Lo sube lo suficiente para no chocar con la barra nav en iPhone Pro Max
+            // md:bottom-10: En PC lo baja porque la barra es flotante
+            className="fixed bottom-28 left-0 right-0 md:bottom-10 md:right-10 md:left-auto z-50 flex justify-center md:justify-end pointer-events-none px-4 safe-area-bottom transition-all duration-300"
           >
             <button
               onClick={() => setIsCheckoutOpen(true)}
