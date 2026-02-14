@@ -1,0 +1,14 @@
+[00:00:00.789] Server  LOG     ✓ Ready in 569ms
+[00:00:04.707] Browser INFO    %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
+[00:00:05.217] Browser WARN    Detected `scroll-behavior: smooth` on the `<html>` element. To disable smooth scrolling during route transitions, add `data-scroll-behavior="smooth"` to your <html> element. Learn more: https://nextjs.org/docs/messages/missing-data-scroll-behavior
+[00:00:05.229] Server  WARN    Image with src "https://images.unsplash.com/photo-1543353071-873f17a7a088?q=80&w=2070&auto=format&fit=crop" is using quality "90" which is not configured in images.qualities [75]. Please update your config to [75, 90].
+Read more: https://nextjs.org/docs/messages/next-image-unconfigured-qualities
+[00:00:05.352] Browser INFO    %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
+[00:00:06.424] Browser WARN    Image with src "https://images.unsplash.com/photo-1543353071-873f17a7a088?q=80&w=2070&auto=format&fit=crop" is using quality "90" which is not configured in images.qualities [75]. Please update your config to [75, 90].
+Read more: https://nextjs.org/docs/messages/next-image-unconfigured-qualities
+[00:00:06.427] Browser WARN    Image with src "https://images.unsplash.com/photo-1543353071-873f17a7a088?q=80&w=2070&auto=format&fit=crop" is using quality "90" which is not configured in images.qualities [75]. Please update your config to [75, 90].
+Read more: https://nextjs.org/docs/messages/next-image-unconfigured-qualities
+[00:00:46.926] Browser WARN    Detected `scroll-behavior: smooth` on the `<html>` element. To disable smooth scrolling during route transitions, add `data-scroll-behavior="smooth"` to your <html> element. Learn more: https://nextjs.org/docs/messages/missing-data-scroll-behavior
+[00:00:50.453] Browser INFO    %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
+[00:01:18.482] Browser INFO    %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
+[00:01:34.190] Browser WARN    Detected `scroll-behavior: smooth` on the `<html>` element. To disable smooth scrolling during route transitions, add `data-scroll-behavior="smooth"` to your <html> element. Learn more: https://nextjs.org/docs/messages/missing-data-scroll-behavior

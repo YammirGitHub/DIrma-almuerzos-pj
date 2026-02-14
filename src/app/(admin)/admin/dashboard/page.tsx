@@ -1,4 +1,5 @@
 "use client";
+
 import { useState, useEffect, useRef } from "react";
 import { createBrowserClient } from "@supabase/ssr";
 import { useRouter } from "next/navigation";
@@ -33,7 +34,7 @@ import {
   Smartphone,
 } from "lucide-react";
 
-// Tipos actualizados
+// --- TIPOS ---
 type Order = {
   id: string;
   customer_name: string;
@@ -46,7 +47,7 @@ type Order = {
   status: string;
   operation_code?: string;
   created_at: string;
-  metadata?: { device: string; ip: string }; // Nueva metadata
+  metadata?: { device: string; ip: string };
 };
 
 type Product = {
@@ -60,10 +61,11 @@ type Product = {
 };
 
 export default function AdminDashboard() {
+  // --- ESTADOS ---
   const [activeTab, setActiveTab] = useState("orders");
   const [orders, setOrders] = useState<Order[]>([]);
   const [products, setProducts] = useState<Product[]>([]);
-  const [deliveredHistory, setDeliveredHistory] = useState<string[]>([]); // Lista de clientes confiables
+  const [deliveredHistory, setDeliveredHistory] = useState<string[]>([]);
 
   // Estados UI
   const [isAddOpen, setIsAddOpen] = useState(false);
@@ -73,7 +75,7 @@ export default function AdminDashboard() {
   const [isDeleteOpen, setIsDeleteOpen] = useState(false);
   const [orderToDelete, setOrderToDelete] = useState<string | null>(null);
 
-  // Form
+  // Formulario Nuevo Producto
   const [newProduct, setNewProduct] = useState({
     name: "",
     description: "",
@@ -84,15 +86,20 @@ export default function AdminDashboard() {
 
   const router = useRouter();
   const audioRef = useRef<HTMLAudioElement | null>(null);
+
   const supabase = createBrowserClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
   );
 
+  // --- EFECTOS (Init & Realtime) ---
   useEffect(() => {
+    // 1. Inicializar Audio
     audioRef.current = new Audio(
       "https://cdn.freesound.org/previews/536/536108_1415754-lq.mp3",
     );
+
+    // 2. Verificar Sesión
     const checkSession = async () => {
       const {
         data: { session },
@@ -102,8 +109,9 @@ export default function AdminDashboard() {
     checkSession();
     fetchData();
 
+    // 3. Suscripción Realtime
     const channel = supabase
-      .channel("admin_realtime_v3")
+      .channel("admin_realtime_v4")
       .on(
         "postgres_changes",
         { event: "*", schema: "public", table: "orders" },
@@ -121,31 +129,28 @@ export default function AdminDashboard() {
     };
   }, []);
 
-  // --- CARGA INTELIGENTE ---
+  // --- CARGA DE DATOS ---
   const fetchData = async () => {
-    // 1. Cargar Pedidos Activos
+    // Pedidos
     const { data: ordersData } = await supabase
       .from("orders")
       .select("*")
       .order("created_at", { ascending: false });
     if (ordersData) setOrders(ordersData);
 
-    // 2. Cargar Productos
+    // Productos
     const { data: productsData } = await supabase
       .from("products")
       .select("*")
       .order("created_at", { ascending: false });
     if (productsData) setProducts(productsData);
 
-    // 3. HISTORIAL DE CONFIANZA: Traemos todos los teléfonos que han completado pedidos antes
-    // Esto nos permite saber quién es "Cliente Frecuente"
+    // Historial Confiable
     const { data: historyData } = await supabase
       .from("orders")
       .select("customer_phone")
-      .eq("status", "delivered"); // Solo entregados
-
+      .eq("status", "delivered");
     if (historyData) {
-      // Creamos un Set (lista única) de teléfonos confiables
       const trustedPhones = new Set(
         historyData.map((o: any) => o.customer_phone),
       );
@@ -153,6 +158,7 @@ export default function AdminDashboard() {
     }
   };
 
+  // --- MANEJADORES REALTIME ---
   const handleRealtimeOrder = (payload: any) => {
     if (payload.eventType === "INSERT") {
       setOrders((prev) => [payload.new, ...prev]);
@@ -179,25 +185,50 @@ export default function AdminDashboard() {
       setProducts((prev) => prev.filter((p) => p.id !== payload.old.id));
   };
 
-  // --- FUNCIÓN DE BLOQUEO (LISTA NEGRA) ---
-  const blockUser = async (phone: string, name: string) => {
+  // --- LÓGICA DE NEGOCIO ---
+
+  // 1. Validar Pago Yape (Movido fuera del useEffect para corregir el bug)
+  const verifyPayment = async (id: string, amount: number) => {
     if (
-      !confirm(
-        `⚠️ ¿BLOQUEAR PERMANENTEMENTE a ${name} (${phone})?\n\nNunca más podrá hacer pedidos en el sistema.`,
-      )
+      !confirm(`¿Confirmas que recibiste S/ ${amount.toFixed(2)} en tu Yape?`)
     )
       return;
 
+    // UI Optimista
+    setOrders(
+      orders.map((o) => (o.id === id ? { ...o, payment_status: "paid" } : o)),
+    );
+
+    // Backend Update
+    await supabase
+      .from("orders")
+      .update({ payment_status: "paid" })
+      .eq("id", id);
+
+    // Sonido caja
+    const audio = new Audio(
+      "https://cdn.freesound.org/previews/172/172205_3244838-lq.mp3",
+    );
+    audio.play().catch(() => {});
+  };
+
+  // 2. Bloquear Usuario
+  const blockUser = async (phone: string, name: string) => {
+    if (
+      !confirm(
+        `⚠️ ¿BLOQUEAR PERMANENTEMENTE a ${name} (${phone})?\n\nNunca más podrá hacer pedidos.`,
+      )
+    )
+      return;
     const { error } = await supabase
       .from("customers")
       .update({ is_blacklisted: true })
       .eq("phone", phone);
-
-    if (error) alert("Error al bloquear: " + error.message);
-    else alert(`✅ Usuario ${phone} bloqueado exitosamente.`);
+    if (error) alert("Error: " + error.message);
+    else alert(`✅ Usuario ${phone} bloqueado.`);
   };
 
-  // --- PROCESOS ---
+  // 3. Gestión Productos
   const handleAddProduct = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
@@ -241,6 +272,7 @@ export default function AdminDashboard() {
     await supabase.from("products").delete().eq("id", id);
   };
 
+  // 4. Gestión Pedidos
   const markOrderDelivered = async (id: string) => {
     setProcessingId(id);
     setOrders(
@@ -260,6 +292,7 @@ export default function AdminDashboard() {
     setOrderToDelete(null);
   };
 
+  // --- RENDERIZADO ---
   const renderProductSection = (
     title: string,
     categoryFilter: string,
@@ -285,13 +318,13 @@ export default function AdminDashboard() {
             {filteredProducts.length}
           </span>
         </div>
-        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4 md:gap-6">
           {filteredProducts.map((product) => (
             <div
               key={product.id}
-              className={`bg-white p-4 rounded-[2rem] shadow-sm border border-gray-100 flex items-center gap-5 transition-all hover:shadow-lg ${!product.is_available ? "opacity-60 bg-gray-50" : ""}`}
+              className={`bg-white p-4 rounded-[1.5rem] shadow-sm border border-gray-100 flex items-center gap-4 transition-all hover:shadow-lg ${!product.is_available ? "opacity-60 bg-gray-50" : ""}`}
             >
-              <div className="relative w-24 h-24 shrink-0 bg-gray-100 rounded-2xl overflow-hidden shadow-inner group">
+              <div className="relative w-20 h-20 md:w-24 md:h-24 shrink-0 bg-gray-100 rounded-xl overflow-hidden shadow-inner group">
                 <img
                   src={
                     product.image_url ||
@@ -311,7 +344,7 @@ export default function AdminDashboard() {
               <div className="flex-1 min-w-0 py-1 flex flex-col h-full justify-between">
                 <div>
                   <div className="flex justify-between items-start">
-                    <h3 className="font-bold text-base text-gray-900 truncate pr-2">
+                    <h3 className="font-bold text-sm md:text-base text-gray-900 truncate pr-2">
                       {product.name}
                     </h3>
                     <button
@@ -321,7 +354,7 @@ export default function AdminDashboard() {
                       <Trash2 size={16} />
                     </button>
                   </div>
-                  <p className="text-lg font-black text-gray-900 mt-0.5">
+                  <p className="text-base md:text-lg font-black text-gray-900 mt-0.5">
                     S/ {product.price}
                   </p>
                 </div>
@@ -362,16 +395,17 @@ export default function AdminDashboard() {
 
   return (
     <div className="min-h-screen bg-[#F8F9FA] pb-32 font-sans text-gray-900 selection:bg-orange-100 selection:text-orange-900">
-      <div className="sticky top-0 z-40 bg-white/80 backdrop-blur-xl border-b border-gray-200/50 px-4 sm:px-8 py-4 flex items-center justify-between shadow-sm">
+      {/* HEADER RESPONSIVO */}
+      <div className="sticky top-0 z-40 bg-white/85 backdrop-blur-xl border-b border-gray-200/50 px-4 md:px-8 py-3 md:py-4 flex items-center justify-between shadow-sm safe-area-top">
         <div className="flex items-center gap-3">
-          <div className="bg-orange-600 p-2.5 rounded-xl text-white shadow-lg shadow-orange-600/30">
-            <ChefHat size={22} strokeWidth={2.5} />
+          <div className="bg-orange-600 p-2 rounded-xl text-white shadow-lg shadow-orange-600/30">
+            <ChefHat size={20} strokeWidth={2.5} />
           </div>
           <div>
-            <h1 className="font-black text-lg tracking-tight text-gray-900 leading-none">
+            <h1 className="font-black text-base md:text-lg tracking-tight text-gray-900 leading-none">
               D' Irma
             </h1>
-            <p className="text-[10px] text-gray-400 font-bold uppercase tracking-widest mt-0.5">
+            <p className="text-[9px] md:text-[10px] text-gray-400 font-bold uppercase tracking-widest mt-0.5">
               Admin
             </p>
           </div>
@@ -379,9 +413,9 @@ export default function AdminDashboard() {
         <div className="flex gap-2">
           <button
             onClick={() => window.location.reload()}
-            className="p-3 text-gray-500 hover:text-gray-900 hover:bg-white rounded-xl border border-transparent hover:border-gray-200"
+            className="p-2.5 text-gray-500 hover:text-gray-900 hover:bg-white rounded-xl border border-transparent hover:border-gray-200"
           >
-            <RefreshCw size={20} />
+            <RefreshCw size={18} />
           </button>
           <button
             onClick={() => {
@@ -390,24 +424,25 @@ export default function AdminDashboard() {
                 router.push("/admin");
               }
             }}
-            className="p-3 text-red-400 hover:text-red-600 hover:bg-red-50 rounded-xl border border-transparent hover:border-red-100"
+            className="p-2.5 text-red-400 hover:text-red-600 hover:bg-red-50 rounded-xl border border-transparent hover:border-red-100"
           >
-            <LogOut size={20} />
+            <LogOut size={18} />
           </button>
         </div>
       </div>
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-8 mt-6">
-        <div className="flex p-1.5 bg-gray-200/50 backdrop-blur-sm rounded-2xl border border-gray-200/50 max-w-md mx-auto sm:mx-0 relative">
+      {/* TABS DE NAVEGACIÓN */}
+      <div className="max-w-7xl mx-auto px-4 md:px-8 mt-4 md:mt-6">
+        <div className="flex p-1.5 bg-gray-200/50 backdrop-blur-sm rounded-2xl border border-gray-200/50 w-full md:max-w-md mx-auto md:mx-0 relative">
           <button
             onClick={() => setActiveTab("orders")}
-            className={`flex-1 py-3 rounded-xl text-sm font-bold flex items-center justify-center gap-2 transition-all relative z-10 ${activeTab === "orders" ? "bg-white text-gray-900 shadow-md" : "text-gray-500 hover:text-gray-700"}`}
+            className={`flex-1 py-3 rounded-xl text-sm font-bold flex items-center justify-center gap-2 transition-all relative z-10 touch-manipulation ${activeTab === "orders" ? "bg-white text-gray-900 shadow-md" : "text-gray-500 hover:text-gray-700"}`}
           >
             <Bell
               size={18}
               className={activeTab === "orders" ? "text-orange-500" : ""}
-            />{" "}
-            Pedidos{" "}
+            />
+            Pedidos
             {orders.filter((o) => o.status !== "delivered").length > 0 && (
               <span className="bg-orange-600 text-white text-[10px] px-1.5 py-0.5 rounded-full font-black shadow-sm ml-1">
                 {orders.filter((o) => o.status !== "delivered").length}
@@ -416,18 +451,19 @@ export default function AdminDashboard() {
           </button>
           <button
             onClick={() => setActiveTab("menu")}
-            className={`flex-1 py-3 rounded-xl text-sm font-bold flex items-center justify-center gap-2 transition-all relative z-10 ${activeTab === "menu" ? "bg-white text-gray-900 shadow-md" : "text-gray-500 hover:text-gray-700"}`}
+            className={`flex-1 py-3 rounded-xl text-sm font-bold flex items-center justify-center gap-2 transition-all relative z-10 touch-manipulation ${activeTab === "menu" ? "bg-white text-gray-900 shadow-md" : "text-gray-500 hover:text-gray-700"}`}
           >
             <Utensils
               size={18}
               className={activeTab === "menu" ? "text-orange-500" : ""}
-            />{" "}
+            />
             Menú
           </button>
         </div>
       </div>
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-8 mt-8">
+      <div className="max-w-7xl mx-auto px-4 md:px-8 mt-6">
+        {/* VISTA DE PEDIDOS */}
         {activeTab === "orders" && (
           <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
             {orders.length === 0 && (
@@ -440,9 +476,10 @@ export default function AdminDashboard() {
                 </p>
               </div>
             )}
-            <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+
+            {/* GRID RESPONSIVO: 1 COL MÓVIL, 2 TABLET, 3 PC */}
+            <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4 md:gap-6">
               {orders.map((order) => {
-                // ANÁLISIS DE CONFIANZA: ¿Está en la lista de históricos?
                 const isTrustedClient = deliveredHistory.includes(
                   order.customer_phone,
                 );
@@ -450,53 +487,57 @@ export default function AdminDashboard() {
                 return (
                   <div
                     key={order.id}
-                    className={`relative bg-white rounded-[2rem] p-6 shadow-sm border border-gray-100 flex flex-col justify-between transition-all hover:shadow-xl ${order.status === "delivered" ? "opacity-60 grayscale bg-gray-50/50" : ""}`}
+                    className={`relative bg-white rounded-[2rem] p-5 md:p-6 shadow-sm border border-gray-100 flex flex-col justify-between transition-all hover:shadow-xl ${order.status === "delivered" ? "opacity-60 grayscale bg-gray-50/50" : ""}`}
                   >
+                    {/* Borde Lateral de Estado */}
                     <div
                       className={`absolute left-0 top-0 bottom-0 w-1.5 ${order.status === "delivered" ? "bg-green-500" : "bg-orange-500"}`}
                     ></div>
 
                     <div className="pl-3">
+                      {/* HEADER TARJETA */}
                       <div className="flex justify-between items-start mb-4">
-                        <div>
-                          {/* INDICADOR DE CONFIANZA */}
+                        <div className="flex-1 min-w-0 pr-2">
                           <div className="flex items-center gap-2 mb-1">
                             {isTrustedClient ? (
-                              <span className="bg-green-100 text-green-700 px-2 py-0.5 rounded-md text-[9px] font-black border border-green-200 flex items-center gap-1 uppercase tracking-wider">
+                              <span className="bg-green-100 text-green-700 px-2 py-0.5 rounded-md text-[9px] font-black border border-green-200 flex items-center gap-1 uppercase tracking-wider shrink-0">
                                 <ShieldCheck size={10} /> Cliente Frecuente
                               </span>
                             ) : (
-                              <span className="bg-yellow-100 text-yellow-700 px-2 py-0.5 rounded-md text-[9px] font-black border border-yellow-200 flex items-center gap-1 uppercase tracking-wider animate-pulse">
+                              <span className="bg-yellow-100 text-yellow-700 px-2 py-0.5 rounded-md text-[9px] font-black border border-yellow-200 flex items-center gap-1 uppercase tracking-wider animate-pulse shrink-0">
                                 <UserPlus size={10} /> Nuevo Cliente
                               </span>
                             )}
                           </div>
-
-                          <h3 className="font-black text-xl text-gray-900 leading-none">
+                          <h3 className="font-black text-lg md:text-xl text-gray-900 leading-tight truncate">
                             {order.customer_name}
                           </h3>
+
                           <div className="flex flex-col gap-1 mt-2">
-                            <div className="flex items-center gap-2 text-sm text-gray-600 font-bold bg-gray-50 w-fit px-2 py-1 rounded-lg">
-                              <MapPin size={14} className="text-orange-500" />
-                              {order.customer_office}
+                            <div className="flex items-center gap-2 text-xs md:text-sm text-gray-600 font-bold bg-gray-50 w-fit px-2 py-1 rounded-lg">
+                              <MapPin
+                                size={14}
+                                className="text-orange-500 shrink-0"
+                              />
+                              <span className="truncate max-w-[150px]">
+                                {order.customer_office}
+                              </span>
                             </div>
                             <div className="flex items-center gap-2 text-xs text-gray-400 font-mono pl-1">
-                              <Search size={10} />
-                              {order.customer_phone}
+                              <Search size={10} /> {order.customer_phone}
                             </div>
                           </div>
                         </div>
-                        <div className="flex flex-col items-end gap-2">
+
+                        {/* COLUMNA DERECHA (HORA + BOTONES) */}
+                        <div className="flex flex-col items-end gap-2 shrink-0">
                           <span className="text-[10px] font-black text-gray-400 bg-gray-50 px-2 py-1.5 rounded-lg border border-gray-100 uppercase tracking-wide">
                             {new Date(order.created_at).toLocaleTimeString([], {
                               hour: "2-digit",
                               minute: "2-digit",
                             })}
                           </span>
-
-                          {/* BOTONES ACCIÓN */}
                           <div className="flex gap-1">
-                            {/* BLOQUEAR USUARIO */}
                             <button
                               onClick={(e) => {
                                 e.stopPropagation();
@@ -505,34 +546,34 @@ export default function AdminDashboard() {
                                   order.customer_name,
                                 );
                               }}
-                              className="text-gray-300 hover:text-red-600 hover:bg-red-50 p-1.5 rounded-md transition-colors"
-                              title="Bloquear Usuario (Fraude)"
+                              className="text-gray-300 hover:text-red-600 hover:bg-red-50 p-2 rounded-md transition-colors"
+                              title="Bloquear Usuario"
                             >
-                              <Ban size={16} />
+                              <Ban size={18} />
                             </button>
-                            {/* BORRAR PEDIDO */}
                             <button
                               onClick={(e) => {
                                 e.stopPropagation();
                                 setOrderToDelete(order.id);
                                 setIsDeleteOpen(true);
                               }}
-                              className="text-gray-300 hover:text-orange-500 hover:bg-orange-50 p-1.5 rounded-md transition-colors"
+                              className="text-gray-300 hover:text-orange-500 hover:bg-orange-50 p-2 rounded-md transition-colors"
                               title="Eliminar pedido"
                             >
-                              <Trash2 size={16} />
+                              <Trash2 size={18} />
                             </button>
                           </div>
                         </div>
                       </div>
 
-                      <div className="space-y-3 mb-6 max-h-[220px] overflow-y-auto custom-scrollbar pr-2">
+                      {/* LISTA DE ÍTEMS */}
+                      <div className="space-y-3 mb-6 max-h-[200px] overflow-y-auto custom-scrollbar pr-2">
                         {order.items.map((item: any, i: number) => (
                           <div
                             key={i}
                             className="flex gap-3 text-sm items-start border-b border-dashed border-gray-100 pb-2 last:border-0"
                           >
-                            <span className="font-black text-xs bg-gray-900 text-white px-2 py-1 rounded-md min-w-[28px] text-center shadow-sm">
+                            <span className="font-black text-xs bg-gray-900 text-white px-2 py-1 rounded-md min-w-[28px] text-center shadow-sm shrink-0">
                               {item.qty}x
                             </span>
                             <div className="flex flex-col">
@@ -559,6 +600,7 @@ export default function AdminDashboard() {
                       </div>
                     </div>
 
+                    {/* FOOTER TARJETA */}
                     <div className="pl-3 mt-auto pt-4 border-t border-gray-100">
                       <div className="flex items-center justify-between mb-4">
                         <div>
@@ -569,6 +611,8 @@ export default function AdminDashboard() {
                             S/ {order.total_amount.toFixed(2)}
                           </div>
                         </div>
+
+                        {/* MÉTODO DE PAGO */}
                         {order.payment_method === "yape" ? (
                           <div className="flex flex-col items-end">
                             <div className="flex items-center gap-1.5 bg-purple-100 text-purple-700 px-3 py-1 rounded-full border border-purple-200">
@@ -610,10 +654,10 @@ export default function AdminDashboard() {
 
                       {/* INFO TÉCNICA (Dispositivo) */}
                       {order.metadata && (
-                        <div className="flex items-center gap-1 mb-3 text-[10px] text-gray-400 bg-gray-50 px-2 py-1 rounded border border-gray-100 w-fit">
-                          <Smartphone size={10} />
+                        <div className="flex items-center gap-1 mb-3 text-[10px] text-gray-400 bg-gray-50 px-2 py-1 rounded border border-gray-100 w-fit max-w-full">
+                          <Smartphone size={10} className="shrink-0" />
                           <span
-                            className="truncate max-w-[150px]"
+                            className="truncate"
                             title={order.metadata.device}
                           >
                             {order.metadata.device.includes("iPhone")
@@ -627,26 +671,69 @@ export default function AdminDashboard() {
                         </div>
                       )}
 
-                      {order.status !== "delivered" ? (
-                        <button
-                          onClick={() => markOrderDelivered(order.id)}
-                          disabled={processingId === order.id}
-                          className="w-full bg-orange-600 text-white py-4 rounded-2xl font-bold text-sm flex items-center justify-center gap-2 transition-all shadow-xl shadow-orange-200 hover:bg-orange-700 active:scale-[0.98] disabled:opacity-70 disabled:cursor-not-allowed"
-                        >
-                          {processingId === order.id ? (
-                            <Loader2 size={20} className="animate-spin" />
-                          ) : (
-                            <>
-                              <CheckCircle size={20} /> DESPACHAR PEDIDO
-                            </>
-                          )}
-                        </button>
-                      ) : (
-                        <div className="w-full bg-green-50 text-green-700 py-3.5 rounded-2xl font-bold text-xs uppercase flex items-center justify-center gap-2 border border-green-100 cursor-not-allowed opacity-80">
-                          <CheckCircle size={16} className="fill-green-200" />{" "}
-                          Entregado
-                        </div>
-                      )}
+                      {/* --- ACCIONES INTELIGENTES --- */}
+                      <div className="mt-4">
+                        {/* CASO A: VALIDAR YAPE */}
+                        {order.payment_method === "yape" &&
+                        order.payment_status === "verifying" ? (
+                          <div className="space-y-3">
+                            <div className="bg-purple-50 border border-purple-100 p-3 rounded-xl flex items-center justify-between">
+                              <div className="flex flex-col">
+                                <span className="text-[10px] text-purple-400 font-bold uppercase tracking-widest">
+                                  Código
+                                </span>
+                                <span className="font-mono font-black text-lg text-purple-900 leading-none">
+                                  {order.operation_code || "---"}
+                                </span>
+                              </div>
+                              <div className="text-right">
+                                <span className="text-[10px] text-gray-400 font-bold uppercase">
+                                  Monto
+                                </span>
+                                <div className="font-black text-gray-900 leading-none">
+                                  S/ {order.total_amount.toFixed(2)}
+                                </div>
+                              </div>
+                            </div>
+
+                            <button
+                              onClick={() =>
+                                verifyPayment(order.id, order.total_amount)
+                              }
+                              className="w-full bg-purple-600 text-white py-3.5 rounded-xl font-bold text-sm shadow-lg shadow-purple-200 hover:bg-purple-700 active:scale-95 transition-all flex items-center justify-center gap-2 touch-manipulation"
+                            >
+                              <CheckCircle size={18} /> CONFIRMAR DINERO
+                            </button>
+                            <p className="text-[10px] text-center text-gray-400 mt-1">
+                              * Verifica en tu App antes de confirmar.
+                            </p>
+                          </div>
+                        ) : order.status !== "delivered" ? (
+                          /* CASO B: DESPACHAR */
+                          <button
+                            onClick={() => markOrderDelivered(order.id)}
+                            disabled={processingId === order.id}
+                            className={`w-full py-4 rounded-2xl font-bold text-sm flex items-center justify-center gap-2 transition-all shadow-xl active:scale-[0.98] disabled:opacity-70 disabled:cursor-not-allowed touch-manipulation ${
+                              order.payment_status === "on_account"
+                                ? "bg-blue-600 text-white shadow-blue-200 hover:bg-blue-700"
+                                : "bg-orange-600 text-white shadow-orange-200 hover:bg-orange-700"
+                            }`}
+                          >
+                            {processingId === order.id ? (
+                              <Loader2 size={20} className="animate-spin" />
+                            ) : (
+                              <>
+                                <Utensils size={20} /> YA LO COCINÉ Y ENVIÉ
+                              </>
+                            )}
+                          </button>
+                        ) : (
+                          /* CASO C: FINALIZADO */
+                          <div className="w-full bg-gray-100 text-gray-400 py-3.5 rounded-2xl font-bold text-xs uppercase flex items-center justify-center gap-2 border border-gray-200 cursor-not-allowed">
+                            <CheckCircle size={16} /> Pedido Finalizado
+                          </div>
+                        )}
+                      </div>
                     </div>
                   </div>
                 );
@@ -655,13 +742,13 @@ export default function AdminDashboard() {
           </div>
         )}
 
-        {/* VISTA MENÚ (Igual que antes) */}
+        {/* VISTA MENÚ */}
         {activeTab === "menu" && (
           <div className="animate-in fade-in slide-in-from-bottom-4 duration-500 pb-20">
             <div className="mb-8">
               <button
                 onClick={() => setIsAddOpen(true)}
-                className="w-full md:w-auto md:min-w-[300px] group bg-orange-50 border-2 border-dashed border-orange-300 rounded-[2rem] p-6 flex items-center justify-center gap-4 hover:bg-orange-100 hover:border-orange-500 transition-all active:scale-95"
+                className="w-full md:w-auto md:min-w-[300px] group bg-orange-50 border-2 border-dashed border-orange-300 rounded-[2rem] p-6 flex items-center justify-center gap-4 hover:bg-orange-100 hover:border-orange-500 transition-all active:scale-95 touch-manipulation"
               >
                 <div className="bg-white p-3 rounded-full text-orange-600 shadow-md group-hover:scale-110 transition-transform">
                   <Plus size={24} strokeWidth={3} />
@@ -706,6 +793,7 @@ export default function AdminDashboard() {
               <GlassWater size={20} strokeWidth={2.5} />,
               "bg-cyan-500",
             )}
+
             {products.length === 0 && (
               <div className="text-center py-20 opacity-50">
                 <p className="text-xl font-bold text-gray-400">
@@ -717,22 +805,25 @@ export default function AdminDashboard() {
         )}
       </div>
 
-      {/* MODALES AGREGAR Y ELIMINAR (Igual que antes) */}
+      {/* MODAL NUEVO PLATO */}
       {isAddOpen && (
         <div className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-gray-900/60 backdrop-blur-md transition-opacity animate-in fade-in">
-          <div className="bg-white w-full max-w-lg rounded-[2.5rem] p-8 shadow-2xl animate-in zoom-in-95 duration-300 border border-white/20">
-            <div className="flex justify-between items-center mb-8 border-b border-gray-100 pb-4">
-              <h2 className="text-3xl font-black text-gray-900 tracking-tight">
+          <div className="bg-white w-full max-w-lg rounded-[2.5rem] p-6 md:p-8 shadow-2xl animate-in zoom-in-95 duration-300 border border-white/20 max-h-[90vh] overflow-y-auto custom-scrollbar">
+            <div className="flex justify-between items-center mb-6 border-b border-gray-100 pb-4">
+              <h2 className="text-2xl md:text-3xl font-black text-gray-900 tracking-tight">
                 Nuevo Plato
               </h2>
               <button
                 onClick={() => setIsAddOpen(false)}
-                className="p-2.5 bg-gray-50 rounded-full hover:bg-gray-100 transition-colors text-gray-400"
+                className="p-2 bg-gray-50 rounded-full hover:bg-gray-100 transition-colors text-gray-400"
               >
-                <X size={24} />
+                <X size={20} />
               </button>
             </div>
-            <form onSubmit={handleAddProduct} className="space-y-6">
+            <form
+              onSubmit={handleAddProduct}
+              className="space-y-4 md:space-y-6"
+            >
               <div className="space-y-2">
                 <label className="text-xs font-black text-gray-400 uppercase tracking-widest ml-1">
                   Nombre
@@ -748,7 +839,7 @@ export default function AdminDashboard() {
                     onChange={(e) =>
                       setNewProduct({ ...newProduct, name: e.target.value })
                     }
-                    className="w-full pl-12 pr-4 py-4 bg-gray-50 border-2 border-transparent focus:bg-white focus:border-orange-500 rounded-2xl font-bold text-gray-900 outline-none transition-all text-lg"
+                    className="w-full pl-12 pr-4 py-3 md:py-4 bg-gray-50 border-2 border-transparent focus:bg-white focus:border-orange-500 rounded-2xl font-bold text-gray-900 outline-none transition-all text-base md:text-lg"
                     placeholder="Ej: Seco de Cabrito"
                   />
                 </div>
@@ -770,7 +861,7 @@ export default function AdminDashboard() {
                         description: e.target.value,
                       })
                     }
-                    className="w-full pl-12 pr-4 py-4 bg-gray-50 border-2 border-transparent focus:bg-white focus:border-orange-500 rounded-2xl font-medium text-gray-900 outline-none transition-all"
+                    className="w-full pl-12 pr-4 py-3 md:py-4 bg-gray-50 border-2 border-transparent focus:bg-white focus:border-orange-500 rounded-2xl font-medium text-gray-900 outline-none transition-all text-sm md:text-base"
                     placeholder="Con frejoles y arroz..."
                   />
                 </div>
@@ -793,7 +884,7 @@ export default function AdminDashboard() {
                       onChange={(e) =>
                         setNewProduct({ ...newProduct, price: e.target.value })
                       }
-                      className="w-full pl-12 pr-4 py-4 bg-gray-50 border-2 border-transparent focus:bg-white focus:border-orange-500 rounded-2xl font-bold text-gray-900 outline-none transition-all"
+                      className="w-full pl-12 pr-4 py-3 md:py-4 bg-gray-50 border-2 border-transparent focus:bg-white focus:border-orange-500 rounded-2xl font-bold text-gray-900 outline-none transition-all"
                       placeholder="0.00"
                     />
                   </div>
@@ -815,7 +906,7 @@ export default function AdminDashboard() {
                           category: e.target.value,
                         })
                       }
-                      className="w-full pl-12 pr-4 py-4 bg-gray-50 border-2 border-transparent focus:bg-white focus:border-orange-500 rounded-2xl font-bold text-gray-900 outline-none cursor-pointer appearance-none"
+                      className="w-full pl-12 pr-4 py-3 md:py-4 bg-gray-50 border-2 border-transparent focus:bg-white focus:border-orange-500 rounded-2xl font-bold text-gray-900 outline-none cursor-pointer appearance-none text-sm md:text-base"
                     >
                       <option value="menu">Menú Ejecutivo</option>
                       <option value="plato">Plato a la Carta</option>
@@ -843,7 +934,7 @@ export default function AdminDashboard() {
                         image_url: e.target.value,
                       })
                     }
-                    className="w-full pl-12 pr-4 py-4 bg-gray-50 border-2 border-transparent focus:bg-white focus:border-orange-500 rounded-2xl font-medium text-gray-900 outline-none transition-all text-sm"
+                    className="w-full pl-12 pr-4 py-3 md:py-4 bg-gray-50 border-2 border-transparent focus:bg-white focus:border-orange-500 rounded-2xl font-medium text-gray-900 outline-none transition-all text-xs md:text-sm"
                     placeholder="https://..."
                   />
                 </div>
@@ -851,7 +942,7 @@ export default function AdminDashboard() {
               <button
                 type="submit"
                 disabled={isSubmitting}
-                className="w-full bg-orange-600 text-white py-5 rounded-2xl font-black text-lg shadow-xl shadow-orange-200 mt-4 hover:bg-orange-700 active:scale-[0.98] transition-all disabled:opacity-50 flex items-center justify-center gap-2"
+                className="w-full bg-orange-600 text-white py-4 md:py-5 rounded-2xl font-black text-lg shadow-xl shadow-orange-200 mt-4 hover:bg-orange-700 active:scale-[0.98] transition-all disabled:opacity-50 flex items-center justify-center gap-2 touch-manipulation"
               >
                 {isSubmitting ? (
                   <>
@@ -868,6 +959,7 @@ export default function AdminDashboard() {
         </div>
       )}
 
+      {/* MODAL ELIMINAR */}
       {isDeleteOpen && (
         <div className="fixed inset-0 z-[70] flex items-center justify-center p-4 isolate">
           <div
@@ -890,14 +982,14 @@ export default function AdminDashboard() {
             <div className="grid grid-cols-2 gap-3 w-full">
               <button
                 onClick={() => setIsDeleteOpen(false)}
-                className="w-full py-3.5 rounded-2xl font-bold text-gray-500 bg-gray-100 hover:bg-gray-200 hover:text-gray-700 transition-all active:scale-95"
+                className="w-full py-3.5 rounded-2xl font-bold text-gray-500 bg-gray-100 hover:bg-gray-200 hover:text-gray-700 transition-all active:scale-95 touch-manipulation"
               >
                 Cancelar
               </button>
               <button
                 onClick={executeDeleteOrder}
                 disabled={isSubmitting}
-                className="w-full py-3.5 rounded-2xl font-bold text-white bg-red-500 shadow-lg shadow-red-200 hover:bg-red-600 hover:shadow-red-300 transition-all active:scale-95 flex items-center justify-center gap-2"
+                className="w-full py-3.5 rounded-2xl font-bold text-white bg-red-500 shadow-lg shadow-red-200 hover:bg-red-600 hover:shadow-red-300 transition-all active:scale-95 flex items-center justify-center gap-2 touch-manipulation"
               >
                 {isSubmitting ? (
                   <Loader2 size={18} className="animate-spin" />

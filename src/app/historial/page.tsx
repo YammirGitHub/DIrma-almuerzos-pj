@@ -1,5 +1,5 @@
 "use client";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { createBrowserClient } from "@supabase/ssr";
 import Link from "next/link";
 import {
@@ -21,7 +21,7 @@ export default function HistorialPage() {
   const [orders, setOrders] = useState<any[]>([]);
   const [searched, setSearched] = useState(false);
   const [customerExists, setCustomerExists] = useState(false);
-  const [expandedOrder, setExpandedOrder] = useState<string | null>(null); // Para expandir detalles
+  const [expandedOrder, setExpandedOrder] = useState<string | null>(null);
 
   const [toast, setToast] = useState({
     show: false,
@@ -33,6 +33,37 @@ export default function HistorialPage() {
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
   );
+
+  // --- EFECTO REAL-TIME ---
+  // Si ya buscamos un teléfono, nos quedamos escuchando cambios para ese número
+  useEffect(() => {
+    if (!searched || !phone) return;
+
+    const channel = supabase
+      .channel(`historial-${phone}`)
+      .on(
+        "postgres_changes",
+        {
+          event: "UPDATE",
+          schema: "public",
+          table: "orders",
+          filter: `customer_phone=eq.${phone}`, // Solo escuchamos updates de este teléfono
+        },
+        (payload) => {
+          // Actualizamos la orden que cambió en la lista local
+          setOrders((prevOrders) =>
+            prevOrders.map((o) =>
+              o.id === payload.new.id ? { ...o, ...payload.new } : o,
+            ),
+          );
+        },
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [searched, phone]); // Se activa cuando 'searched' es true
 
   const handlePhoneChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value.replace(/\D/g, "");
@@ -53,9 +84,9 @@ export default function HistorialPage() {
 
     setLoading(true);
     setSearched(true);
-    setExpandedOrder(null); // Resetear expansiones
+    setExpandedOrder(null);
 
-    // 1. Verificamos si el cliente EXISTE
+    // 1. Verificamos si existe el cliente
     const { data: customer } = await supabase
       .from("customers")
       .select("phone")
@@ -64,7 +95,7 @@ export default function HistorialPage() {
 
     setCustomerExists(!!customer);
 
-    // 2. Si existe, buscamos pedidos
+    // 2. Buscamos pedidos
     if (customer) {
       const { data: ordersData } = await supabase
         .from("orders")
@@ -216,47 +247,37 @@ export default function HistorialPage() {
                         }
                         className={`bg-white p-5 rounded-[1.5rem] shadow-sm border border-gray-100 transition-all cursor-pointer ${isExpanded ? "ring-2 ring-orange-100" : "hover:shadow-md"}`}
                       >
-                        {/* HEADER TARJETA */}
+                        {/* HEADER TARJETA CON ESTADO DE ENTREGA REAL-TIME */}
                         <div className="flex justify-between items-start mb-3">
                           <div>
                             <p className="font-bold text-gray-900 text-lg capitalize">
                               {new Date(order.created_at).toLocaleDateString(
                                 "es-PE",
-                                {
-                                  weekday: "long",
-                                  day: "numeric",
-                                },
+                                { weekday: "long", day: "numeric" },
                               )}
                             </p>
                             <p className="text-xs text-gray-400 font-bold uppercase tracking-wider">
                               {new Date(order.created_at).toLocaleTimeString(
                                 [],
-                                {
-                                  hour: "2-digit",
-                                  minute: "2-digit",
-                                },
+                                { hour: "2-digit", minute: "2-digit" },
                               )}
                             </p>
                           </div>
 
-                          {/* COLUMNA DE ESTADOS (PAGO + ENTREGA) */}
+                          {/* COLUMNA DE ESTADOS */}
                           <div className="flex flex-col items-end gap-2">
-                            {/* 1. Estado de Pago */}
+                            {/* ESTADO PAGO */}
                             <span
-                              className={`px-3 py-1 rounded-lg text-[10px] font-black uppercase tracking-wide border ${
-                                order.payment_status === "on_account"
-                                  ? "bg-orange-50 text-orange-700 border-orange-100"
-                                  : "bg-emerald-50 text-emerald-700 border-emerald-100"
-                              }`}
+                              className={`px-3 py-1 rounded-lg text-[10px] font-black uppercase tracking-wide border ${order.payment_status === "on_account" ? "bg-orange-50 text-orange-700 border-orange-100" : "bg-emerald-50 text-emerald-700 border-emerald-100"}`}
                             >
                               {order.payment_status === "on_account"
                                 ? "Debe"
                                 : "Pagado"}
                             </span>
 
-                            {/* 2. Estado de Entrega (NUEVO) */}
+                            {/* ESTADO ENTREGA (CAMBIA SOLO) */}
                             {order.status === "delivered" ? (
-                              <span className="flex items-center gap-1.5 bg-gray-50 text-gray-600 px-2 py-0.5 rounded-md text-[9px] font-bold border border-gray-100 uppercase tracking-wider">
+                              <span className="flex items-center gap-1.5 bg-gray-50 text-gray-600 px-2 py-0.5 rounded-md text-[9px] font-bold border border-gray-100 uppercase tracking-wider animate-in fade-in duration-500">
                                 <CheckCircle
                                   size={12}
                                   className="text-green-500"
@@ -271,7 +292,7 @@ export default function HistorialPage() {
                           </div>
                         </div>
 
-                        {/* RESUMEN VISUAL (Si está cerrado muestra cantidad, si abierto nada) */}
+                        {/* RESUMEN VISUAL */}
                         {!isExpanded && (
                           <div className="flex items-center gap-2 text-sm text-gray-500 mb-2">
                             <Receipt size={14} />
