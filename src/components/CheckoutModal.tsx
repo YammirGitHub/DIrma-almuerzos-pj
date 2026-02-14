@@ -15,6 +15,10 @@ import {
   Trash2,
   CalendarDays,
   AlertCircle,
+  QrCode,
+  Smartphone,
+  Copy,
+  Check,
 } from "lucide-react";
 
 export default function CheckoutModal({
@@ -24,9 +28,17 @@ export default function CheckoutModal({
   total,
 }: any) {
   const [method, setMethod] = useState("yape");
+  const [yapeMode, setYapeMode] = useState<"qr" | "number">("qr");
+  const [copied, setCopied] = useState(false);
   const [state, formAction, isPending] = useActionState(createOrder, null);
 
-  // Transformar carrito para visualización
+  // Función para copiar número al portapapeles
+  const copyNumber = () => {
+    navigator.clipboard.writeText("974805994");
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  };
+
   const cartItems = Object.entries(cart).map(([key, item]: any) => {
     return {
       cartId: key,
@@ -40,20 +52,13 @@ export default function CheckoutModal({
 
   return (
     <div className="fixed inset-0 z-[9999] flex items-end sm:items-center justify-center isolate">
-      {/* Fondo negro suave con blur potente para tapar la web de atrás */}
       <div
         className="absolute inset-0 bg-black/40 backdrop-blur-xl transition-opacity animate-in fade-in duration-500"
         onClick={close}
       />
 
-      {/* 2. EL MODAL (CONTENEDOR) */}
       <div className="relative w-full max-w-lg bg-[#F8F9FA] sm:rounded-[2.5rem] rounded-t-[2.5rem] shadow-2xl flex flex-col h-[92vh] sm:h-[85vh] overflow-hidden animate-in slide-in-from-bottom-12 duration-300 border border-white/40 ring-1 ring-black/5">
-        {/* Barra de agarre visual (Affordance) */}
-        <div className="absolute top-0 left-0 right-0 h-6 z-30 flex justify-center pt-2 pointer-events-none">
-          <div className="w-12 h-1.5 bg-gray-300/50 rounded-full backdrop-blur-sm"></div>
-        </div>
-
-        {/* --- HEADER DEL MODAL --- */}
+        {/* HEADER */}
         <div className="relative z-20 flex items-center justify-between px-6 py-4 bg-white/80 backdrop-blur-xl border-b border-gray-100/50 shrink-0">
           <div className="flex items-center gap-3 mt-2">
             <div className="bg-orange-500 text-white p-2.5 rounded-xl shadow-lg shadow-orange-500/20">
@@ -76,19 +81,17 @@ export default function CheckoutModal({
           </button>
         </div>
 
-        {/* --- FORMULARIO (Scrollable) --- */}
         <form
           action={formAction}
           className="flex flex-col flex-1 min-h-0 overflow-hidden"
         >
-          {/* Inputs Ocultos */}
           <input type="hidden" name="items" value={JSON.stringify(cartItems)} />
           <input type="hidden" name="total" value={total} />
           <input type="hidden" name="payment_method" value={method} />
 
-          {/* ÁREA SCROLLABLE */}
+          {/* AREA SCROLLABLE */}
           <div className="flex-1 overflow-y-auto p-4 sm:p-6 space-y-6 custom-scrollbar bg-[#F8F9FA]">
-            {/* SECCIÓN A: TICKET DETALLADO */}
+            {/* SECCIÓN A: TICKET DETALLADO (RESTAURADO) */}
             <div className="bg-white p-5 rounded-3xl border border-gray-100 shadow-sm relative overflow-hidden">
               <div className="absolute top-0 bottom-0 left-0 w-1.5 bg-orange-500"></div>
 
@@ -158,12 +161,11 @@ export default function CheckoutModal({
             </div>
 
             {/* SECCIÓN B: DATOS DE ENTREGA */}
-            <div className="space-y-4">
+            <div className="space-y-3">
               <h3 className="text-xs font-black text-gray-400 uppercase tracking-widest pl-2">
                 Datos de Entrega
               </h3>
               <div className="bg-white p-4 rounded-3xl shadow-sm border border-gray-100 space-y-3">
-                {/* NOMBRE - Input 'Safe Zoom' */}
                 <div className="relative group">
                   <User
                     className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-orange-500 transition-colors"
@@ -173,11 +175,9 @@ export default function CheckoutModal({
                     name="name"
                     required
                     placeholder="Tu Nombre Completo"
-                    className="w-full pl-11 pr-4 py-3.5 bg-gray-50 border border-transparent rounded-2xl focus:bg-white focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 outline-none transition-all placeholder:text-gray-400 text-base sm:text-sm font-medium"
+                    className="w-full pl-11 pr-4 py-3.5 bg-gray-50 border border-transparent rounded-2xl focus:bg-white focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 outline-none transition-all placeholder:text-gray-400 text-sm font-medium"
                   />
                 </div>
-
-                {/* TELÉFONO - VALIDADO */}
                 <div className="relative group">
                   <Phone
                     className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-orange-500 transition-colors"
@@ -188,22 +188,17 @@ export default function CheckoutModal({
                     required
                     type="tel"
                     inputMode="numeric"
-                    maxLength={9} // Límite físico
-                    pattern="9[0-9]{8}" // Regla: Empieza con 9, siguen 8 números
-                    title="Debe ser un celular válido de 9 dígitos empezando con 9"
-                    placeholder="Celular (9 Digitos)"
-                    // Esto evita que escriban letras
+                    maxLength={9}
+                    placeholder="Celular (9 dígitos)"
                     onInput={(e) => {
                       e.currentTarget.value = e.currentTarget.value.replace(
                         /[^0-9]/g,
                         "",
                       );
                     }}
-                    className="w-full pl-11 pr-4 py-3.5 bg-gray-50 border border-transparent rounded-2xl focus:bg-white focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 outline-none transition-all placeholder:text-gray-400 text-base sm:text-sm font-medium"
+                    className="w-full pl-11 pr-4 py-3.5 bg-gray-50 border border-transparent rounded-2xl focus:bg-white focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 outline-none transition-all placeholder:text-gray-400 text-sm font-medium"
                   />
                 </div>
-
-                {/* OFICINA - Input 'Safe Zoom' */}
                 <div className="relative group">
                   <MapPin
                     className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-orange-500 transition-colors"
@@ -212,136 +207,143 @@ export default function CheckoutModal({
                   <input
                     name="office"
                     required
-                    placeholder="Oficina / Juzgado (Ej: Civil 2)"
-                    className="w-full pl-11 pr-4 py-3.5 bg-gray-50 border border-transparent rounded-2xl focus:bg-white focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 outline-none transition-all placeholder:text-gray-400 text-base sm:text-sm font-medium"
+                    placeholder="Oficina / Juzgado"
+                    className="w-full pl-11 pr-4 py-3.5 bg-gray-50 border border-transparent rounded-2xl focus:bg-white focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 outline-none transition-all placeholder:text-gray-400 text-sm font-medium"
                   />
                 </div>
               </div>
             </div>
 
             {/* SECCIÓN C: MÉTODO DE PAGO */}
-            <div className="space-y-4">
+            <div className="space-y-3">
               <h3 className="text-xs font-black text-gray-400 uppercase tracking-widest pl-2">
                 Método de Pago
               </h3>
 
-              {/* GRID DE 2 COLUMNAS (YAPE y MENSUAL) */}
               <div className="grid grid-cols-2 gap-3">
-                {/* 1. YAPE */}
                 <button
                   type="button"
                   onClick={() => setMethod("yape")}
-                  className={`relative p-4 rounded-2xl border transition-all duration-300 flex flex-col items-center justify-center gap-2 ${
-                    method === "yape"
-                      ? "bg-purple-600 border-purple-600 text-white shadow-lg shadow-purple-200"
-                      : "bg-white border-gray-200 text-gray-400 hover:border-purple-200 hover:bg-purple-50"
-                  }`}
+                  className={`p-4 rounded-2xl border transition-all duration-300 flex flex-col items-center justify-center gap-2 ${method === "yape" ? "bg-purple-600 border-purple-600 text-white shadow-lg shadow-purple-200" : "bg-white border-gray-200 text-gray-400 hover:bg-purple-50"}`}
                 >
                   <CreditCard
                     size={24}
                     className={method === "yape" ? "stroke-2" : "stroke-1"}
                   />
-                  <span className="text-[10px] font-black uppercase text-center leading-tight tracking-wider">
+                  <span className="text-[10px] font-black uppercase tracking-wider">
                     Yape / Plin
                   </span>
                 </button>
-
-                {/* 2. A FIN DE MES */}
                 <button
                   type="button"
                   onClick={() => setMethod("monthly")}
-                  className={`relative p-4 rounded-2xl border transition-all duration-300 flex flex-col items-center justify-center gap-2 ${
-                    method === "monthly"
-                      ? "bg-blue-600 border-blue-600 text-white shadow-lg shadow-blue-200"
-                      : "bg-white border-gray-200 text-gray-400 hover:border-blue-200 hover:bg-blue-50"
-                  }`}
+                  className={`p-4 rounded-2xl border transition-all duration-300 flex flex-col items-center justify-center gap-2 ${method === "monthly" ? "bg-blue-600 border-blue-600 text-white shadow-lg shadow-blue-200" : "bg-white border-gray-200 text-gray-400 hover:bg-blue-50"}`}
                 >
                   <CalendarDays
                     size={24}
                     className={method === "monthly" ? "stroke-2" : "stroke-1"}
                   />
-                  <span className="text-[10px] font-black uppercase text-center leading-tight tracking-wider">
+                  <span className="text-[10px] font-black uppercase tracking-wider">
                     A Fin de Mes
                   </span>
                 </button>
               </div>
 
-              {/* DETALLES DE PAGO */}
+              {/* ZONA YAPE MEJORADA */}
               <div className="animate-in fade-in slide-in-from-top-2 duration-300">
                 {method === "yape" && (
-                  <div className="bg-white p-5 rounded-3xl border border-purple-100 shadow-sm">
-                    <div className="text-center mb-4">
-                      <p className="text-xs text-purple-400 font-bold uppercase tracking-widest mb-1">
-                        Monto Exacto
-                      </p>
-                      <p className="text-3xl font-black text-purple-900 tracking-tighter">
-                        S/ {total.toFixed(2)}
-                      </p>
+                  <div className="bg-white rounded-3xl border border-purple-100 shadow-sm overflow-hidden">
+                    {/* TABS QR / NUMERO */}
+                    <div className="flex border-b border-purple-50">
+                      <button
+                        type="button"
+                        onClick={() => setYapeMode("qr")}
+                        className={`flex-1 py-3 text-xs font-bold uppercase tracking-wider flex items-center justify-center gap-2 transition-colors ${yapeMode === "qr" ? "bg-purple-50 text-purple-700 border-b-2 border-purple-500" : "text-gray-400 hover:bg-gray-50"}`}
+                      >
+                        <QrCode size={16} /> Código QR
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setYapeMode("number")}
+                        className={`flex-1 py-3 text-xs font-bold uppercase tracking-wider flex items-center justify-center gap-2 transition-colors ${yapeMode === "number" ? "bg-purple-50 text-purple-700 border-b-2 border-purple-500" : "text-gray-400 hover:bg-gray-50"}`}
+                      >
+                        <Smartphone size={16} /> Número Celular
+                      </button>
                     </div>
-                    <div className="bg-purple-50 rounded-xl p-3 mb-4 text-center border border-purple-100">
-                      <p className="text-[10px] text-purple-400 font-bold uppercase mb-1">
-                        Yapear a
-                      </p>
-                      <div className="text-xl font-black text-purple-900 font-mono tracking-wider select-all">
-                        974-805-994
+
+                    <div className="p-5 text-center">
+                      {/* MODO QR */}
+                      {yapeMode === "qr" && (
+                        <div className="animate-in zoom-in duration-300">
+                          <div className="bg-white p-2 rounded-xl border-2 border-dashed border-purple-200 inline-block mb-3">
+                            <img
+                              src="/yape-qr.png"
+                              alt="QR Yape"
+                              className="w-40 h-40 object-contain rounded-lg"
+                            />
+                          </div>
+                          <p className="text-[10px] text-gray-400 font-bold uppercase">
+                            Escanea desde tu app
+                          </p>
+                        </div>
+                      )}
+                      {/* MODO NÚMERO */}
+                      {yapeMode === "number" && (
+                        <div className="animate-in zoom-in duration-300 py-4">
+                          <div className="text-3xl font-black text-purple-900 font-mono tracking-wider mb-2">
+                            974 805 994
+                          </div>
+                          <p className="text-sm font-bold text-purple-600 mb-4">
+                            Irma Cerna Hoyos
+                          </p>
+                          <button
+                            type="button"
+                            onClick={copyNumber}
+                            className="mx-auto flex items-center gap-2 bg-purple-100 hover:bg-purple-200 text-purple-700 px-4 py-2 rounded-full text-xs font-bold transition-colors"
+                          >
+                            {copied ? <Check size={14} /> : <Copy size={14} />}
+                            {copied ? "¡Copiado!" : "Copiar Número"}
+                          </button>
+                        </div>
+                      )}
+                      {/* INPUT CÓDIGO */}
+                      <div className="mt-6 pt-6 border-t border-purple-50">
+                        <label className="text-[10px] font-black text-purple-400 uppercase tracking-widest block mb-2">
+                          Código de Operación
+                        </label>
+                        <input
+                          name="operation_code"
+                          required
+                          placeholder="Ej: 123456"
+                          className="w-full p-3 bg-purple-50/50 border border-purple-100 rounded-xl focus:border-purple-500 focus:bg-white outline-none text-center font-bold text-purple-900 placeholder:text-purple-300/50"
+                        />
+                        <p className="text-[10px] text-gray-400 mt-2">
+                          Lo encuentras en la constancia de pago.
+                        </p>
                       </div>
-                      <div className="text-xs font-bold text-purple-600 mt-1">
-                        Irma Cerna Hoyos
-                      </div>
-                    </div>
-                    {/* Input Código - Safe Zoom */}
-                    <div className="relative">
-                      <input
-                        name="operation_code"
-                        required
-                        placeholder="Ingresa el Código de Operación"
-                        className="w-full p-3 bg-white border-2 border-purple-100 rounded-xl focus:border-purple-500 focus:ring-4 focus:ring-purple-500/10 outline-none text-center font-bold text-purple-900 placeholder:text-gray-300 text-base sm:text-sm"
-                      />
                     </div>
                   </div>
                 )}
 
-                {/* DETALLE A FIN DE MES */}
                 {method === "monthly" && (
-                  <div className="bg-white p-5 rounded-3xl border border-blue-100 shadow-sm text-center relative overflow-hidden">
-                    {/* Decoración de fondo */}
-                    <div className="absolute top-0 right-0 w-16 h-16 bg-blue-50 rounded-bl-full -mr-8 -mt-8 opacity-50"></div>
-
-                    <div className="relative z-10">
-                      <p className="text-xs text-blue-600 font-bold uppercase tracking-wider mb-2 flex items-center justify-center gap-1">
-                        <CalendarDays size={14} /> Pago Programado
-                      </p>
-
-                      <div className="bg-blue-50 rounded-xl p-3 mb-3 border border-blue-100">
-                        <p className="text-2xl font-black text-blue-900 tracking-tighter">
-                          S/ {total.toFixed(2)}
-                        </p>
-                        <p className="text-[10px] text-blue-400 font-bold uppercase">
-                          Se suma a tu cuenta
-                        </p>
-                      </div>
-
-                      <div className="flex items-start gap-2 text-left bg-gray-50 p-2.5 rounded-lg border border-gray-100">
-                        <AlertCircle
-                          size={14}
-                          className="text-gray-400 mt-0.5 shrink-0"
-                        />
-                        <p className="text-[10px] text-gray-500 leading-tight">
-                          Al confirmar, este monto se registrará en tu cuenta
-                          corriente asociada al celular{" "}
-                          <span className="font-bold text-gray-700">
-                            ingresado arriba
-                          </span>
-                          .
-                        </p>
+                  <div className="bg-blue-50/50 p-4 rounded-3xl border border-blue-100 text-center">
+                    <div className="flex justify-center mb-2">
+                      <div className="bg-blue-100 p-2 rounded-full text-blue-600">
+                        <CalendarDays size={20} />
                       </div>
                     </div>
+                    <p className="font-bold text-blue-900 text-sm">
+                      Pago a fin de mes
+                    </p>
+                    <p className="text-xs text-blue-600/80 mt-1 px-4">
+                      El monto se sumará a tu cuenta corriente asociada al
+                      celular ingresado.
+                    </p>
                   </div>
                 )}
               </div>
             </div>
 
-            {/* Mensaje Error */}
             {state?.message && !state.success && (
               <div className="p-4 bg-red-50 border border-red-100 text-red-600 rounded-2xl text-xs font-bold text-center animate-pulse">
                 {state.message}
@@ -349,15 +351,14 @@ export default function CheckoutModal({
             )}
           </div>
 
-          {/* --- FOOTER FLOTANTE --- */}
           <div className="p-4 bg-white border-t border-gray-100 shrink-0 z-20 pb-8 safe-area-bottom">
             <button
               type="submit"
               disabled={isPending}
-              className="w-full bg-orange-600 text-white py-4 rounded-2xl font-bold text-lg shadow-xl shadow-orange-200 hover:bg-orange-700 active:scale-[0.98] transition-all disabled:opacity-70 disabled:cursor-not-allowed flex items-center justify-between px-6 group"
+              className="w-full bg-orange-600 text-white py-4 rounded-2xl font-bold text-lg shadow-xl shadow-orange-200 hover:bg-orange-700 active:scale-[0.98] transition-all disabled:opacity-70 flex items-center justify-between px-6 group"
             >
               {isPending ? (
-                <span className="flex items-center gap-2 mx-auto text-sm">
+                <span className="mx-auto flex items-center gap-2 text-sm">
                   <Loader2 className="animate-spin" size={18} /> Procesando...
                 </span>
               ) : (
