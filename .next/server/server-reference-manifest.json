@@ -1,0 +1,21 @@
+{
+  "node": {
+    "6080c0e0aa438770bc2a56642e572bcfd907edb1b6": {
+      "workers": {
+        "app/(client)/page": {
+          "moduleId": 78591,
+          "async": false,
+          "exportedName": "createOrder",
+          "filename": "src/app/actions.ts"
+        }
+      },
+      "layer": {
+        "app/(client)/page": "action-browser"
+      },
+      "filename": "src/app/actions.ts",
+      "exportedName": "createOrder"
+    }
+  },
+  "edge": {},
+  "encryptionKey": "DcsKg/IbZJfxmryiBo8/g1gN4iDXsdl+FVIgVm4SrPE="
+}

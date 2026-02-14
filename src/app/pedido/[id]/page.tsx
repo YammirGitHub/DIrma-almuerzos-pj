@@ -27,7 +27,7 @@ export default function OrderStatusPage() {
   );
 
   useEffect(() => {
-    // 1. CARGA DE DATOS INICIAL
+    // 1. Carga Inicial
     const fetchOrder = async () => {
       const { data, error } = await supabase
         .from("orders")
@@ -45,26 +45,38 @@ export default function OrderStatusPage() {
 
     fetchOrder();
 
-    // 2. SUSCRIPCIÓN REALTIME (Separada para estabilidad)
+    // 2. Suscripción Realtime con LOGS DE ESTADO
+    console.log("Intentando conectar al canal:", `tracking-${id}`);
+    
     const channel = supabase
       .channel(`tracking-${id}`)
       .on(
         "postgres_changes",
         {
-          event: "UPDATE",
+          event: "UPDATE", // Escuchamos actualizaciones
           schema: "public",
           table: "orders",
-          filter: `id=eq.${id}`, // Escucha solo ESTE pedido
+          filter: `id=eq.${id}`, // Filtro exacto
         },
         (payload) => {
-          console.log("⚡ Cambio detectado:", payload.new);
-          // Actualizamos el estado fusionando los nuevos datos
+          console.log("🟢 ¡CAMBIO DETECTADO EN VIVO!", payload.new);
+          // Forzamos actualización fusionando datos
           setOrder((prev: any) => ({ ...prev, ...payload.new }));
-        },
+        }
       )
-      .subscribe();
+      .subscribe((status) => {
+        // ESTO ES CLAVE: Te dirá si se conectó o falló
+        console.log(`Estado de la conexión Realtime: ${status}`);
+        
+        if (status === "SUBSCRIBED") {
+          console.log("✅ Escuchando cambios...");
+        } else if (status === "CLOSED") {
+          console.log("❌ Desconectado");
+        } else if (status === "CHANNEL_ERROR") {
+          console.log("⚠️ Error en el canal (Revisa Configuración de Supabase)");
+        }
+      });
 
-    // 3. LIMPIEZA (Vital para que no se cuelgue)
     return () => {
       supabase.removeChannel(channel);
     };

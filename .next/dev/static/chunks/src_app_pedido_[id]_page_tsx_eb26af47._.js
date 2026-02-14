@@ -39,7 +39,7 @@ function OrderStatusPage() {
     const supabase = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f40$supabase$2f$ssr$2f$dist$2f$module$2f$createBrowserClient$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["createBrowserClient"])(("TURBOPACK compile-time value", "https://qmpymxajjxlfnlfybaqt.supabase.co"), ("TURBOPACK compile-time value", "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFtcHlteGFqanhsZm5sZnliYXF0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzA2OTI4NjIsImV4cCI6MjA4NjI2ODg2Mn0.Oo4KnFI-Y6xkeI2xbEQ8zQBE7y63ZaztwbQvbU7bgiE"));
     (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$index$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useEffect"])({
         "OrderStatusPage.useEffect": ()=>{
-            // 1. CARGA DE DATOS INICIAL
+            // 1. Carga Inicial
             const fetchOrder = {
                 "OrderStatusPage.useEffect.fetchOrder": async ()=>{
                     const { data, error } = await supabase.from("orders").select("*").eq("id", id).single();
@@ -52,7 +52,8 @@ function OrderStatusPage() {
                 }
             }["OrderStatusPage.useEffect.fetchOrder"];
             fetchOrder();
-            // 2. SUSCRIPCIÓN REALTIME (Separada para estabilidad)
+            // 2. Suscripción Realtime con LOGS DE ESTADO
+            console.log("Intentando conectar al canal:", `tracking-${id}`);
             const channel = supabase.channel(`tracking-${id}`).on("postgres_changes", {
                 event: "UPDATE",
                 schema: "public",
@@ -60,8 +61,8 @@ function OrderStatusPage() {
                 filter: `id=eq.${id}`
             }, {
                 "OrderStatusPage.useEffect.channel": (payload)=>{
-                    console.log("⚡ Cambio detectado:", payload.new);
-                    // Actualizamos el estado fusionando los nuevos datos
+                    console.log("🟢 ¡CAMBIO DETECTADO EN VIVO!", payload.new);
+                    // Forzamos actualización fusionando datos
                     setOrder({
                         "OrderStatusPage.useEffect.channel": (prev)=>({
                                 ...prev,
@@ -69,8 +70,19 @@ function OrderStatusPage() {
                             })
                     }["OrderStatusPage.useEffect.channel"]);
                 }
-            }["OrderStatusPage.useEffect.channel"]).subscribe();
-            // 3. LIMPIEZA (Vital para que no se cuelgue)
+            }["OrderStatusPage.useEffect.channel"]).subscribe({
+                "OrderStatusPage.useEffect.channel": (status)=>{
+                    // ESTO ES CLAVE: Te dirá si se conectó o falló
+                    console.log(`Estado de la conexión Realtime: ${status}`);
+                    if (status === "SUBSCRIBED") {
+                        console.log("✅ Escuchando cambios...");
+                    } else if (status === "CLOSED") {
+                        console.log("❌ Desconectado");
+                    } else if (status === "CHANNEL_ERROR") {
+                        console.log("⚠️ Error en el canal (Revisa Configuración de Supabase)");
+                    }
+                }
+            }["OrderStatusPage.useEffect.channel"]);
             return ({
                 "OrderStatusPage.useEffect": ()=>{
                     supabase.removeChannel(channel);
@@ -88,12 +100,12 @@ function OrderStatusPage() {
             size: 40
         }, void 0, false, {
             fileName: "[project]/src/app/pedido/[id]/page.tsx",
-            lineNumber: 76,
+            lineNumber: 88,
             columnNumber: 9
         }, this)
     }, void 0, false, {
         fileName: "[project]/src/app/pedido/[id]/page.tsx",
-        lineNumber: 75,
+        lineNumber: 87,
         columnNumber: 7
     }, this);
     if (!order) return /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -101,7 +113,7 @@ function OrderStatusPage() {
         children: "Pedido no encontrado"
     }, void 0, false, {
         fileName: "[project]/src/app/pedido/[id]/page.tsx",
-        lineNumber: 82,
+        lineNumber: 94,
         columnNumber: 7
     }, this);
     // --- LÓGICA DE ESTADOS VISUALES ---
@@ -115,21 +127,21 @@ function OrderStatusPage() {
             size: 56
         }, void 0, false, {
             fileName: "[project]/src/app/pedido/[id]/page.tsx",
-            lineNumber: 99,
+            lineNumber: 111,
             columnNumber: 46
         }, this);
         if (order.payment_status === "paid") return /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$lucide$2d$react$2f$dist$2f$esm$2f$icons$2f$chef$2d$hat$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__$3c$export__default__as__ChefHat$3e$__["ChefHat"], {
             size: 56
         }, void 0, false, {
             fileName: "[project]/src/app/pedido/[id]/page.tsx",
-            lineNumber: 100,
+            lineNumber: 112,
             columnNumber: 49
         }, this);
         if (order.payment_status === "on_account") return /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$lucide$2d$react$2f$dist$2f$esm$2f$icons$2f$chef$2d$hat$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__$3c$export__default__as__ChefHat$3e$__["ChefHat"], {
             size: 56
         }, void 0, false, {
             fileName: "[project]/src/app/pedido/[id]/page.tsx",
-            lineNumber: 101,
+            lineNumber: 113,
             columnNumber: 55
         }, this);
         return /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$lucide$2d$react$2f$dist$2f$esm$2f$icons$2f$clock$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__$3c$export__default__as__Clock$3e$__["Clock"], {
@@ -137,7 +149,7 @@ function OrderStatusPage() {
             className: "animate-pulse"
         }, void 0, false, {
             fileName: "[project]/src/app/pedido/[id]/page.tsx",
-            lineNumber: 102,
+            lineNumber: 114,
             columnNumber: 12
         }, this);
     };
@@ -169,12 +181,12 @@ function OrderStatusPage() {
                             className: "text-gray-600"
                         }, void 0, false, {
                             fileName: "[project]/src/app/pedido/[id]/page.tsx",
-                            lineNumber: 133,
+                            lineNumber: 145,
                             columnNumber: 11
                         }, this)
                     }, void 0, false, {
                         fileName: "[project]/src/app/pedido/[id]/page.tsx",
-                        lineNumber: 129,
+                        lineNumber: 141,
                         columnNumber: 9
                     }, this),
                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -185,7 +197,7 @@ function OrderStatusPage() {
                                 children: "Pedido N°"
                             }, void 0, false, {
                                 fileName: "[project]/src/app/pedido/[id]/page.tsx",
-                                lineNumber: 136,
+                                lineNumber: 148,
                                 columnNumber: 11
                             }, this),
                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
@@ -193,26 +205,26 @@ function OrderStatusPage() {
                                 children: order.id.slice(0, 6).toUpperCase()
                             }, void 0, false, {
                                 fileName: "[project]/src/app/pedido/[id]/page.tsx",
-                                lineNumber: 139,
+                                lineNumber: 151,
                                 columnNumber: 11
                             }, this)
                         ]
                     }, void 0, true, {
                         fileName: "[project]/src/app/pedido/[id]/page.tsx",
-                        lineNumber: 135,
+                        lineNumber: 147,
                         columnNumber: 9
                     }, this),
                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
                         className: "w-10"
                     }, void 0, false, {
                         fileName: "[project]/src/app/pedido/[id]/page.tsx",
-                        lineNumber: 143,
+                        lineNumber: 155,
                         columnNumber: 9
                     }, this)
                 ]
             }, void 0, true, {
                 fileName: "[project]/src/app/pedido/[id]/page.tsx",
-                lineNumber: 128,
+                lineNumber: 140,
                 columnNumber: 7
             }, this),
             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -237,21 +249,21 @@ function OrderStatusPage() {
                                         className: "absolute top-0 left-0 w-full h-full bg-white/10 backdrop-blur-3xl"
                                     }, void 0, false, {
                                         fileName: "[project]/src/app/pedido/[id]/page.tsx",
-                                        lineNumber: 156,
+                                        lineNumber: 168,
                                         columnNumber: 13
                                     }, this),
                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
                                         className: "absolute -top-10 -right-10 w-40 h-40 bg-white/20 rounded-full blur-2xl"
                                     }, void 0, false, {
                                         fileName: "[project]/src/app/pedido/[id]/page.tsx",
-                                        lineNumber: 159,
+                                        lineNumber: 171,
                                         columnNumber: 13
                                     }, this),
                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
                                         className: "absolute bottom-10 -left-10 w-32 h-32 bg-black/10 rounded-full blur-2xl"
                                     }, void 0, false, {
                                         fileName: "[project]/src/app/pedido/[id]/page.tsx",
-                                        lineNumber: 160,
+                                        lineNumber: 172,
                                         columnNumber: 13
                                     }, this),
                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -262,7 +274,7 @@ function OrderStatusPage() {
                                                 children: getStatusIcon()
                                             }, void 0, false, {
                                                 fileName: "[project]/src/app/pedido/[id]/page.tsx",
-                                                lineNumber: 163,
+                                                lineNumber: 175,
                                                 columnNumber: 15
                                             }, this),
                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -272,7 +284,7 @@ function OrderStatusPage() {
                                                         children: getStatusTitle()
                                                     }, void 0, false, {
                                                         fileName: "[project]/src/app/pedido/[id]/page.tsx",
-                                                        lineNumber: 167,
+                                                        lineNumber: 179,
                                                         columnNumber: 17
                                                     }, this),
                                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
@@ -280,13 +292,13 @@ function OrderStatusPage() {
                                                         children: getStatusMessage()
                                                     }, void 0, false, {
                                                         fileName: "[project]/src/app/pedido/[id]/page.tsx",
-                                                        lineNumber: 170,
+                                                        lineNumber: 182,
                                                         columnNumber: 17
                                                     }, this)
                                                 ]
                                             }, void 0, true, {
                                                 fileName: "[project]/src/app/pedido/[id]/page.tsx",
-                                                lineNumber: 166,
+                                                lineNumber: 178,
                                                 columnNumber: 15
                                             }, this),
                                             order.payment_method === "yape" && order.payment_status === "verifying" && /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -297,7 +309,7 @@ function OrderStatusPage() {
                                                         children: "Código enviado:"
                                                     }, void 0, false, {
                                                         fileName: "[project]/src/app/pedido/[id]/page.tsx",
-                                                        lineNumber: 179,
+                                                        lineNumber: 191,
                                                         columnNumber: 21
                                                     }, this),
                                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
@@ -305,25 +317,25 @@ function OrderStatusPage() {
                                                         children: order.operation_code
                                                     }, void 0, false, {
                                                         fileName: "[project]/src/app/pedido/[id]/page.tsx",
-                                                        lineNumber: 182,
+                                                        lineNumber: 194,
                                                         columnNumber: 21
                                                     }, this)
                                                 ]
                                             }, void 0, true, {
                                                 fileName: "[project]/src/app/pedido/[id]/page.tsx",
-                                                lineNumber: 178,
+                                                lineNumber: 190,
                                                 columnNumber: 19
                                             }, this)
                                         ]
                                     }, void 0, true, {
                                         fileName: "[project]/src/app/pedido/[id]/page.tsx",
-                                        lineNumber: 162,
+                                        lineNumber: 174,
                                         columnNumber: 13
                                     }, this)
                                 ]
                             }, void 0, true, {
                                 fileName: "[project]/src/app/pedido/[id]/page.tsx",
-                                lineNumber: 150,
+                                lineNumber: 162,
                                 columnNumber: 11
                             }, this),
                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -334,7 +346,7 @@ function OrderStatusPage() {
                                         children: "¿Necesitas ayuda con este pedido?"
                                     }, void 0, false, {
                                         fileName: "[project]/src/app/pedido/[id]/page.tsx",
-                                        lineNumber: 192,
+                                        lineNumber: 204,
                                         columnNumber: 13
                                     }, this),
                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("a", {
@@ -347,26 +359,26 @@ function OrderStatusPage() {
                                                 size: 20
                                             }, void 0, false, {
                                                 fileName: "[project]/src/app/pedido/[id]/page.tsx",
-                                                lineNumber: 201,
+                                                lineNumber: 213,
                                                 columnNumber: 15
                                             }, this),
                                             " Contactar Soporte"
                                         ]
                                     }, void 0, true, {
                                         fileName: "[project]/src/app/pedido/[id]/page.tsx",
-                                        lineNumber: 195,
+                                        lineNumber: 207,
                                         columnNumber: 13
                                     }, this)
                                 ]
                             }, void 0, true, {
                                 fileName: "[project]/src/app/pedido/[id]/page.tsx",
-                                lineNumber: 191,
+                                lineNumber: 203,
                                 columnNumber: 11
                             }, this)
                         ]
                     }, void 0, true, {
                         fileName: "[project]/src/app/pedido/[id]/page.tsx",
-                        lineNumber: 149,
+                        lineNumber: 161,
                         columnNumber: 9
                     }, this),
                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -382,14 +394,14 @@ function OrderStatusPage() {
                                                 size: 14
                                             }, void 0, false, {
                                                 fileName: "[project]/src/app/pedido/[id]/page.tsx",
-                                                lineNumber: 211,
+                                                lineNumber: 223,
                                                 columnNumber: 15
                                             }, this),
                                             " Datos de Entrega"
                                         ]
                                     }, void 0, true, {
                                         fileName: "[project]/src/app/pedido/[id]/page.tsx",
-                                        lineNumber: 210,
+                                        lineNumber: 222,
                                         columnNumber: 13
                                     }, this),
                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -401,12 +413,12 @@ function OrderStatusPage() {
                                                     size: 24
                                                 }, void 0, false, {
                                                     fileName: "[project]/src/app/pedido/[id]/page.tsx",
-                                                    lineNumber: 215,
+                                                    lineNumber: 227,
                                                     columnNumber: 17
                                                 }, this)
                                             }, void 0, false, {
                                                 fileName: "[project]/src/app/pedido/[id]/page.tsx",
-                                                lineNumber: 214,
+                                                lineNumber: 226,
                                                 columnNumber: 15
                                             }, this),
                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -416,7 +428,7 @@ function OrderStatusPage() {
                                                         children: order.customer_name
                                                     }, void 0, false, {
                                                         fileName: "[project]/src/app/pedido/[id]/page.tsx",
-                                                        lineNumber: 218,
+                                                        lineNumber: 230,
                                                         columnNumber: 17
                                                     }, this),
                                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -424,25 +436,25 @@ function OrderStatusPage() {
                                                         children: order.customer_office
                                                     }, void 0, false, {
                                                         fileName: "[project]/src/app/pedido/[id]/page.tsx",
-                                                        lineNumber: 221,
+                                                        lineNumber: 233,
                                                         columnNumber: 17
                                                     }, this)
                                                 ]
                                             }, void 0, true, {
                                                 fileName: "[project]/src/app/pedido/[id]/page.tsx",
-                                                lineNumber: 217,
+                                                lineNumber: 229,
                                                 columnNumber: 15
                                             }, this)
                                         ]
                                     }, void 0, true, {
                                         fileName: "[project]/src/app/pedido/[id]/page.tsx",
-                                        lineNumber: 213,
+                                        lineNumber: 225,
                                         columnNumber: 13
                                     }, this)
                                 ]
                             }, void 0, true, {
                                 fileName: "[project]/src/app/pedido/[id]/page.tsx",
-                                lineNumber: 209,
+                                lineNumber: 221,
                                 columnNumber: 11
                             }, this),
                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -452,7 +464,7 @@ function OrderStatusPage() {
                                         className: "absolute top-0 left-6 w-12 h-1 bg-orange-500 rounded-b-lg"
                                     }, void 0, false, {
                                         fileName: "[project]/src/app/pedido/[id]/page.tsx",
-                                        lineNumber: 231,
+                                        lineNumber: 243,
                                         columnNumber: 13
                                     }, this),
                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("h3", {
@@ -462,14 +474,14 @@ function OrderStatusPage() {
                                                 size: 14
                                             }, void 0, false, {
                                                 fileName: "[project]/src/app/pedido/[id]/page.tsx",
-                                                lineNumber: 234,
+                                                lineNumber: 246,
                                                 columnNumber: 15
                                             }, this),
                                             " Detalle del Consumo"
                                         ]
                                     }, void 0, true, {
                                         fileName: "[project]/src/app/pedido/[id]/page.tsx",
-                                        lineNumber: 233,
+                                        lineNumber: 245,
                                         columnNumber: 13
                                     }, this),
                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -485,7 +497,7 @@ function OrderStatusPage() {
                                                                 children: item.qty
                                                             }, void 0, false, {
                                                                 fileName: "[project]/src/app/pedido/[id]/page.tsx",
-                                                                lineNumber: 244,
+                                                                lineNumber: 256,
                                                                 columnNumber: 21
                                                             }, this),
                                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -496,7 +508,7 @@ function OrderStatusPage() {
                                                                         children: item.name
                                                                     }, void 0, false, {
                                                                         fileName: "[project]/src/app/pedido/[id]/page.tsx",
-                                                                        lineNumber: 248,
+                                                                        lineNumber: 260,
                                                                         columnNumber: 23
                                                                     }, this),
                                                                     item.options && /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -507,7 +519,7 @@ function OrderStatusPage() {
                                                                                 children: item.options.entrada
                                                                             }, void 0, false, {
                                                                                 fileName: "[project]/src/app/pedido/[id]/page.tsx",
-                                                                                lineNumber: 254,
+                                                                                lineNumber: 266,
                                                                                 columnNumber: 29
                                                                             }, this),
                                                                             item.options.bebida && /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
@@ -515,25 +527,25 @@ function OrderStatusPage() {
                                                                                 children: item.options.bebida
                                                                             }, void 0, false, {
                                                                                 fileName: "[project]/src/app/pedido/[id]/page.tsx",
-                                                                                lineNumber: 259,
+                                                                                lineNumber: 271,
                                                                                 columnNumber: 29
                                                                             }, this)
                                                                         ]
                                                                     }, void 0, true, {
                                                                         fileName: "[project]/src/app/pedido/[id]/page.tsx",
-                                                                        lineNumber: 252,
+                                                                        lineNumber: 264,
                                                                         columnNumber: 25
                                                                     }, this)
                                                                 ]
                                                             }, void 0, true, {
                                                                 fileName: "[project]/src/app/pedido/[id]/page.tsx",
-                                                                lineNumber: 247,
+                                                                lineNumber: 259,
                                                                 columnNumber: 21
                                                             }, this)
                                                         ]
                                                     }, void 0, true, {
                                                         fileName: "[project]/src/app/pedido/[id]/page.tsx",
-                                                        lineNumber: 243,
+                                                        lineNumber: 255,
                                                         columnNumber: 19
                                                     }, this),
                                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
@@ -544,18 +556,18 @@ function OrderStatusPage() {
                                                         ]
                                                     }, void 0, true, {
                                                         fileName: "[project]/src/app/pedido/[id]/page.tsx",
-                                                        lineNumber: 267,
+                                                        lineNumber: 279,
                                                         columnNumber: 19
                                                     }, this)
                                                 ]
                                             }, i, true, {
                                                 fileName: "[project]/src/app/pedido/[id]/page.tsx",
-                                                lineNumber: 239,
+                                                lineNumber: 251,
                                                 columnNumber: 17
                                             }, this))
                                     }, void 0, false, {
                                         fileName: "[project]/src/app/pedido/[id]/page.tsx",
-                                        lineNumber: 237,
+                                        lineNumber: 249,
                                         columnNumber: 13
                                     }, this),
                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -566,7 +578,7 @@ function OrderStatusPage() {
                                                 children: "Total a Pagar"
                                             }, void 0, false, {
                                                 fileName: "[project]/src/app/pedido/[id]/page.tsx",
-                                                lineNumber: 275,
+                                                lineNumber: 287,
                                                 columnNumber: 15
                                             }, this),
                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
@@ -577,19 +589,19 @@ function OrderStatusPage() {
                                                 ]
                                             }, void 0, true, {
                                                 fileName: "[project]/src/app/pedido/[id]/page.tsx",
-                                                lineNumber: 278,
+                                                lineNumber: 290,
                                                 columnNumber: 15
                                             }, this)
                                         ]
                                     }, void 0, true, {
                                         fileName: "[project]/src/app/pedido/[id]/page.tsx",
-                                        lineNumber: 274,
+                                        lineNumber: 286,
                                         columnNumber: 13
                                     }, this)
                                 ]
                             }, void 0, true, {
                                 fileName: "[project]/src/app/pedido/[id]/page.tsx",
-                                lineNumber: 229,
+                                lineNumber: 241,
                                 columnNumber: 11
                             }, this),
                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -604,37 +616,37 @@ function OrderStatusPage() {
                                             size: 18
                                         }, void 0, false, {
                                             fileName: "[project]/src/app/pedido/[id]/page.tsx",
-                                            lineNumber: 292,
+                                            lineNumber: 304,
                                             columnNumber: 15
                                         }, this),
                                         " ¿Problemas? Escribir al WhatsApp"
                                     ]
                                 }, void 0, true, {
                                     fileName: "[project]/src/app/pedido/[id]/page.tsx",
-                                    lineNumber: 286,
+                                    lineNumber: 298,
                                     columnNumber: 13
                                 }, this)
                             }, void 0, false, {
                                 fileName: "[project]/src/app/pedido/[id]/page.tsx",
-                                lineNumber: 285,
+                                lineNumber: 297,
                                 columnNumber: 11
                             }, this)
                         ]
                     }, void 0, true, {
                         fileName: "[project]/src/app/pedido/[id]/page.tsx",
-                        lineNumber: 207,
+                        lineNumber: 219,
                         columnNumber: 9
                     }, this)
                 ]
             }, void 0, true, {
                 fileName: "[project]/src/app/pedido/[id]/page.tsx",
-                lineNumber: 147,
+                lineNumber: 159,
                 columnNumber: 7
             }, this)
         ]
     }, void 0, true, {
         fileName: "[project]/src/app/pedido/[id]/page.tsx",
-        lineNumber: 126,
+        lineNumber: 138,
         columnNumber: 5
     }, this);
 }
