@@ -26,18 +26,6 @@ export default function CheckoutModal({
   const [method, setMethod] = useState("yape");
   const [state, formAction, isPending] = useActionState(createOrder, null);
 
-  // Bloquear scroll del body al abrir el modal
-  useEffect(() => {
-    document.body.style.overflow = "hidden";
-    // Esta clase ayuda a ocultar el header en layout
-    document.body.classList.add("modal-open");
-
-    return () => {
-      document.body.style.overflow = "unset";
-      document.body.classList.remove("modal-open");
-    };
-  }, []);
-
   // Transformar carrito para visualización
   const cartItems = Object.entries(cart).map(([key, item]: any) => {
     return {
@@ -351,7 +339,7 @@ export default function CheckoutModal({
           </div>
 
           {/* --- FOOTER FLOTANTE --- */}
-          <div className="p-4 bg-white border-t border-gray-100 shrink-0 z-20 pb-8 sm:pb-4 safe-area-bottom">
+          <div className="p-4 bg-white border-t border-gray-100 shrink-0 z-20 pb-8 safe-area-bottom">
             <button
               type="submit"
               disabled={isPending}

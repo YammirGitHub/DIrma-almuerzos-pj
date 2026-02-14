@@ -1,6 +1,8 @@
 import type { Metadata, Viewport } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
+// 1. IMPORTAR EL COMPONENTE
+import BottomNav from "@/components/BottomNav";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -9,7 +11,7 @@ export const metadata: Metadata = {
   description: "Gastronomía casera premium.",
   appleWebApp: {
     capable: true,
-    statusBarStyle: "black-translucent", // Barra transparente para fusión total
+    statusBarStyle: "black-translucent",
     title: "D' Irma",
   },
 };
@@ -20,7 +22,7 @@ export const viewport: Viewport = {
   maximumScale: 1,
   userScalable: false,
   viewportFit: "cover",
-  themeColor: "#0f172a", // Coincide con el Hero para que la barra de estado se vea integrada
+  themeColor: "#0f172a",
 };
 
 export default function RootLayout({
@@ -30,11 +32,13 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="es" className="antialiased scroll-smooth">
-      {/* Eliminamos los gradientes fijos que ensuciaban la vista */}
       <body
         className={`${inter.className} min-h-screen bg-[#F8F9FA] text-gray-900`}
       >
         {children}
+
+        {/* 2. AGREGAR LA BARRA AQUÍ AL FINAL */}
+        <BottomNav />
       </body>
     </html>
   );

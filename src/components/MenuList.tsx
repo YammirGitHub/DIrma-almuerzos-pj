@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useMemo, useEffect } from "react";
-import { createBrowserClient } from "@supabase/ssr"; // NECESARIO PARA REALTIME
+import { createBrowserClient } from "@supabase/ssr";
 import { Plus, Minus, Utensils, X, ChefHat, Coffee } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import CheckoutModal from "./CheckoutModal";
@@ -22,15 +22,15 @@ export default function MenuList({
 }: {
   products: any[];
 }) {
-  // 1. ESTADO LOCAL SINCRONIZADO
-  // Usamos los productos iniciales, pero permitimos que cambien en vivo
+  // 1. ESTADO
   const [products, setProducts] = useState(initialProducts);
-
   const [cart, setCart] = useState<{ [key: string]: any }>({});
+
+  // ESTADO NUEVO: Para saber si ya leímos la memoria del celular
+  const [isCartLoaded, setIsCartLoaded] = useState(false);
+
   const [filter, setFilter] = useState("all");
   const [isCheckoutOpen, setIsCheckoutOpen] = useState(false);
-
-  // Modal State
   const [selectedProduct, setSelectedProduct] = useState<any>(null);
   const [tempOptions, setTempOptions] = useState({
     entrada: "",
@@ -38,13 +38,35 @@ export default function MenuList({
     cremas: "",
   });
 
-  // Cliente Supabase para escuchar cambios
   const supabase = createBrowserClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
   );
 
-  // --- 2. EFECTO REAL-TIME (LA MAGIA) ---
+  // --- 2. PERSISTENCIA DE DATOS (EL TRUCO) ---
+
+  // A) RECUPERAR EL CARRITO AL ENTRAR
+  useEffect(() => {
+    const savedCart = localStorage.getItem("d-irma-cart");
+    if (savedCart) {
+      try {
+        setCart(JSON.parse(savedCart));
+      } catch (e) {
+        console.error("Error al recuperar el carrito", e);
+      }
+    }
+    setIsCartLoaded(true); // Marca que ya terminamos de cargar
+  }, []);
+
+  // B) GUARDAR EL CARRITO AUTOMÁTICAMENTE
+  useEffect(() => {
+    // Solo guardamos SI ya cargamos el anterior (para no sobrescribir con vacío al inicio)
+    if (isCartLoaded) {
+      localStorage.setItem("d-irma-cart", JSON.stringify(cart));
+    }
+  }, [cart, isCartLoaded]);
+
+  // --- 3. EFECTO REAL-TIME ---
   useEffect(() => {
     const channel = supabase
       .channel("menu_updates_client")
@@ -53,15 +75,12 @@ export default function MenuList({
         { event: "*", schema: "public", table: "products" },
         (payload) => {
           if (payload.eventType === "UPDATE") {
-            // Si actualizas stock o precio, se refleja al instante
             setProducts((prev) =>
               prev.map((p) => (p.id === payload.new.id ? payload.new : p)),
             );
           } else if (payload.eventType === "INSERT") {
-            // Si agregas un plato nuevo, aparece solo
             setProducts((prev) => [payload.new, ...prev]);
           } else if (payload.eventType === "DELETE") {
-            // Si borras un plato, desaparece
             setProducts((prev) => prev.filter((p) => p.id !== payload.old.id));
           }
         },
@@ -85,12 +104,9 @@ export default function MenuList({
     return () => document.body.classList.remove("modal-open");
   }, [selectedProduct, isCheckoutOpen]);
 
-  // --- AGRUPACIÓN CON FILTRO DE DISPONIBILIDAD ---
+  // --- LOGICA CARRITO ---
   const groupedProducts = useMemo(() => {
-    // FILTRO CLAVE: Solo mostramos lo que está disponible (is_available === true)
-    // Si quieres que aparezca "Agotado" pero visible, quita el .filter
     const activeProducts = products.filter((p) => p.is_available === true);
-
     const menus = activeProducts.filter((p) =>
       ["menu", "diet"].includes(p.category),
     );
@@ -98,9 +114,8 @@ export default function MenuList({
       (p) => !["menu", "diet"].includes(p.category),
     );
     return { menus, extras };
-  }, [products]); // Se recalcula cuando products cambia vía Real-time
+  }, [products]);
 
-  // --- LÓGICA CARRITO ---
   const addToCart = (product: any, options: any = null) => {
     const cartItemId = options
       ? `${product.id}-${JSON.stringify(options)}`
@@ -133,7 +148,6 @@ export default function MenuList({
       .reduce((acc: number, item: any) => acc + item.qty, 0);
   };
 
-  // --- HANDLER INTELIGENTE ---
   const handleProductAction = (
     product: any,
     action: "add" | "remove",
@@ -171,7 +185,7 @@ export default function MenuList({
 
   return (
     <>
-      {/* --- CABECERA & FILTROS --- */}
+      {/* CABECERA & FILTROS */}
       <div className="flex flex-col md:flex-row md:items-end justify-between mb-8 pb-6 border-b border-gray-100 gap-4">
         <div>
           <h2 className="text-3xl md:text-4xl font-black text-gray-900 tracking-tight">
@@ -199,7 +213,7 @@ export default function MenuList({
         </div>
       </div>
 
-      {/* --- CONTENIDO DINÁMICO --- */}
+      {/* LISTA DE PRODUCTOS */}
       <div className="space-y-12 pb-32 min-h-[300px]">
         {/* SECCIÓN MENÚS */}
         {(filter === "all" || filter === "menu") &&
@@ -263,7 +277,7 @@ export default function MenuList({
             </div>
           )}
 
-        {/* EMPTY STATE (Si todo se agota) */}
+        {/* EMPTY STATE */}
         {groupedProducts.menus.length === 0 &&
           groupedProducts.extras.length === 0 && (
             <div className="flex flex-col items-center justify-center py-20 text-center animate-in zoom-in">
@@ -280,7 +294,7 @@ export default function MenuList({
           )}
       </div>
 
-      {/* --- MODAL DETALLE --- */}
+      {/* MODAL DETALLE */}
       <AnimatePresence>
         {selectedProduct && (
           <div className="fixed inset-0 z-[60] flex items-end sm:items-center justify-center sm:p-4 isolate">
@@ -410,20 +424,26 @@ export default function MenuList({
       </AnimatePresence>
 
       {/* --- BOTÓN FLOTANTE --- */}
+      {/* --- BOTÓN FLOTANTE (CARRITO) --- */}
       <AnimatePresence>
         {totalItems > 0 && (
           <motion.div
-            initial={{ y: 100 }}
-            animate={{ y: 0 }}
-            exit={{ y: 100 }}
-            className="fixed bottom-6 left-0 right-0 z-50 flex justify-center pointer-events-none px-4 safe-area-bottom"
+            id="floating-cart-btn" // ID PARA CSS GLOBAL
+            initial={{ y: 100, opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            exit={{ y: 100, opacity: 0 }}
+            transition={{ type: "spring", stiffness: 260, damping: 20 }}
+            // CLASES RESPONSIVAS CLAVE:
+            // Móvil: bottom-24 (encima del nav), left-0 right-0 (ancho completo con px-4)
+            // PC (md): bottom-8 right-8 (esquina flotante), width auto (max-w-md), left-auto (no centrado)
+            className="fixed bottom-24 left-0 right-0 md:bottom-8 md:right-8 md:left-auto z-50 flex justify-center md:justify-end pointer-events-none px-4 safe-area-bottom transition-all duration-300"
           >
             <button
               onClick={() => setIsCheckoutOpen(true)}
-              className="pointer-events-auto w-full max-w-md bg-orange-600 text-white p-3.5 rounded-full shadow-2xl shadow-orange-600/40 flex justify-between items-center active:scale-[0.98] transition-all border border-white/20 backdrop-blur-md hover:bg-orange-700"
+              className="pointer-events-auto w-full max-w-md bg-orange-600 text-white p-3.5 rounded-full shadow-2xl shadow-orange-600/40 flex justify-between items-center active:scale-[0.98] transition-transform border border-white/20 backdrop-blur-md hover:bg-orange-700 hover:scale-[1.02]"
             >
               <div className="flex items-center gap-3">
-                <div className="bg-white text-orange-600 h-10 w-10 flex items-center justify-center rounded-full text-sm font-black shadow-lg shadow-orange-900/10">
+                <div className="bg-white text-orange-600 h-10 w-10 flex items-center justify-center rounded-full text-sm font-black shadow-lg">
                   {totalItems}
                 </div>
                 <div className="flex flex-col items-start leading-tight">
@@ -454,7 +474,7 @@ export default function MenuList({
   );
 }
 
-// --- TARJETA DE PRODUCTO INTELIGENTE ---
+// TARJETA DE PRODUCTO (Sin Cambios)
 function ProductCard({ product, qty, onClickCard, onAdd, onRemove }: any) {
   const isMenu = ["menu", "diet"].includes(product.category);
 
@@ -463,11 +483,10 @@ function ProductCard({ product, qty, onClickCard, onAdd, onRemove }: any) {
       layout
       initial={{ opacity: 0, scale: 0.9 }}
       animate={{ opacity: 1, scale: 1 }}
-      exit={{ opacity: 0, scale: 0.9 }} // Animación de salida cuando se deshabilita
+      exit={{ opacity: 0, scale: 0.9 }}
       onClick={onClickCard}
       className={`group bg-white rounded-[1.5rem] p-3 shadow-sm border border-gray-100 transition-all hover:shadow-xl hover:shadow-orange-500/5 hover:border-orange-200 flex gap-4 h-full relative overflow-hidden ${isMenu ? "cursor-pointer" : "cursor-default"}`}
     >
-      {/* ... (contenido de la tarjeta igual que antes) ... */}
       <div className="relative h-28 w-28 shrink-0 overflow-hidden rounded-xl bg-gray-100 shadow-inner">
         <img
           src={
