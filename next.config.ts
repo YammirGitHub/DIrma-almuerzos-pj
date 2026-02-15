@@ -1,17 +1,12 @@
-/** @type {import('next').NextConfig} */
-const nextConfig = {
+import type { NextConfig } from "next";
+
+const nextConfig: NextConfig = {
   images: {
     remotePatterns: [
       {
         protocol: 'https',
-        hostname: 'images.unsplash.com',
+        hostname: '**', // Este "comodín" ya incluye a Unsplash, Supabase y todo lo demás.
       },
-      // Agrega esto también por si tus productos vienen de Supabase
-      // (Cambia 'tustringdeproyecto' por lo que salga en tus URLs de Supabase)
-      // {
-      //   protocol: 'https',
-      //   hostname: '**.supabase.co',
-      // },
     ],
   },
 };

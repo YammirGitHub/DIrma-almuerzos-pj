@@ -11,6 +11,13 @@ import {
   Receipt,
   ChevronDown,
   ChevronUp,
+  CreditCard,
+  X,
+  QrCode,
+  Smartphone,
+  Copy,
+  Check,
+  Loader2,
 } from "lucide-react";
 import Toast from "@/components/ui/Toast";
 import { motion, AnimatePresence } from "framer-motion";
@@ -23,6 +30,13 @@ export default function HistorialPage() {
   const [customerExists, setCustomerExists] = useState(false);
   const [expandedOrder, setExpandedOrder] = useState<string | null>(null);
 
+  // --- ESTADOS PARA EL PAGO DE DEUDA ---
+  const [showPayModal, setShowPayModal] = useState(false);
+  const [yapeMode, setYapeMode] = useState<"qr" | "number">("qr");
+  const [copied, setCopied] = useState(false);
+  const [paying, setPaying] = useState(false);
+  const [opCode, setOpCode] = useState("");
+
   const [toast, setToast] = useState({
     show: false,
     message: "",
@@ -34,11 +48,8 @@ export default function HistorialPage() {
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
   );
 
-  // --- EFECTO REAL-TIME ---
-  // Si ya buscamos un teléfono, nos quedamos escuchando cambios para ese número
   useEffect(() => {
     if (!searched || !phone) return;
-
     const channel = supabase
       .channel(`historial-${phone}`)
       .on(
@@ -47,23 +58,21 @@ export default function HistorialPage() {
           event: "UPDATE",
           schema: "public",
           table: "orders",
-          filter: `customer_phone=eq.${phone}`, // Solo escuchamos updates de este teléfono
+          filter: `customer_phone=eq.${phone}`,
         },
         (payload) => {
-          // Actualizamos la orden que cambió en la lista local
-          setOrders((prevOrders) =>
-            prevOrders.map((o) =>
+          setOrders((prev) =>
+            prev.map((o) =>
               o.id === payload.new.id ? { ...o, ...payload.new } : o,
             ),
           );
         },
       )
       .subscribe();
-
     return () => {
       supabase.removeChannel(channel);
     };
-  }, [searched, phone]); // Se activa cuando 'searched' es true
+  }, [searched, phone]);
 
   const handlePhoneChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value.replace(/\D/g, "");
@@ -72,30 +81,25 @@ export default function HistorialPage() {
 
   const handleSearch = async (e: React.FormEvent) => {
     e.preventDefault();
-
     if (phone.length !== 9 || !phone.startsWith("9")) {
       setToast({
         show: true,
-        message: "Ingresa un celular válido (9 dígitos)",
+        message: "Ingresa un celular válido",
         type: "error",
       });
       return;
     }
-
     setLoading(true);
     setSearched(true);
     setExpandedOrder(null);
 
-    // 1. Verificamos si existe el cliente
     const { data: customer } = await supabase
       .from("customers")
       .select("phone")
       .eq("phone", phone)
       .single();
-
     setCustomerExists(!!customer);
 
-    // 2. Buscamos pedidos
     if (customer) {
       const { data: ordersData } = await supabase
         .from("orders")
@@ -107,8 +111,74 @@ export default function HistorialPage() {
     } else {
       setOrders([]);
     }
-
     setLoading(false);
+  };
+
+  // --- LÓGICA DE PAGO DE DEUDA ---
+  const handlePayDebt = async () => {
+    if (!opCode) {
+      setToast({
+        show: true,
+        message: "Ingresa el código de operación",
+        type: "error",
+      });
+      return;
+    }
+    setPaying(true);
+
+    // 1. Identificar pedidos pendientes
+    const unpaidOrderIds = orders
+      .filter(
+        (o) =>
+          o.payment_status === "on_account" || o.payment_status === "unpaid",
+      )
+      .map((o) => o.id);
+
+    if (unpaidOrderIds.length === 0) {
+      setPaying(false);
+      return;
+    }
+
+    // 2. Actualizar en Supabase (Lote)
+    const { error } = await supabase
+      .from("orders")
+      .update({
+        payment_status: "verifying",
+        payment_method: "yape", // Cambiamos a Yape porque ahora está pagando
+        operation_code: opCode,
+      })
+      .in("id", unpaidOrderIds);
+
+    setPaying(false);
+    if (error) {
+      setToast({
+        show: true,
+        message: "Error al procesar pago",
+        type: "error",
+      });
+    } else {
+      setToast({
+        show: true,
+        message: "Pago enviado a verificación",
+        type: "success",
+      });
+      setShowPayModal(false);
+      setOpCode("");
+      // Actualización optimista local
+      setOrders(
+        orders.map((o) =>
+          unpaidOrderIds.includes(o.id)
+            ? { ...o, payment_status: "verifying", operation_code: opCode }
+            : o,
+        ),
+      );
+    }
+  };
+
+  const copyNumber = () => {
+    navigator.clipboard.writeText("974805994");
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
   };
 
   const deudaTotal = orders
@@ -126,6 +196,7 @@ export default function HistorialPage() {
         onClose={() => setToast({ ...toast, show: false })}
       />
 
+      {/* HEADER */}
       <div className="bg-white p-4 sticky top-0 z-10 border-b border-gray-100 flex items-center gap-4 safe-area-top">
         <Link
           href="/"
@@ -145,7 +216,6 @@ export default function HistorialPage() {
           <p className="text-sm text-gray-400 mb-6">
             Ingresa tu número para ver tu estado de cuenta.
           </p>
-
           <form onSubmit={handleSearch} className="flex flex-col gap-4">
             <div className="relative">
               <input
@@ -172,7 +242,6 @@ export default function HistorialPage() {
 
         {searched && (
           <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
-            {/* ESTADO 1: NO EXISTE */}
             {!customerExists && (
               <div className="text-center py-8 bg-gray-50 rounded-[2rem] border border-gray-100 px-6">
                 <div className="bg-white p-4 rounded-full w-16 h-16 flex items-center justify-center mx-auto mb-4 shadow-sm">
@@ -193,9 +262,9 @@ export default function HistorialPage() {
               </div>
             )}
 
-            {/* ESTADO 2 y 3: CLIENTE EXISTE */}
             {customerExists && (
               <>
+                {/* --- TARJETA DE DEUDA CON BOTÓN --- */}
                 {deudaTotal > 0 ? (
                   <div className="bg-orange-600 text-white p-6 rounded-[2rem] shadow-xl shadow-orange-600/30 mb-8 relative overflow-hidden">
                     <div className="absolute -right-10 -top-10 w-40 h-40 bg-white/10 rounded-full blur-3xl"></div>
@@ -206,11 +275,24 @@ export default function HistorialPage() {
                           Por Pagar
                         </p>
                       </div>
-                      <div className="text-5xl font-black mb-2 tracking-tight">
-                        S/ {deudaTotal.toFixed(2)}
+
+                      {/* FILA DE MONTO Y BOTÓN */}
+                      <div className="flex justify-between items-end mb-2">
+                        <div className="text-5xl font-black tracking-tight">
+                          S/ {deudaTotal.toFixed(2)}
+                        </div>
+
+                        {/* BOTÓN PAGAR AQUI */}
+                        <button
+                          onClick={() => setShowPayModal(true)}
+                          className="bg-white text-orange-600 px-4 py-2.5 rounded-xl font-black text-xs uppercase tracking-wider shadow-lg hover:bg-orange-50 active:scale-95 transition-all flex items-center gap-2"
+                        >
+                          <CreditCard size={16} /> Pagar Ahora
+                        </button>
                       </div>
+
                       <p className="text-sm text-orange-100 font-medium">
-                        Tienes pedidos pendientes.
+                        Tienes pedidos pendientes de regularizar.
                       </p>
                     </div>
                   </div>
@@ -238,7 +320,6 @@ export default function HistorialPage() {
                 <div className="space-y-4 pb-20">
                   {orders.map((order) => {
                     const isExpanded = expandedOrder === order.id;
-
                     return (
                       <div
                         key={order.id}
@@ -247,7 +328,6 @@ export default function HistorialPage() {
                         }
                         className={`bg-white p-5 rounded-[1.5rem] shadow-sm border border-gray-100 transition-all cursor-pointer ${isExpanded ? "ring-2 ring-orange-100" : "hover:shadow-md"}`}
                       >
-                        {/* HEADER TARJETA CON ESTADO DE ENTREGA REAL-TIME */}
                         <div className="flex justify-between items-start mb-3">
                           <div>
                             <p className="font-bold text-gray-900 text-lg capitalize">
@@ -263,21 +343,18 @@ export default function HistorialPage() {
                               )}
                             </p>
                           </div>
-
-                          {/* COLUMNA DE ESTADOS */}
                           <div className="flex flex-col items-end gap-2">
-                            {/* ESTADO PAGO */}
                             <span
-                              className={`px-3 py-1 rounded-lg text-[10px] font-black uppercase tracking-wide border ${order.payment_status === "on_account" ? "bg-orange-50 text-orange-700 border-orange-100" : "bg-emerald-50 text-emerald-700 border-emerald-100"}`}
+                              className={`px-3 py-1 rounded-lg text-[10px] font-black uppercase tracking-wide border ${order.payment_status === "on_account" ? "bg-orange-50 text-orange-700 border-orange-100" : order.payment_status === "verifying" ? "bg-purple-50 text-purple-700 border-purple-100" : "bg-emerald-50 text-emerald-700 border-emerald-100"}`}
                             >
                               {order.payment_status === "on_account"
                                 ? "Debe"
-                                : "Pagado"}
+                                : order.payment_status === "verifying"
+                                  ? "Verificando"
+                                  : "Pagado"}
                             </span>
-
-                            {/* ESTADO ENTREGA (CAMBIA SOLO) */}
                             {order.status === "delivered" ? (
-                              <span className="flex items-center gap-1.5 bg-gray-50 text-gray-600 px-2 py-0.5 rounded-md text-[9px] font-bold border border-gray-100 uppercase tracking-wider animate-in fade-in duration-500">
+                              <span className="flex items-center gap-1.5 bg-gray-50 text-gray-600 px-2 py-0.5 rounded-md text-[9px] font-bold border border-gray-100 uppercase tracking-wider">
                                 <CheckCircle
                                   size={12}
                                   className="text-green-500"
@@ -291,8 +368,6 @@ export default function HistorialPage() {
                             )}
                           </div>
                         </div>
-
-                        {/* RESUMEN VISUAL */}
                         {!isExpanded && (
                           <div className="flex items-center gap-2 text-sm text-gray-500 mb-2">
                             <Receipt size={14} />
@@ -303,8 +378,6 @@ export default function HistorialPage() {
                             />
                           </div>
                         )}
-
-                        {/* DETALLE EXPANDIBLE (ACORDEÓN) */}
                         <AnimatePresence>
                           {isExpanded && (
                             <motion.div
@@ -358,8 +431,6 @@ export default function HistorialPage() {
                             </motion.div>
                           )}
                         </AnimatePresence>
-
-                        {/* TOTAL FOOTER */}
                         <div className="flex justify-between items-center pt-3 border-t border-gray-100 mt-1">
                           <span className="text-xs font-bold text-gray-400 uppercase">
                             {order.payment_method === "yape"
@@ -379,6 +450,126 @@ export default function HistorialPage() {
           </div>
         )}
       </div>
+
+      {/* --- MODAL DE PAGO DE DEUDA --- */}
+      <AnimatePresence>
+        {showPayModal && (
+          <div className="fixed inset-0 z-[9999] flex items-end sm:items-center justify-center isolate">
+            <div
+              className="absolute inset-0 bg-black/40 backdrop-blur-xl transition-opacity animate-in fade-in duration-300"
+              onClick={() => setShowPayModal(false)}
+            />
+            <motion.div
+              initial={{ y: "100%" }}
+              animate={{ y: 0 }}
+              exit={{ y: "100%" }}
+              className="relative w-full max-w-md bg-white sm:rounded-[2.5rem] rounded-t-[2.5rem] shadow-2xl p-6 pb-12 flex flex-col max-h-[90vh] overflow-y-auto"
+            >
+              <div className="flex justify-between items-center mb-6">
+                <div>
+                  <h2 className="text-xl font-black text-gray-900">
+                    Pagar Deuda Total
+                  </h2>
+                  <p className="text-xs text-gray-400 uppercase tracking-widest">
+                    Regulariza tus pedidos
+                  </p>
+                </div>
+                <button
+                  onClick={() => setShowPayModal(false)}
+                  className="p-2 bg-gray-50 rounded-full hover:bg-gray-100 text-gray-400"
+                >
+                  <X size={20} />
+                </button>
+              </div>
+
+              <div className="text-center mb-6">
+                <div className="text-4xl font-black text-orange-600 tracking-tighter mb-1">
+                  S/ {deudaTotal.toFixed(2)}
+                </div>
+                <div className="inline-block bg-orange-50 text-orange-700 px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wide">
+                  Monto Pendiente
+                </div>
+              </div>
+
+              {/* TABS QR / NUMERO */}
+              <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden mb-6">
+                <div className="flex border-b border-gray-100">
+                  <button
+                    onClick={() => setYapeMode("qr")}
+                    className={`flex-1 py-3 text-xs font-bold uppercase tracking-wider flex items-center justify-center gap-2 transition-colors ${yapeMode === "qr" ? "bg-purple-50 text-purple-700 border-b-2 border-purple-500" : "text-gray-400 hover:bg-gray-50"}`}
+                  >
+                    <QrCode size={16} /> QR Yape
+                  </button>
+                  <button
+                    onClick={() => setYapeMode("number")}
+                    className={`flex-1 py-3 text-xs font-bold uppercase tracking-wider flex items-center justify-center gap-2 transition-colors ${yapeMode === "number" ? "bg-purple-50 text-purple-700 border-b-2 border-purple-500" : "text-gray-400 hover:bg-gray-50"}`}
+                  >
+                    <Smartphone size={16} /> Número
+                  </button>
+                </div>
+                <div className="p-5 text-center">
+                  {yapeMode === "qr" && (
+                    <div className="animate-in zoom-in duration-300">
+                      <div className="bg-white p-2 rounded-xl border-2 border-dashed border-purple-200 inline-block mb-3">
+                        <img
+                          src="/yape-qr.png"
+                          alt="QR Yape"
+                          className="w-40 h-40 object-contain rounded-lg"
+                        />
+                      </div>
+                      <p className="text-[10px] text-gray-400 font-bold uppercase">
+                        Escanea desde tu app
+                      </p>
+                    </div>
+                  )}
+                  {yapeMode === "number" && (
+                    <div className="animate-in zoom-in duration-300 py-4">
+                      <div className="text-3xl font-black text-purple-900 font-mono tracking-wider mb-2">
+                        974 805 994
+                      </div>
+                      <p className="text-sm font-bold text-purple-600 mb-4">
+                        Irma Cerna Hoyos
+                      </p>
+                      <button
+                        onClick={copyNumber}
+                        className="mx-auto flex items-center gap-2 bg-purple-100 hover:bg-purple-200 text-purple-700 px-4 py-2 rounded-full text-xs font-bold transition-colors"
+                      >
+                        {copied ? <Check size={14} /> : <Copy size={14} />}
+                        {copied ? "¡Copiado!" : "Copiar Número"}
+                      </button>
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              {/* INPUT CÓDIGO */}
+              <div className="space-y-2">
+                <label className="text-xs font-black text-gray-400 uppercase tracking-widest pl-1">
+                  Código de Operación
+                </label>
+                <input
+                  value={opCode}
+                  onChange={(e) => setOpCode(e.target.value)}
+                  placeholder="Ej: 123456"
+                  className="w-full p-4 bg-gray-50 border border-gray-200 rounded-2xl focus:border-orange-500 focus:bg-white outline-none text-center font-bold text-gray-900 text-lg placeholder:text-gray-300 transition-all"
+                />
+              </div>
+
+              <button
+                onClick={handlePayDebt}
+                disabled={paying}
+                className="w-full bg-gray-900 text-white py-4 rounded-2xl font-bold text-lg shadow-xl hover:bg-black mt-6 active:scale-95 transition-all disabled:opacity-70 flex items-center justify-center gap-2"
+              >
+                {paying ? (
+                  <Loader2 className="animate-spin" />
+                ) : (
+                  "Enviar Comprobante"
+                )}
+              </button>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }

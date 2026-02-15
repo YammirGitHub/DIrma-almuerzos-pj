@@ -1,6 +1,6 @@
 {
   "node": {
-    "605b20d98de81589558bc9d895bbe5a675c9d9b054": {
+    "6061af35b7effceb1b03519a0f5b0411506813e76e": {
       "workers": {
         "app/(client)/page": {
           "moduleId": "[project]/.next-internal/server/app/(client)/page/actions.js { ACTIONS_MODULE0 => \"[project]/src/app/actions.ts [app-rsc] (ecmascript)\" } [app-rsc] (server actions loader, ecmascript)",
@@ -17,5 +17,5 @@
     }
   },
   "edge": {},
-  "encryptionKey": "TA9atzods26eI4uHJnFR/hjWuiqG926GiAtl69CBAnE="
+  "encryptionKey": "o6W026bXwcoxhviXIKxXuQImc7w+t+g/PvROjLEKuBI="
 }

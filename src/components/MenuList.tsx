@@ -2,7 +2,17 @@
 
 import { useState, useMemo, useEffect } from "react";
 import { createBrowserClient } from "@supabase/ssr";
-import { Plus, Minus, Utensils, X, ChefHat, Coffee } from "lucide-react";
+import {
+  Plus,
+  Minus,
+  Utensils,
+  X,
+  ChefHat,
+  Coffee,
+  Salad,
+  GlassWater,
+  Soup,
+} from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import CheckoutModal from "./CheckoutModal";
 
@@ -25,10 +35,7 @@ export default function MenuList({
   // 1. ESTADO
   const [products, setProducts] = useState(initialProducts);
   const [cart, setCart] = useState<{ [key: string]: any }>({});
-
-  // ESTADO NUEVO: Para saber si ya leímos la memoria del celular
   const [isCartLoaded, setIsCartLoaded] = useState(false);
-
   const [filter, setFilter] = useState("all");
   const [isCheckoutOpen, setIsCheckoutOpen] = useState(false);
   const [selectedProduct, setSelectedProduct] = useState<any>(null);
@@ -43,56 +50,46 @@ export default function MenuList({
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
   );
 
-  // --- 2. PERSISTENCIA DE DATOS (EL TRUCO) ---
-
-  // A) RECUPERAR EL CARRITO AL ENTRAR
+  // --- 2. PERSISTENCIA Y REALTIME ---
   useEffect(() => {
     const savedCart = localStorage.getItem("d-irma-cart");
     if (savedCart) {
       try {
         setCart(JSON.parse(savedCart));
       } catch (e) {
-        console.error("Error al recuperar el carrito", e);
+        console.error(e);
       }
     }
-    setIsCartLoaded(true); // Marca que ya terminamos de cargar
+    setIsCartLoaded(true);
   }, []);
 
-  // B) GUARDAR EL CARRITO AUTOMÁTICAMENTE
   useEffect(() => {
-    // Solo guardamos SI ya cargamos el anterior (para no sobrescribir con vacío al inicio)
-    if (isCartLoaded) {
-      localStorage.setItem("d-irma-cart", JSON.stringify(cart));
-    }
+    if (isCartLoaded) localStorage.setItem("d-irma-cart", JSON.stringify(cart));
   }, [cart, isCartLoaded]);
 
-  // --- 3. EFECTO REAL-TIME ---
   useEffect(() => {
     const channel = supabase
-      .channel("menu_updates_client")
+      .channel("menu_client_v2")
       .on(
         "postgres_changes",
         { event: "*", schema: "public", table: "products" },
         (payload) => {
-          if (payload.eventType === "UPDATE") {
+          if (payload.eventType === "UPDATE")
             setProducts((prev) =>
               prev.map((p) => (p.id === payload.new.id ? payload.new : p)),
             );
-          } else if (payload.eventType === "INSERT") {
+          else if (payload.eventType === "INSERT")
             setProducts((prev) => [payload.new, ...prev]);
-          } else if (payload.eventType === "DELETE") {
+          else if (payload.eventType === "DELETE")
             setProducts((prev) => prev.filter((p) => p.id !== payload.old.id));
-          }
         },
       )
       .subscribe();
-
     return () => {
       supabase.removeChannel(channel);
     };
   }, []);
 
-  // Bloquear scroll y ocultar header
   useEffect(() => {
     if (selectedProduct || isCheckoutOpen) {
       document.body.style.overflow = "hidden";
@@ -104,16 +101,16 @@ export default function MenuList({
     return () => document.body.classList.remove("modal-open");
   }, [selectedProduct, isCheckoutOpen]);
 
-  // --- LOGICA CARRITO ---
+  // --- LOGICA CARRITO Y GRUPOS ---
   const groupedProducts = useMemo(() => {
-    const activeProducts = products.filter((p) => p.is_available === true);
-    const menus = activeProducts.filter((p) =>
-      ["menu", "diet"].includes(p.category),
-    );
-    const extras = activeProducts.filter(
-      (p) => !["menu", "diet"].includes(p.category),
-    );
-    return { menus, extras };
+    const active = products.filter((p) => p.is_available === true);
+    return {
+      menu: active.filter((p) => p.category === "menu"),
+      plato: active.filter((p) => p.category === "plato"),
+      diet: active.filter((p) => p.category === "diet"),
+      extra: active.filter((p) => p.category === "extra"),
+      bebida: active.filter((p) => p.category === "bebida"),
+    };
   }, [products]);
 
   const addToCart = (product: any, options: any = null) => {
@@ -154,12 +151,10 @@ export default function MenuList({
     isDirectClick: boolean = false,
   ) => {
     const isMenu = ["menu", "diet"].includes(product.category);
-
     if (action === "remove") {
       removeFromCart(product.id);
       return;
     }
-
     if (isMenu) {
       setTempOptions({
         entrada: EXTRAS_OPTIONS.entrada[0],
@@ -167,10 +162,8 @@ export default function MenuList({
         cremas: EXTRAS_OPTIONS.cremas[0],
       });
       setSelectedProduct(product);
-    } else {
-      if (isDirectClick) {
-        addToCart(product);
-      }
+    } else if (isDirectClick) {
+      addToCart(product);
     }
   };
 
@@ -182,6 +175,48 @@ export default function MenuList({
     (acc: number, item: any) => acc + item.product.price * item.qty,
     0,
   );
+
+  // --- RENDERIZADO DE SECCIONES (IGUAL QUE ADMIN) ---
+  const renderSection = (
+    key: string,
+    title: string,
+    icon: any,
+    colorBg: string,
+    colorText: string,
+  ) => {
+    const items = groupedProducts[key as keyof typeof groupedProducts];
+    if (!items || items.length === 0) return null;
+    if (filter !== "all" && filter !== key) return null; // Filtro simple
+
+    return (
+      <div className="animate-in fade-in slide-in-from-bottom-4 duration-500 mb-10">
+        {(filter === "all" || filter === key) && (
+          <div className="flex items-center gap-3 mb-6 pl-1">
+            <div
+              className={`p-2.5 rounded-xl ${colorBg} ${colorText} shadow-sm`}
+            >
+              {icon}
+            </div>
+            <h3 className="text-xl font-black text-gray-900 tracking-tight">
+              {title}
+            </h3>
+          </div>
+        )}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          {items.map((product) => (
+            <ProductCard
+              key={product.id}
+              product={product}
+              qty={getProductQty(product.id)}
+              onClickCard={() => handleProductAction(product, "add", false)}
+              onAdd={() => handleProductAction(product, "add", true)}
+              onRemove={() => handleProductAction(product, "remove", true)}
+            />
+          ))}
+        </div>
+      </div>
+    );
+  };
 
   return (
     <>
@@ -195,17 +230,19 @@ export default function MenuList({
             Personaliza tu pedido a tu gusto.
           </p>
         </div>
-
         <div className="flex gap-2 overflow-x-auto pb-2 md:pb-0 no-scrollbar">
           {[
             { id: "all", label: "Todo" },
-            { id: "menu", label: "Menú Ejecutivo" },
+            { id: "menu", label: "Menú" },
+            { id: "plato", label: "Carta" },
+            { id: "diet", label: "Dietas" },
             { id: "extra", label: "Extras" },
+            { id: "bebida", label: "Bebidas" },
           ].map((f) => (
             <button
               key={f.id}
               onClick={() => setFilter(f.id)}
-              className={`px-5 py-2.5 rounded-full text-xs font-bold transition-all whitespace-nowrap shadow-sm border ${filter === f.id ? "bg-orange-500 text-white border-orange-500 shadow-orange-200" : "bg-gray-50 text-gray-500 border-gray-200 hover:bg-gray-100"}`}
+              className={`px-5 py-2.5 rounded-full text-xs font-bold transition-all whitespace-nowrap shadow-sm border ${filter === f.id ? "bg-orange-600 text-white border-orange-600 shadow-orange-200" : "bg-white text-gray-500 border-gray-200 hover:bg-gray-50"}`}
             >
               {f.label}
             </button>
@@ -214,87 +251,60 @@ export default function MenuList({
       </div>
 
       {/* LISTA DE PRODUCTOS */}
-      <div className="space-y-12 pb-32 min-h-[300px]">
-        {/* SECCIÓN MENÚS */}
-        {(filter === "all" || filter === "menu") &&
-          groupedProducts.menus.length > 0 && (
-            <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
-              {filter === "all" && (
-                <div className="flex items-center gap-2 mb-6 ml-1">
-                  <div className="bg-orange-100 p-2 rounded-lg text-orange-600">
-                    <ChefHat size={20} />
-                  </div>
-                  <h3 className="text-xl font-black text-gray-900">
-                    Platos de Fondo
-                  </h3>
-                </div>
-              )}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                {groupedProducts.menus.map((product) => (
-                  <ProductCard
-                    key={product.id}
-                    product={product}
-                    qty={getProductQty(product.id)}
-                    onClickCard={() =>
-                      handleProductAction(product, "add", false)
-                    }
-                    onAdd={() => handleProductAction(product, "add", true)}
-                    onRemove={() => {}}
-                  />
-                ))}
-              </div>
-            </div>
-          )}
-
-        {/* SECCIÓN EXTRAS */}
-        {(filter === "all" || filter === "extra") &&
-          groupedProducts.extras.length > 0 && (
-            <div className="animate-in fade-in slide-in-from-bottom-4 duration-500 delay-100">
-              {filter === "all" && (
-                <div className="flex items-center gap-2 mb-6 ml-1">
-                  <div className="bg-blue-100 p-2 rounded-lg text-blue-600">
-                    <Coffee size={20} />
-                  </div>
-                  <h3 className="text-xl font-black text-gray-900">
-                    Extras y Bebidas
-                  </h3>
-                </div>
-              )}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                {groupedProducts.extras.map((product) => (
-                  <ProductCard
-                    key={product.id}
-                    product={product}
-                    qty={getProductQty(product.id)}
-                    onClickCard={() => {}}
-                    onAdd={() => handleProductAction(product, "add", true)}
-                    onRemove={() =>
-                      handleProductAction(product, "remove", true)
-                    }
-                  />
-                ))}
-              </div>
-            </div>
-          )}
+      <div className="space-y-2 pb-32 min-h-[300px]">
+        {renderSection(
+          "menu",
+          "Menú Ejecutivo",
+          <ChefHat size={20} />,
+          "bg-orange-500",
+          "text-white",
+        )}
+        {renderSection(
+          "plato",
+          "Platos a la Carta",
+          <Soup size={20} />,
+          "bg-red-500",
+          "text-white",
+        )}
+        {renderSection(
+          "diet",
+          "Dietas Saludables",
+          <Salad size={20} />,
+          "bg-green-500",
+          "text-white",
+        )}
+        {renderSection(
+          "extra",
+          "Extras",
+          <Coffee size={20} />,
+          "bg-yellow-500",
+          "text-white",
+        )}
+        {renderSection(
+          "bebida",
+          "Bebidas",
+          <GlassWater size={20} />,
+          "bg-cyan-500",
+          "text-white",
+        )}
 
         {/* EMPTY STATE */}
-        {groupedProducts.menus.length === 0 &&
-          groupedProducts.extras.length === 0 && (
-            <div className="flex flex-col items-center justify-center py-20 text-center animate-in zoom-in">
-              <div className="bg-gray-100 p-6 rounded-full mb-4">
-                <Utensils size={40} className="text-gray-300" />
-              </div>
-              <h3 className="text-lg font-bold text-gray-500">
-                ¡Se acabó todo! 🙈
-              </h3>
-              <p className="text-sm text-gray-400">
-                Vuelve mañana para más sazón.
-              </p>
+        {Object.values(groupedProducts).every((arr) => arr.length === 0) && (
+          <div className="flex flex-col items-center justify-center py-20 text-center animate-in zoom-in">
+            <div className="bg-gray-100 p-6 rounded-full mb-4">
+              <Utensils size={40} className="text-gray-300" />
             </div>
-          )}
+            <h3 className="text-lg font-bold text-gray-500">
+              ¡Se acabó todo! 🙈
+            </h3>
+            <p className="text-sm text-gray-400">
+              Vuelve mañana para más sazón.
+            </p>
+          </div>
+        )}
       </div>
 
-      {/* MODAL DETALLE */}
+      {/* MODAL DETALLE (Igual que antes) */}
       <AnimatePresence>
         {selectedProduct && (
           <div className="fixed inset-0 z-[60] flex items-end sm:items-center justify-center sm:p-4 isolate">
@@ -312,7 +322,6 @@ export default function MenuList({
               transition={{ type: "spring", damping: 25, stiffness: 300 }}
               className="relative bg-white w-full max-w-lg rounded-t-[2rem] sm:rounded-[2.5rem] overflow-hidden shadow-2xl h-[85vh] sm:h-auto sm:max-h-[90vh] flex flex-col z-10"
             >
-              {/* Header Imagen */}
               <div className="relative h-56 bg-gray-100 shrink-0">
                 <img
                   src={
@@ -330,7 +339,6 @@ export default function MenuList({
                 </button>
                 <div className="absolute bottom-0 inset-x-0 bg-gradient-to-t from-white to-transparent h-24" />
               </div>
-
               <div className="p-6 overflow-y-auto flex-1 custom-scrollbar overscroll-contain">
                 <div className="mb-8">
                   <h2 className="text-2xl md:text-3xl font-black text-gray-900 leading-tight mb-2">
@@ -343,8 +351,7 @@ export default function MenuList({
                     S/ {selectedProduct.price.toFixed(2)}
                   </div>
                 </div>
-
-                {/* SELECCIONADORES */}
+                {/* OPCIONES */}
                 <div className="space-y-8 pb-4">
                   <div className="space-y-3">
                     <h3 className="text-xs font-bold text-gray-400 uppercase tracking-wider flex items-center gap-2">
@@ -384,7 +391,6 @@ export default function MenuList({
                       ))}
                     </div>
                   </div>
-
                   <div className="space-y-3">
                     <h3 className="text-xs font-bold text-gray-400 uppercase tracking-wider flex items-center gap-2">
                       <span className="bg-gray-100 text-gray-600 w-5 h-5 flex items-center justify-center rounded text-[10px]">
@@ -408,14 +414,13 @@ export default function MenuList({
                   </div>
                 </div>
               </div>
-
               <div className="p-4 border-t border-gray-100 bg-white safe-area-bottom">
                 <button
                   onClick={() => addToCart(selectedProduct, tempOptions)}
                   className="w-full bg-orange-600 text-white py-4 rounded-2xl font-black text-lg shadow-xl shadow-orange-200 active:scale-[0.98] transition-transform flex items-center justify-center gap-2 hover:bg-orange-700"
                 >
-                  <Plus size={20} strokeWidth={3} />
-                  AGREGAR - S/ {selectedProduct.price.toFixed(2)}
+                  <Plus size={20} strokeWidth={3} /> AGREGAR - S/{" "}
+                  {selectedProduct.price.toFixed(2)}
                 </button>
               </div>
             </motion.div>
@@ -423,7 +428,6 @@ export default function MenuList({
         )}
       </AnimatePresence>
 
-      {/* --- BOTÓN FLOTANTE --- */}
       {/* --- BOTÓN FLOTANTE (CARRITO) --- */}
       <AnimatePresence>
         {totalItems > 0 && (
@@ -433,9 +437,6 @@ export default function MenuList({
             animate={{ y: 0, opacity: 1 }}
             exit={{ y: 100, opacity: 0 }}
             transition={{ type: "spring", stiffness: 260, damping: 20 }}
-            // CORRECCIÓN SENIOR DE POSICIONAMIENTO:
-            // bottom-28: Lo sube lo suficiente para no chocar con la barra nav en iPhone Pro Max
-            // md:bottom-10: En PC lo baja porque la barra es flotante
             className="fixed bottom-28 left-0 right-0 md:bottom-10 md:right-10 md:left-auto z-50 flex justify-center md:justify-end pointer-events-none px-4 safe-area-bottom transition-all duration-300"
           >
             <button
@@ -474,10 +475,9 @@ export default function MenuList({
   );
 }
 
-// TARJETA DE PRODUCTO (Sin Cambios)
+// TARJETA DE PRODUCTO
 function ProductCard({ product, qty, onClickCard, onAdd, onRemove }: any) {
-  const isMenu = ["menu", "diet"].includes(product.category);
-
+  const isMenu = ["menu", "diet"].includes(product.category); // Menú o Dieta abren modal
   return (
     <motion.div
       layout
@@ -498,17 +498,15 @@ function ProductCard({ product, qty, onClickCard, onAdd, onRemove }: any) {
         />
         {isMenu && (
           <div className="absolute bottom-0 inset-x-0 bg-black/60 backdrop-blur-sm text-white text-[9px] font-bold text-center py-1 uppercase tracking-widest">
-            Menú
+            Opciones
           </div>
         )}
-
         {isMenu && qty > 0 && (
           <div className="absolute top-2 right-2 bg-orange-600 text-white w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold shadow-md animate-in zoom-in">
             {qty}
           </div>
         )}
       </div>
-
       <div className="flex flex-1 flex-col justify-between py-1 pr-1">
         <div>
           <h3 className="font-bold text-gray-900 leading-tight text-base md:text-lg group-hover:text-orange-600 transition-colors line-clamp-2">
@@ -518,12 +516,10 @@ function ProductCard({ product, qty, onClickCard, onAdd, onRemove }: any) {
             {product.description}
           </p>
         </div>
-
         <div className="flex justify-between items-end mt-2">
           <span className="font-black text-lg text-gray-900">
             S/ {product.price.toFixed(2)}
           </span>
-
           {isMenu ? (
             <button
               onClick={(e) => {

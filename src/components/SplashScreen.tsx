@@ -8,10 +8,10 @@ export default function SplashScreen() {
   const [isVisible, setIsVisible] = useState(true);
 
   useEffect(() => {
-    // La animación dura 2.5 segundos en total antes de desaparecer
+    // REDUCIDO: De 2500ms a 1500ms (1.5 segundos)
     const timer = setTimeout(() => {
       setIsVisible(false);
-    }, 2500);
+    }, 1500);
 
     return () => clearTimeout(timer);
   }, []);
@@ -23,24 +23,25 @@ export default function SplashScreen() {
           key="splash"
           initial={{ opacity: 1 }}
           exit={{ opacity: 0 }}
-          transition={{ duration: 0.5, ease: "easeInOut" }}
+          // REDUCIDO: La salida ahora es más rápida (0.3s)
+          transition={{ duration: 0.3, ease: "easeInOut" }}
           className="fixed inset-0 z-[9999] flex flex-col items-center justify-center bg-[#F8F9FA]"
         >
           {/* CONTENEDOR LOGO ANIMADO */}
           <div className="relative">
-            {/* Efecto de onda (Pulse) */}
+            {/* Efecto de onda (Pulse) - Acelerado */}
             <motion.div
               initial={{ scale: 0.8, opacity: 0 }}
               animate={{ scale: 1.5, opacity: 0 }}
               transition={{
-                duration: 1.5,
+                duration: 1, // Antes 1.5
                 repeat: Infinity,
                 ease: "easeOut",
               }}
               className="absolute inset-0 bg-orange-200 rounded-2xl"
             />
 
-            {/* El Logo Principal */}
+            {/* El Logo Principal - Aparición más rápida */}
             <motion.div
               initial={{ scale: 0, rotate: -180 }}
               animate={{ scale: 1, rotate: 0 }}
@@ -48,7 +49,7 @@ export default function SplashScreen() {
                 type: "spring",
                 stiffness: 260,
                 damping: 20,
-                duration: 0.8,
+                duration: 0.5, // Antes 0.8
               }}
               className="relative z-10 flex items-center justify-center w-24 h-24 bg-orange-500 rounded-3xl shadow-2xl shadow-orange-500/40"
             >
@@ -56,12 +57,12 @@ export default function SplashScreen() {
             </motion.div>
           </div>
 
-          {/* TEXTOS CON ENTRADA ESCALONADA */}
+          {/* TEXTOS CON ENTRADA ESCALONADA (Delays reducidos a la mitad) */}
           <div className="mt-8 text-center space-y-2 overflow-hidden">
             <motion.h1
               initial={{ y: 20, opacity: 0 }}
               animate={{ y: 0, opacity: 1 }}
-              transition={{ delay: 0.5, duration: 0.5 }}
+              transition={{ delay: 0.2, duration: 0.4 }} // Antes delay 0.5
               className="text-4xl font-black text-gray-900 tracking-tight"
             >
               D' Irma
@@ -70,7 +71,7 @@ export default function SplashScreen() {
             <motion.div
               initial={{ y: 20, opacity: 0 }}
               animate={{ y: 0, opacity: 1 }}
-              transition={{ delay: 0.7, duration: 0.5 }}
+              transition={{ delay: 0.3, duration: 0.4 }} // Antes delay 0.7
               className="flex items-center justify-center gap-2"
             >
               <div className="h-[1px] w-4 bg-orange-300"></div>
@@ -81,11 +82,11 @@ export default function SplashScreen() {
             </motion.div>
           </div>
 
-          {/* FOOTER DE CARGA (Opcional, detalle técnico) */}
+          {/* FOOTER DE CARGA */}
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
-            transition={{ delay: 1 }}
+            transition={{ delay: 0.5 }} // Antes delay 1
             className="absolute bottom-10"
           >
             <div className="flex gap-1">
@@ -97,9 +98,9 @@ export default function SplashScreen() {
                     opacity: [0.5, 1, 0.5],
                   }}
                   transition={{
-                    duration: 1,
+                    duration: 0.8, // Ligeramente más rápido
                     repeat: Infinity,
-                    delay: i * 0.2,
+                    delay: i * 0.15,
                   }}
                   className="w-2 h-2 bg-orange-400 rounded-full"
                 />

@@ -1,16 +1,17 @@
-import Header from "@/components/Header";
+// src/app/(client)/layout.tsx
+import BottomNav from "@/components/BottomNav";
+import Header from "@/components/Header"; // <--- 1. IMPORTAR HEADER
 
-// Este layout SOLO aplica a la tienda
 export default function ClientLayout({
   children,
-}: Readonly<{
+}: {
   children: React.ReactNode;
-}>) {
+}) {
   return (
-    // 'bg-transparent' para que se vea el gradiente del body
-    <div className="bg-transparent min-h-screen flex flex-col">
-      <Header />
-      <div className="flex-1 w-full">{children}</div>
-    </div>
+    <>
+      <Header /> {/* <--- 2. AGREGARLO AQUÍ ARRIBA */}
+      {children}
+      <BottomNav />
+    </>
   );
 }

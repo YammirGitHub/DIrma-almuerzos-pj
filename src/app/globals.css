@@ -2,6 +2,121 @@
 
 /* --- BASE --- */
 html {
+  @tailwind base;
+  @tailwind components;
+  @tailwind utilities;
+
+  /* =========================================
+   1. ESTILOS BASE (Reset y Configuración Global)
+   ========================================= */
+  @layer base {
+    html {
+      scroll-behavior: smooth;
+      /* Desplazamiento suave */
+      overscroll-behavior-y: none;
+      /* Evita el efecto "rebote" elástico en iOS al llegar al tope */
+      touch-action: manipulation;
+      /* Mejora la respuesta táctil en botones/links */
+      -webkit-text-size-adjust: 100%;
+      /* Evita que iOS cambie el tamaño de texto al girar */
+      height: 100%;
+      background-color: #0f172a;
+      /* Fondo oscuro de seguridad (evita flashes blancos) */
+    }
+
+    body {
+      min-height: 100%;
+      width: 100%;
+      background-color: #F8F9FA;
+      /* Color real de fondo de la app */
+      -webkit-font-smoothing: antialiased;
+      /* Texto más nítido en MacOS/iOS */
+      /* Asegura que el contenido no quede tapado por la "Isla Dinámica" o gestos */
+      padding-top: env(safe-area-inset-top);
+      padding-bottom: env(safe-area-inset-bottom);
+    }
+  }
+
+  /* =========================================
+   2. UTILIDADES PERSONALIZADAS
+   ========================================= */
+  @layer utilities {
+
+    /* --- Ocultar Scrollbar (Estético) --- */
+    .no-scrollbar::-webkit-scrollbar {
+      display: none;
+    }
+
+    .no-scrollbar {
+      -ms-overflow-style: none;
+      /* IE and Edge */
+      scrollbar-width: none;
+      /* Firefox */
+    }
+
+    /* --- Altura Dinámica Móvil (Fix barra navegador) --- */
+    /* Usa 100dvh (Dynamic Viewport Height) para que la app ocupe
+     exactamente el espacio visible, descontando la barra de URL del navegador */
+    .min-h-dvh {
+      min-height: 100dvh;
+    }
+
+    /* --- Safe Areas (iPhone X/11/12/etc) --- */
+    /* Útiles para contenedores fijos como el BottomNav o Headers */
+    .pb-safe {
+      padding-bottom: env(safe-area-inset-bottom);
+    }
+
+    .pt-safe {
+      padding-top: env(safe-area-inset-top);
+    }
+
+    .mb-safe {
+      margin-bottom: env(safe-area-inset-bottom);
+    }
+  }
+
+  /* =========================================
+   3. GESTIÓN DE ESTADO MODAL (CORE UI)
+   ========================================= */
+  /* Esta lógica controla qué pasa cuando se abre un modal (carrito, detalle producto).
+   El objetivo es bloquear el scroll del fondo y esconder elementos de navegación
+   para enfocar la atención en el modal. */
+
+  /* Bloquea el scroll del body cuando el modal está abierto */
+  body.modal-open {
+    overflow: hidden !important;
+    position: fixed;
+    width: 100%;
+    height: 100%;
+    /* Asegura bloqueo total en iOS */
+  }
+
+  /* A. El Header sube y desaparece suavemente */
+  body.modal-open #app-header {
+    transform: translateY(-150%);
+    opacity: 0;
+    pointer-events: none;
+    /* Evita clicks accidentales aunque sea invisible */
+    transition: transform 0.3s ease, opacity 0.3s ease;
+  }
+
+  /* B. La Barra de Navegación baja y desaparece suavemente */
+  body.modal-open #app-bottom-nav {
+    transform: translateY(150%);
+    opacity: 0;
+    pointer-events: none;
+    transition: transform 0.3s ease, opacity 0.3s ease;
+  }
+
+  /* C. El Botón Flotante del Carrito también se esconde */
+  body.modal-open #floating-cart-btn {
+    transform: translateY(200%);
+    opacity: 0;
+    pointer-events: none;
+    transition: transform 0.3s ease, opacity 0.3s ease;
+  }
+
   scroll-behavior: smooth;
   overscroll-behavior-y: none;
   /* Evita rebote feo en iOS */
@@ -62,4 +177,43 @@ body.modal-open #floating-cart-btn {
   transform: translateY(200%);
   opacity: 0;
   pointer-events: none;
+}
+
+@layer utilities {
+
+  /* Altura real en móviles descontando la barra de navegación */
+  .min-h-dvh {
+    min-height: 100dvh;
+  }
+
+  /* Relleno seguro para iPhone X en adelante */
+  .pb-safe {
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+
+  .pt-safe {
+    padding-top: env(safe-area-inset-top);
+  }
+
+  /* Margen seguro */
+  .mb-safe {
+    margin-bottom: env(safe-area-inset-bottom);
+  }
+}
+
+@layer utilities {
+
+  /* Altura dinámica real para móviles */
+  .min-h-dvh {
+    min-height: 100dvh;
+  }
+
+  /* Relleno seguro para la "isla" y la barra de gestos del iPhone */
+  .pb-safe {
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+
+  .pt-safe {
+    padding-top: env(safe-area-inset-top);
+  }
 }

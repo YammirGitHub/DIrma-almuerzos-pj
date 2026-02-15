@@ -18,7 +18,7 @@ export default function BottomNav() {
   return (
     <div
       id="app-bottom-nav"
-      className="fixed bottom-0 left-0 right-0 z-40 flex justify-center pointer-events-none transition-transform duration-500 ease-in-out"
+      className="fixed bottom-0 left-0 pb-safe right-0 z-40 flex justify-center pointer-events-none transition-transform duration-500 ease-in-out"
     >
       <nav
         className="

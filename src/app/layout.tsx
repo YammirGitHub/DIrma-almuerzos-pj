@@ -1,8 +1,8 @@
+// src/app/layout.tsx
 import type { Metadata, Viewport } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
-// 1. IMPORTAR EL COMPONENTE
-import BottomNav from "@/components/BottomNav";
+// ELIMINAR: import BottomNav from "@/components/BottomNav"; <--- BORRAR ESTO
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -33,12 +33,10 @@ export default function RootLayout({
   return (
     <html lang="es" className="antialiased scroll-smooth">
       <body
-        className={`${inter.className} min-h-screen bg-[#F8F9FA] text-gray-900`}
+        className={`${inter.className} min-h-dvh bg-[#F8F9FA] text-gray-900`}
       >
         {children}
-
-        {/* 2. AGREGAR LA BARRA AQUÍ AL FINAL */}
-        <BottomNav />
+        {/* ELIMINAR: <BottomNav /> <--- BORRAR ESTO DE AQUÍ */}
       </body>
     </html>
   );
