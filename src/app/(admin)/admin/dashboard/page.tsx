@@ -5,8 +5,8 @@ import { createBrowserClient } from "@supabase/ssr";
 import { useRouter } from "next/navigation";
 import ConfirmationModal from "@/components/ui/ConfirmationModal";
 import OrderCard from "@/components/admin/OrderCard";
-import ProductCard from "@/components/admin/ProductCard"; // NUEVO
-import CustomerRow from "@/components/admin/CustomerRow"; // NUEVO
+import ProductCard from "@/components/admin/ProductCard";
+import CustomerRow from "@/components/admin/CustomerRow";
 import {
   Bell,
   CheckCircle,
@@ -26,12 +26,13 @@ import {
   Wallet,
 } from "lucide-react";
 
-// --- TIPOS ---
+// --- TIPOS CORREGIDOS ---
 type Order = {
   id: string;
   customer_name: string;
   customer_office: string;
   customer_phone: string;
+  customer_dni?: string; // <--- AGREGADO: Vital para que no de error
   items: any[];
   total_amount: number;
   payment_method: string;
@@ -54,6 +55,7 @@ type Product = {
 
 type CustomerSummary = {
   phone: string;
+  dni?: string; // <--- AGREGADO
   name: string;
   office: string;
   total_debt: number;
@@ -134,7 +136,7 @@ export default function AdminDashboard() {
     fetchData();
 
     const channel = supabase
-      .channel("admin_realtime_v9")
+      .channel("admin_realtime_v10")
       .on(
         "postgres_changes",
         { event: "*", schema: "public", table: "orders" },
@@ -152,19 +154,24 @@ export default function AdminDashboard() {
     };
   }, []);
 
+  // --- LOGICA DE AGRUPACIÓN (CORRECTA) ---
   const customersList = useMemo(() => {
     const map = new Map<string, CustomerSummary>();
+
     orders.forEach((order) => {
-      if (!map.has(order.customer_phone)) {
+      // Clave única: DNI o Teléfono
+      const key = order.customer_dni || order.customer_phone;
+
+      if (!map.has(key)) {
         const officialEntry = officialCustomers.find(
-          (c) => c.phone === order.customer_phone,
+          (c) =>
+            c.dni === order.customer_dni || c.phone === order.customer_phone,
         );
-        const realName = officialEntry
-          ? officialEntry.full_name
-          : order.customer_name;
-        map.set(order.customer_phone, {
+
+        map.set(key, {
           phone: order.customer_phone,
-          name: realName,
+          dni: order.customer_dni, // Guardamos el DNI
+          name: officialEntry ? officialEntry.full_name : order.customer_name,
           office: order.customer_office,
           total_debt: 0,
           total_spent: 0,
@@ -173,33 +180,35 @@ export default function AdminDashboard() {
           history: [],
         });
       }
-      const customer = map.get(order.customer_phone)!;
+
+      const customer = map.get(key)!;
       customer.history.push(order);
       customer.orders_count += 1;
       customer.total_spent += order.total_amount;
+
       if (
         order.payment_status === "on_account" ||
         order.payment_status === "unpaid"
-      )
+      ) {
         customer.total_debt += order.total_amount;
+      }
+
       if (new Date(order.created_at) > new Date(customer.last_order)) {
         customer.last_order = order.created_at;
+        customer.phone = order.customer_phone; // Actualizar último teléfono usado
         customer.office = order.customer_office;
       }
     });
+
     return Array.from(map.values())
       .filter(
         (c) =>
           c.name.toLowerCase().includes(customerSearch.toLowerCase()) ||
-          c.phone.includes(customerSearch),
+          c.phone.includes(customerSearch) ||
+          (c.dni && c.dni.includes(customerSearch)),
       )
-      .sort((a, b) => {
-        if (b.total_debt !== a.total_debt) return b.total_debt - a.total_debt;
-        return (
-          new Date(b.last_order).getTime() - new Date(a.last_order).getTime()
-        );
-      });
-  }, [orders, customerSearch, officialCustomers]);
+      .sort((a, b) => b.total_debt - a.total_debt);
+  }, [orders, officialCustomers, customerSearch]);
 
   const fetchData = async () => {
     const { data: ordersData } = await supabase
@@ -207,15 +216,18 @@ export default function AdminDashboard() {
       .select("*")
       .order("created_at", { ascending: false });
     if (ordersData) setOrders(ordersData);
+
     const { data: productsData } = await supabase
       .from("products")
       .select("*")
       .order("created_at", { ascending: false });
     if (productsData) setProducts(productsData);
+
     const { data: customersData } = await supabase
       .from("customers")
-      .select("phone, full_name");
+      .select("phone, full_name, dni");
     if (customersData) setOfficialCustomers(customersData);
+
     const { data: historyData } = await supabase
       .from("orders")
       .select("customer_phone")
@@ -251,22 +263,38 @@ export default function AdminDashboard() {
       setProducts((prev) => prev.filter((p) => p.id !== payload.old.id));
   };
 
-  const handleManualDebtPayment = async (customerPhone: string) => {
-    const pendingOrders = orders.filter(
-      (o) =>
-        o.customer_phone === customerPhone &&
-        (o.payment_status === "on_account" || o.payment_status === "unpaid"),
-    );
+  // --- COBRO DE DEUDA INTELIGENTE (CORREGIDO) ---
+  // Ahora cobramos todo lo asociado al DNI o al Teléfono
+  const handleManualDebtPayment = async (customer: CustomerSummary) => {
+    const pendingOrders = orders.filter((o) => {
+      const isUnpaid =
+        o.payment_status === "on_account" || o.payment_status === "unpaid";
+      if (!isUnpaid) return false;
+
+      // Si el cliente tiene DNI, buscamos todos los pedidos con ese DNI
+      if (customer.dni) {
+        return (
+          o.customer_dni === customer.dni || o.customer_phone === customer.phone
+        );
+      }
+      // Si no, solo por teléfono
+      return o.customer_phone === customer.phone;
+    });
+
     const idsToUpdate = pendingOrders.map((o) => o.id);
-    await supabase
-      .from("orders")
-      .update({ payment_status: "paid", payment_method: "cash_collected" })
-      .in("id", idsToUpdate);
-    setOrders((prev) =>
-      prev.map((o) =>
-        idsToUpdate.includes(o.id) ? { ...o, payment_status: "paid" } : o,
-      ),
-    );
+
+    if (idsToUpdate.length > 0) {
+      await supabase
+        .from("orders")
+        .update({ payment_status: "paid", payment_method: "cash_collected" })
+        .in("id", idsToUpdate);
+
+      setOrders((prev) =>
+        prev.map((o) =>
+          idsToUpdate.includes(o.id) ? { ...o, payment_status: "paid" } : o,
+        ),
+      );
+    }
     setSelectedCustomer(null);
   };
 
@@ -299,15 +327,13 @@ export default function AdminDashboard() {
   const handleAddProduct = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
-    await supabase
-      .from("products")
-      .insert([
-        {
-          ...newProduct,
-          price: parseFloat(newProduct.price),
-          is_available: true,
-        },
-      ]);
+    await supabase.from("products").insert([
+      {
+        ...newProduct,
+        price: parseFloat(newProduct.price),
+        is_available: true,
+      },
+    ]);
     setIsAddOpen(false);
     setNewProduct({
       name: "",
@@ -495,7 +521,7 @@ export default function AdminDashboard() {
           <div className="animate-in fade-in">
             <div className="relative mb-6">
               <input
-                placeholder="Buscar cliente..."
+                placeholder="Buscar por DNI, Nombre o Teléfono..."
                 className="w-full p-4 pl-12 bg-white rounded-2xl shadow-sm border border-gray-100 outline-none focus:ring-2 focus:ring-orange-500/20 text-sm font-medium"
                 value={customerSearch}
                 onChange={(e) => setCustomerSearch(e.target.value)}
@@ -508,7 +534,7 @@ export default function AdminDashboard() {
             <div className="space-y-3 pb-20">
               {customersList.map((customer) => (
                 <CustomerRow
-                  key={customer.phone}
+                  key={customer.dni || customer.phone}
                   customer={customer}
                   onClick={() => setSelectedCustomer(customer)}
                 />
@@ -571,9 +597,15 @@ export default function AdminDashboard() {
                 <h2 className="text-2xl font-black text-gray-900">
                   {selectedCustomer.name}
                 </h2>
-                <p className="text-sm text-gray-500">
-                  {selectedCustomer.office} • {selectedCustomer.phone}
-                </p>
+                <div className="flex flex-col gap-1 text-sm text-gray-500">
+                  <span>{selectedCustomer.office}</span>
+                  <span className="font-mono text-xs">
+                    {selectedCustomer.phone}{" "}
+                    {selectedCustomer.dni
+                      ? `• DNI: ${selectedCustomer.dni}`
+                      : ""}
+                  </span>
+                </div>
               </div>
               <button
                 onClick={() => setSelectedCustomer(null)}
@@ -603,7 +635,8 @@ export default function AdminDashboard() {
                     askConfirmation(
                       "Cobrar Deuda",
                       "¿Recibiste todo el pago?",
-                      () => handleManualDebtPayment(selectedCustomer.phone),
+                      // CORRECCIÓN: Pasamos el objeto completo, no solo el teléfono
+                      () => handleManualDebtPayment(selectedCustomer),
                       "info",
                     )
                   }

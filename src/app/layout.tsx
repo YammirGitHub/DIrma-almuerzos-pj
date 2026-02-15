@@ -16,13 +16,15 @@ export const metadata: Metadata = {
   },
 };
 
+// src/app/layout.tsx
+
 export const viewport: Viewport = {
   width: "device-width",
   initialScale: 1,
-  maximumScale: 1,
-  userScalable: false,
-  viewportFit: "cover",
-  themeColor: "#0f172a",
+  maximumScale: 1, // Prohíbe zoom máximo
+  userScalable: false, // Prohíbe pellizcar
+  viewportFit: "cover", // Usa toda la pantalla (incluido notch)
+  themeColor: "#0f172a", // Color de la barra de estado de Android
 };
 
 export default function RootLayout({

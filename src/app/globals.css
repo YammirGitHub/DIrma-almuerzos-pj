@@ -1,219 +1,101 @@
 @import "tailwindcss";
 
-/* --- BASE --- */
-html {
-  @tailwind base;
-  @tailwind components;
-  @tailwind utilities;
-
-  /* =========================================
-   1. ESTILOS BASE (Reset y Configuración Global)
+/* =========================================
+   1. CORE: ESTILOS BASE (NATIVO & SIN SCROLLBARS)
    ========================================= */
-  @layer base {
-    html {
-      scroll-behavior: smooth;
-      /* Desplazamiento suave */
-      overscroll-behavior-y: none;
-      /* Evita el efecto "rebote" elástico en iOS al llegar al tope */
-      touch-action: manipulation;
-      /* Mejora la respuesta táctil en botones/links */
-      -webkit-text-size-adjust: 100%;
-      /* Evita que iOS cambie el tamaño de texto al girar */
-      height: 100%;
-      background-color: #0f172a;
-      /* Fondo oscuro de seguridad (evita flashes blancos) */
-    }
+@layer base {
 
-    body {
-      min-height: 100%;
-      width: 100%;
-      background-color: #F8F9FA;
-      /* Color real de fondo de la app */
-      -webkit-font-smoothing: antialiased;
-      /* Texto más nítido en MacOS/iOS */
-      /* Asegura que el contenido no quede tapado por la "Isla Dinámica" o gestos */
-      padding-top: env(safe-area-inset-top);
-      padding-bottom: env(safe-area-inset-bottom);
-    }
+  /* Regla Maestra: Ocultar barras de scroll en TODA la web */
+  * {
+    scrollbar-width: none;
+    /* Firefox */
+    -ms-overflow-style: none;
+    /* IE and Edge */
   }
 
-  /* =========================================
+  /* Chrome, Safari, Opera */
+  *::-webkit-scrollbar {
+    display: none;
+  }
+
+  html {
+    scroll-behavior: smooth;
+    overscroll-behavior-y: none;
+    /* Sin rebote elástico en iOS */
+    -webkit-tap-highlight-color: transparent;
+    -webkit-text-size-adjust: 100%;
+    background-color: #0f172a;
+    /* Fondo de seguridad */
+  }
+
+  body {
+    /* CORRECCIÓN VISUAL: Usar 100vh evita que el fondo se corte */
+    min-height: 100vh;
+    width: 100%;
+    background-color: #F8F9FA;
+    -webkit-font-smoothing: antialiased;
+
+    /* Configuración de Scroll invisible pero funcional */
+    overflow-x: hidden;
+    overflow-y: auto;
+
+    /* Respetar Notch y áreas seguras */
+    padding-top: env(safe-area-inset-top);
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+}
+
+/* =========================================
    2. UTILIDADES PERSONALIZADAS
    ========================================= */
-  @layer utilities {
-
-    /* --- Ocultar Scrollbar (Estético) --- */
-    .no-scrollbar::-webkit-scrollbar {
-      display: none;
-    }
-
-    .no-scrollbar {
-      -ms-overflow-style: none;
-      /* IE and Edge */
-      scrollbar-width: none;
-      /* Firefox */
-    }
-
-    /* --- Altura Dinámica Móvil (Fix barra navegador) --- */
-    /* Usa 100dvh (Dynamic Viewport Height) para que la app ocupe
-     exactamente el espacio visible, descontando la barra de URL del navegador */
-    .min-h-dvh {
-      min-height: 100dvh;
-    }
-
-    /* --- Safe Areas (iPhone X/11/12/etc) --- */
-    /* Útiles para contenedores fijos como el BottomNav o Headers */
-    .pb-safe {
-      padding-bottom: env(safe-area-inset-bottom);
-    }
-
-    .pt-safe {
-      padding-top: env(safe-area-inset-top);
-    }
-
-    .mb-safe {
-      margin-bottom: env(safe-area-inset-bottom);
-    }
+@layer utilities {
+  .min-h-dvh {
+    min-height: 100dvh;
   }
 
-  /* =========================================
-   3. GESTIÓN DE ESTADO MODAL (CORE UI)
+  /* Áreas seguras para elementos fijos */
+  .pb-safe {
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+
+  .pt-safe {
+    padding-top: env(safe-area-inset-top);
+  }
+
+  .safe-area-bottom {
+    padding-bottom: max(1rem, env(safe-area-inset-bottom));
+  }
+
+  /* Utilidad para contenedores con scroll interno */
+  .custom-scrollbar {
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+}
+
+/* =========================================
+   3. ESTADOS DE INTERFAZ (MODALES)
    ========================================= */
-  /* Esta lógica controla qué pasa cuando se abre un modal (carrito, detalle producto).
-   El objetivo es bloquear el scroll del fondo y esconder elementos de navegación
-   para enfocar la atención en el modal. */
-
-  /* Bloquea el scroll del body cuando el modal está abierto */
-  body.modal-open {
-    overflow: hidden !important;
-    position: fixed;
-    width: 100%;
-    height: 100%;
-    /* Asegura bloqueo total en iOS */
-  }
-
-  /* A. El Header sube y desaparece suavemente */
-  body.modal-open #app-header {
-    transform: translateY(-150%);
-    opacity: 0;
-    pointer-events: none;
-    /* Evita clicks accidentales aunque sea invisible */
-    transition: transform 0.3s ease, opacity 0.3s ease;
-  }
-
-  /* B. La Barra de Navegación baja y desaparece suavemente */
-  body.modal-open #app-bottom-nav {
-    transform: translateY(150%);
-    opacity: 0;
-    pointer-events: none;
-    transition: transform 0.3s ease, opacity 0.3s ease;
-  }
-
-  /* C. El Botón Flotante del Carrito también se esconde */
-  body.modal-open #floating-cart-btn {
-    transform: translateY(200%);
-    opacity: 0;
-    pointer-events: none;
-    transition: transform 0.3s ease, opacity 0.3s ease;
-  }
-
-  scroll-behavior: smooth;
-  overscroll-behavior-y: none;
-  /* Evita rebote feo en iOS */
-  touch-action: manipulation;
-  -webkit-text-size-adjust: 100%;
-  height: 100%;
-  background-color: #0f172a;
-}
-
-body {
-  min-height: 100%;
-  width: 100%;
-  background-color: #F8F9FA;
-  -webkit-font-smoothing: antialiased;
-  padding-top: env(safe-area-inset-top);
-  padding-bottom: env(safe-area-inset-bottom);
-}
-
-/* --- UTILIDADES --- */
-::-webkit-scrollbar {
-  display: none;
-}
-
-html {
-  scrollbar-width: none;
-}
-
-.pb-safe {
-  padding-bottom: env(safe-area-inset-bottom);
-}
-
-/* --- GESTIÓN DE ESTADO MODAL (CORE) --- */
-/* Cuando el modal está abierto: */
+/* Bloqueo total al abrir modal */
 body.modal-open {
   overflow: hidden !important;
   position: fixed;
-  /* Bloquea el scroll del body real */
   width: 100%;
+  height: 100%;
 }
 
-/* 1. El Header sube y desaparece */
+/* Animaciones de salida para limpiar la pantalla */
 body.modal-open #app-header {
   transform: translateY(-150%);
   opacity: 0;
   pointer-events: none;
+  transition: transform 0.4s ease, opacity 0.3s ease;
 }
 
-/* 2. La Barra de Navegación baja y desaparece */
-body.modal-open #app-bottom-nav {
+body.modal-open #app-bottom-nav,
+body.modal-open #floating-cart-btn {
   transform: translateY(150%);
   opacity: 0;
   pointer-events: none;
-}
-
-/* 3. El Botón Flotante del Carrito (en MenuList) también debe irse */
-/* Nota: Necesitaremos agregarle el ID 'floating-cart-btn' en MenuList.tsx */
-body.modal-open #floating-cart-btn {
-  transform: translateY(200%);
-  opacity: 0;
-  pointer-events: none;
-}
-
-@layer utilities {
-
-  /* Altura real en móviles descontando la barra de navegación */
-  .min-h-dvh {
-    min-height: 100dvh;
-  }
-
-  /* Relleno seguro para iPhone X en adelante */
-  .pb-safe {
-    padding-bottom: env(safe-area-inset-bottom);
-  }
-
-  .pt-safe {
-    padding-top: env(safe-area-inset-top);
-  }
-
-  /* Margen seguro */
-  .mb-safe {
-    margin-bottom: env(safe-area-inset-bottom);
-  }
-}
-
-@layer utilities {
-
-  /* Altura dinámica real para móviles */
-  .min-h-dvh {
-    min-height: 100dvh;
-  }
-
-  /* Relleno seguro para la "isla" y la barra de gestos del iPhone */
-  .pb-safe {
-    padding-bottom: env(safe-area-inset-bottom);
-  }
-
-  .pt-safe {
-    padding-top: env(safe-area-inset-top);
-  }
+  transition: transform 0.4s ease, opacity 0.3s ease;
 }

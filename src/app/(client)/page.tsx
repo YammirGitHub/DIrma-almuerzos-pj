@@ -13,8 +13,7 @@ import {
   Utensils,
 } from "lucide-react";
 
-export const revalidate = 0;
-
+export const revalidate = 60; // Actualiza el menú cada 60 segundos, no en cada visita.
 export default async function Home() {
   const cookieStore = await cookies();
 

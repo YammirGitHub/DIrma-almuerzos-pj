@@ -320,7 +320,8 @@ export default function MenuList({
               animate={{ y: 0 }}
               exit={{ y: "100%" }}
               transition={{ type: "spring", damping: 25, stiffness: 300 }}
-              className="relative bg-white w-full max-w-lg rounded-t-[2rem] sm:rounded-[2.5rem] overflow-hidden shadow-2xl h-[85vh] sm:h-auto sm:max-h-[90vh] flex flex-col z-10"
+              // CAMBIO AQUÍ: Usamos max-h-[95dvh] para que nunca sea más alto que la pantalla real del móvil
+              className="relative bg-white w-full max-w-lg rounded-t-[2rem] sm:rounded-[2.5rem] overflow-hidden shadow-2xl max-h-[95dvh] flex flex-col z-10"
             >
               <div className="relative h-56 bg-gray-100 shrink-0">
                 <img

@@ -1,6 +1,6 @@
 "use client";
 
-import { createOrder } from "@/app/actions";
+import { createOrder, searchDni } from "@/app/actions"; // <--- IMPORTAMOS searchDni
 import { useState, useActionState, useEffect } from "react";
 import {
   X,
@@ -19,6 +19,8 @@ import {
   Smartphone,
   Copy,
   Check,
+  Search,
+  IdCard,
 } from "lucide-react";
 
 export default function CheckoutModal({
@@ -32,6 +34,34 @@ export default function CheckoutModal({
   const [copied, setCopied] = useState(false);
   const [state, formAction, isPending] = useActionState(createOrder, null);
 
+  // --- ESTADOS PARA DNI Y NOMBRE ---
+  const [dni, setDni] = useState("");
+  const [name, setName] = useState("");
+  const [isSearching, setIsSearching] = useState(false);
+
+  // --- LÓGICA DE BÚSQUEDA INSTANTÁNEA (USANDO SERVER ACTION) ---
+  const handleDniChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const val = e.target.value.replace(/\D/g, ""); // Solo números
+    setDni(val);
+
+    // Si tiene 8 dígitos, buscamos automáticamente
+    if (val.length === 8) {
+      setIsSearching(true);
+
+      // Llamamos a la función del servidor (actions.ts)
+      // Esto evita el error "Failed to fetch" y CORS
+      const data = await searchDni(val);
+
+      if (data && data.nombres) {
+        setName(
+          `${data.nombres} ${data.apellidoPaterno} ${data.apellidoMaterno}`,
+        );
+      }
+
+      setIsSearching(false);
+    }
+  };
+
   // Función para copiar número al portapapeles
   const copyNumber = () => {
     navigator.clipboard.writeText("974805994");
@@ -42,11 +72,13 @@ export default function CheckoutModal({
   const cartItems = Object.entries(cart).map(([key, item]: any) => {
     return {
       cartId: key,
-      id: item.product.id,
-      name: item.product.name,
-      price: item.product.price,
       qty: item.qty,
       options: item.options,
+      product: {
+        id: item.product.id,
+        name: item.product.name,
+        price: item.product.price,
+      },
     };
   });
 
@@ -57,7 +89,7 @@ export default function CheckoutModal({
         onClick={close}
       />
 
-      <div className="relative w-full max-w-lg bg-[#F8F9FA] sm:rounded-[2.5rem] rounded-t-[2.5rem] shadow-2xl flex flex-col h-[92vh] sm:h-[85vh] overflow-hidden animate-in slide-in-from-bottom-12 duration-300 border border-white/40 ring-1 ring-black/5">
+      <div className="relative w-full max-w-lg bg-[#F8F9FA] sm:rounded-[2.5rem] rounded-t-[2.5rem] shadow-2xl flex flex-col h-[95dvh] sm:h-[85vh] overflow-hidden animate-in slide-in-from-bottom-12 duration-300 border border-white/40 ring-1 ring-black/5">
         {/* HEADER */}
         <div className="relative z-20 flex items-center justify-between px-6 py-4 bg-white/80 backdrop-blur-xl border-b border-gray-100/50 shrink-0">
           <div className="flex items-center gap-3 mt-2">
@@ -88,10 +120,12 @@ export default function CheckoutModal({
           <input type="hidden" name="items" value={JSON.stringify(cartItems)} />
           <input type="hidden" name="total" value={total} />
           <input type="hidden" name="payment_method" value={method} />
+          {/* INPUT HIDDEN PARA MANDAR EL DNI AL SERVIDOR */}
+          <input type="hidden" name="dni" value={dni} />
 
           {/* AREA SCROLLABLE */}
           <div className="flex-1 overflow-y-auto p-4 sm:p-6 space-y-6 custom-scrollbar bg-[#F8F9FA]">
-            {/* SECCIÓN A: TICKET DETALLADO (RESTAURADO) */}
+            {/* SECCIÓN A: TICKET DETALLADO */}
             <div className="bg-white p-5 rounded-3xl border border-gray-100 shadow-sm relative overflow-hidden">
               <div className="absolute top-0 bottom-0 left-0 w-1.5 bg-orange-500"></div>
 
@@ -160,12 +194,34 @@ export default function CheckoutModal({
               </div>
             </div>
 
-            {/* SECCIÓN B: DATOS DE ENTREGA */}
+            {/* SECCIÓN B: DATOS DE ENTREGA (CON RENIEC) */}
             <div className="space-y-3">
               <h3 className="text-xs font-black text-gray-400 uppercase tracking-widest pl-2">
                 Datos de Entrega
               </h3>
               <div className="bg-white p-4 rounded-3xl shadow-sm border border-gray-100 space-y-3">
+                {/* 1. INPUT DNI CON BÚSQUEDA INSTANTÁNEA */}
+                <div className="relative group">
+                  <div className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-orange-500 transition-colors">
+                    {isSearching ? (
+                      <Loader2 className="animate-spin" size={18} />
+                    ) : (
+                      <IdCard size={18} />
+                    )}
+                  </div>
+                  <input
+                    name="dni_input"
+                    required
+                    maxLength={8}
+                    inputMode="numeric"
+                    placeholder="Ingresa tu DNI (Búsqueda Automática)"
+                    value={dni}
+                    onChange={handleDniChange}
+                    className="w-full pl-11 pr-4 py-3.5 bg-gray-50 border border-transparent rounded-2xl focus:bg-white focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 outline-none transition-all placeholder:text-gray-400 text-sm font-bold tracking-wider"
+                  />
+                </div>
+
+                {/* 2. NOMBRE (AUTOCOMPLETADO) */}
                 <div className="relative group">
                   <User
                     className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-orange-500 transition-colors"
@@ -174,10 +230,13 @@ export default function CheckoutModal({
                   <input
                     name="name"
                     required
-                    placeholder="Tu Nombre Completo"
-                    className="w-full pl-11 pr-4 py-3.5 bg-gray-50 border border-transparent rounded-2xl focus:bg-white focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 outline-none transition-all placeholder:text-gray-400 text-sm font-medium"
+                    placeholder="Nombre Completo"
+                    value={name}
+                    onChange={(e) => setName(e.target.value)}
+                    className={`w-full pl-11 pr-4 py-3.5 bg-gray-50 border border-transparent rounded-2xl focus:bg-white focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 outline-none transition-all text-sm font-medium ${name ? "text-gray-900 font-bold bg-green-50/50" : "placeholder:text-gray-400"}`}
                   />
                 </div>
+
                 <div className="relative group">
                   <Phone
                     className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-orange-500 transition-colors"
@@ -306,19 +365,33 @@ export default function CheckoutModal({
                           </button>
                         </div>
                       )}
-                      {/* INPUT CÓDIGO */}
+                      {/* ZONA YAPE MEJORADA - INPUT DE 3 DÍGITOS */}
                       <div className="mt-6 pt-6 border-t border-purple-50">
-                        <label className="text-[10px] font-black text-purple-400 uppercase tracking-widest block mb-2">
-                          Código de Operación
-                        </label>
+                        <div className="flex justify-between items-center mb-2">
+                          <label className="text-[10px] font-black text-purple-400 uppercase tracking-widest">
+                            Código de Seguridad
+                          </label>
+                          <span className="bg-purple-100 text-purple-700 text-[9px] font-bold px-2 py-0.5 rounded">
+                            El número grande de 3 dígitos
+                          </span>
+                        </div>
+
                         <input
                           name="operation_code"
                           required
-                          placeholder="Ej: 123456"
-                          className="w-full p-3 bg-purple-50/50 border border-purple-100 rounded-xl focus:border-purple-500 focus:bg-white outline-none text-center font-bold text-purple-900 placeholder:text-purple-300/50"
+                          type="text"
+                          inputMode="numeric"
+                          maxLength={3} // LÍMITE DE 3 DÍGITOS
+                          placeholder="Ej: 417" // Ejemplo visual corto
+                          onInput={(e) => {
+                            // Solo permite números
+                            e.currentTarget.value =
+                              e.currentTarget.value.replace(/[^0-9]/g, "");
+                          }}
+                          className="w-full p-4 bg-purple-50/50 border border-purple-100 rounded-2xl focus:border-purple-500 focus:bg-white outline-none text-center font-black text-purple-900 placeholder:text-purple-200 text-3xl tracking-[0.5em] transition-all"
                         />
-                        <p className="text-[10px] text-gray-400 mt-2">
-                          Lo encuentras en la constancia de pago.
+                        <p className="text-[10px] text-gray-400 mt-3 text-center">
+                          Revisa tu constancia de Yape, son los números grandes.
                         </p>
                       </div>
                     </div>
