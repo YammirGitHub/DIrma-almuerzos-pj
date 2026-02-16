@@ -133,20 +133,36 @@ export async function createOrder(prevState: any, formData: FormData) {
   redirect(`/pedido/${data.id}`);
 }
 
-// --- FUNCIÓN DE BÚSQUEDA DE DNI (CORREGIDA FINAL) ---
+
+// --- FUNCIÓN BÚSQUEDA DNI: CACHE INDESTRUCTIBLE ---
 export async function searchDni(dni: string) {
-  console.log("🔍 Buscando DNI en Decolecta:", dni); 
+  const supabase = await getSupabase();
 
   try {
-    // Tu Token Correcto
-    const token = "sk_13346.sk_13346.2NoJq2xmBIBPOoGV96ZBVz7qlm8lmRuj"; 
-
-    // ✅ URL CORRECTA: /v1/reniec/dni (Basado en tu link de SUNAT)
-    const url = `https://api.decolecta.com/v1/reniec/dni?numero=${dni}`;
+    // 1. PRIMERO: Buscamos en tu CAJA FUERTE (dni_cache)
+    // Esta tabla NO se borra aunque borres clientes. Es tu "memoria eterna".
+    console.log(`🔍 Consultando Cache Permanente para: ${dni}...`);
     
-    console.log("📡 Conectando a:", url);
+    const { data: cachedData } = await supabase
+      .from("dni_cache")
+      .select("*")
+      .eq("dni", dni)
+      .maybeSingle();
 
-    const res = await fetch(url, {
+    if (cachedData) {
+      console.log("💎 ¡DNI encontrado en Cache! Costo: S/ 0.00");
+      return { 
+        nombres: cachedData.nombres, 
+        apellidoPaterno: cachedData.apellido_paterno, 
+        apellidoMaterno: cachedData.apellido_materno 
+      };
+    }
+
+    // 2. SEGUNDO: Si no existe, pagamos el crédito a Decolecta
+    console.log("🌐 DNI nuevo. Consultando API externa...");
+    const token = "sk_13346.2NoJq2xmBIBPOoGV96ZBVz7qlm8lmRuj"; 
+    
+    const res = await fetch(`https://api.decolecta.com/v1/reniec/dni?numero=${dni}`, {
       method: 'GET',
       headers: { 
         'Authorization': `Bearer ${token}`,
@@ -155,26 +171,44 @@ export async function searchDni(dni: string) {
       cache: 'no-store'
     });
 
-    console.log("📡 Estado API:", res.status);
-
     if (!res.ok) {
-        const errorText = await res.text();
-        console.error("❌ Error API Respuesta:", errorText);
+        console.error("❌ Error API:", await res.text());
         return null;
     }
 
     const data = await res.json();
-    console.log("✅ Datos encontrados:", data);
     
-    // Decolecta a veces usa camelCase o snake_case, nos aseguramos de atrapar ambos
+    // Normalizamos los datos (Manejando inglés/español de la API)
+    const nombres = data.nombres || data.first_name;
+    const pat = data.apellidoPaterno || data.first_last_name || data.apellido_paterno;
+    const mat = data.apellidoMaterno || data.second_last_name || data.apellido_materno;
+
+    // 3. TERCERO: ¡GUARDADO AUTOMÁTICO EN CAJA FUERTE!
+    // Esto ocurre AHORA MISMO, no hay que esperar a que compre.
+    // Si el usuario cierra la web sin comprar, IGUAL ya te guardaste el dato.
+    const { error: saveError } = await supabase
+      .from("dni_cache")
+      .insert({
+        dni: dni,
+        nombres: nombres,
+        apellido_paterno: pat,
+        apellido_materno: mat
+      });
+
+    if (!saveError) {
+        console.log("💾 ¡DNI guardado para siempre en dni_cache!");
+    } else {
+        console.error("⚠️ Error guardando en cache:", saveError);
+    }
+
     return {
-      nombres: data.nombres,
-      apellidoPaterno: data.apellidoPaterno || data.apellido_paterno,
-      apellidoMaterno: data.apellidoMaterno || data.apellido_materno
+      nombres: nombres,
+      apellidoPaterno: pat,
+      apellidoMaterno: mat
     };
 
   } catch (e) {
-    console.error("🔥 Error de conexión:", e);
+    console.error("🔥 Error crítico:", e);
     return null;
   }
 }

@@ -1,8 +1,8 @@
 "use client";
 
 import { createOrder, searchDni } from "@/app/actions";
-import { useState, useActionState, useEffect } from "react";
-import { motion, AnimatePresence } from "framer-motion"; // Para transiciones físicas premium
+import { useState, useActionState } from "react";
+import { motion, AnimatePresence, type Variants } from "framer-motion";
 import {
   X,
   ShoppingBag,
@@ -13,21 +13,23 @@ import {
   Receipt,
   ChevronRight,
   Loader2,
-  Trash2,
   CalendarDays,
-  QrCode,
-  Smartphone,
-  Copy,
-  Check,
-  IdCard,
   Info,
-  ArrowRight,
+  Check,
+  Copy,
+  IdCard,
   ShieldCheck,
+  ArrowRight,
+  Wallet,
+  Sparkles,
+  Trash2,
+  AlertCircle,
+  QrCode,
+  Smartphone, // <--- ¡AQUÍ ESTABAN LOS FALTANTES!
 } from "lucide-react";
 import { clsx, type ClassValue } from "clsx";
 import { twMerge } from "tailwind-merge";
 
-// Utility para manejo de clases Senior
 function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }
@@ -47,7 +49,7 @@ export default function CheckoutModal({
   const [name, setName] = useState("");
   const [isSearching, setIsSearching] = useState(false);
 
-  // Lógica DNI con feedback inmediato
+  // --- Lógica DNI ---
   const handleDniChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const val = e.target.value.replace(/\D/g, "");
     setDni(val);
@@ -65,7 +67,7 @@ export default function CheckoutModal({
           );
         }
       } catch (error) {
-        console.error("Error DNI:", error);
+        console.error(error);
       } finally {
         setIsSearching(false);
       }
@@ -85,42 +87,70 @@ export default function CheckoutModal({
     product: item.product,
   }));
 
+  // Animaciones Nativas (iOS Spring)
+  const modalVariants: Variants = {
+    hidden: { y: "100%", opacity: 0, scale: 0.98 },
+    visible: {
+      y: 0,
+      opacity: 1,
+      scale: 1,
+      transition: {
+        type: "spring" as const,
+        damping: 25,
+        stiffness: 350,
+        mass: 0.8,
+      },
+    },
+    exit: {
+      y: "100%",
+      opacity: 0,
+      transition: { duration: 0.25, ease: "easeInOut" },
+    },
+  };
+
   return (
-    <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4 sm:p-6 overflow-hidden">
-      {/* Backdrop con Glassmorphism Real */}
+    <div className="fixed inset-0 z-[9999] flex items-end sm:items-center justify-center sm:p-4 isolate overflow-hidden">
+      {/* Backdrop */}
       <motion.div
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         exit={{ opacity: 0 }}
-        className="absolute inset-0 bg-black/40 backdrop-blur-md"
+        className="absolute inset-0 bg-slate-900/40 backdrop-blur-sm transition-all"
         onClick={close}
       />
 
-      {/* El Túnel Invisible (Regla 3) - Centrado Óptico (Visual) */}
+      {/* Modal Principal */}
       <motion.div
-        initial={{ scale: 0.95, opacity: 0, y: 20 }}
-        animate={{ scale: 1, opacity: 1, y: 0 }}
-        className="relative w-full max-w-[500px] bg-white rounded-[2.5rem] shadow-[0_32px_64px_-12px_rgba(0,0,0,0.14)] flex flex-col max-h-[90dvh] overflow-hidden border border-white/20 ring-1 ring-black/5"
+        variants={modalVariants}
+        initial="hidden"
+        animate="visible"
+        exit="exit"
+        className="relative w-full sm:max-w-[500px] bg-white rounded-t-[2.5rem] sm:rounded-[2.5rem] shadow-2xl flex flex-col h-[95dvh] sm:h-[85vh] overflow-hidden ring-1 ring-black/5"
       >
-        {/* Header con Perceived Performance */}
-        <header className="sticky top-0 z-30 px-8 py-6 bg-white/80 backdrop-blur-xl border-b border-gray-100 flex items-center justify-between">
-          <div className="flex items-center gap-4">
-            <div className="p-3 bg-orange-500 rounded-2xl text-white shadow-lg shadow-orange-200">
-              <ShoppingBag size={20} strokeWidth={2.5} />
+        {/* Header Limpio */}
+        <header className="relative z-20 px-6 py-5 flex items-center justify-between shrink-0 bg-white border-b border-slate-50 shadow-[0_4px_20px_-12px_rgba(0,0,0,0.05)]">
+          <div className="flex items-center gap-3">
+            <div className="bg-orange-50 text-orange-600 p-2.5 rounded-2xl border border-orange-100">
+              <ShoppingBag size={22} strokeWidth={2.5} />
             </div>
             <div>
-              <h2 className="text-xl font-black text-gray-900 tracking-tight leading-none">
+              <h2 className="text-lg font-black text-slate-800 tracking-tight leading-none">
                 Confirmar Pedido
               </h2>
-              <p className="text-[10px] font-bold text-gray-400 uppercase tracking-[0.2em] mt-2 flex items-center gap-2">
-                <span className="w-2 h-2 bg-green-500 rounded-full animate-pulse" />{" "}
-                Seguridad Bancaria Activa
-              </p>
+              <div className="flex items-center gap-1.5 mt-1">
+                <span className="relative flex h-2 w-2">
+                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
+                  <span className="relative inline-flex rounded-full h-2 w-2 bg-green-500"></span>
+                </span>
+                <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">
+                  En Vivo
+                </p>
+              </div>
             </div>
           </div>
           <button
             onClick={close}
-            className="p-2 hover:bg-gray-100 rounded-full transition-colors active:scale-90 text-gray-400"
+            className="w-10 h-10 flex items-center justify-center bg-slate-50 hover:bg-red-50 rounded-full text-slate-400 hover:text-red-500 transition-colors active:scale-90"
           >
             <X size={20} />
           </button>
@@ -128,70 +158,120 @@ export default function CheckoutModal({
 
         <form
           action={formAction}
-          className="flex flex-col flex-1 overflow-hidden"
+          className="flex flex-col flex-1 min-h-0 overflow-hidden relative z-0 bg-white"
         >
-          {/* Hidden Inputs (Single Source of Truth) */}
           <input type="hidden" name="items" value={JSON.stringify(cartItems)} />
           <input type="hidden" name="total" value={total} />
           <input type="hidden" name="payment_method" value={method} />
           <input type="hidden" name="dni" value={dni} />
 
-          {/* Area Scrollable con Scroll Fantasma (Regla 4) */}
-          <div className="flex-1 overflow-y-auto px-8 py-6 space-y-10 custom-scrollbar style-scroll-phantom">
-            {/* Ticket de Consumo Justificado y Senior */}
-            <section className="space-y-4">
-              <div className="flex items-center gap-2 px-1">
-                <Receipt size={16} className="text-orange-500" />
-                <span className="text-[11px] font-black text-gray-400 uppercase tracking-widest">
-                  Tu Selección
+          {/* Scroll Area */}
+          <div className="flex-1 overflow-y-auto px-6 py-6 space-y-8 custom-scrollbar pb-32">
+            {/* 1. TICKET DE CONSUMO (Con opción de borrar) */}
+            <section className="space-y-3">
+              <div className="flex items-center justify-between px-1">
+                <div className="flex items-center gap-2 text-slate-400">
+                  <Receipt size={14} />
+                  <span className="text-[10px] font-black uppercase tracking-widest">
+                    Tu Carrito
+                  </span>
+                </div>
+                <span className="text-[10px] font-bold text-orange-600 bg-orange-50 px-2 py-0.5 rounded-md">
+                  {cartItems.length} Items
                 </span>
               </div>
-              <div className="bg-gray-50/50 rounded-[2rem] p-6 border border-gray-100 space-y-4">
+
+              <div className="bg-slate-50/50 rounded-[1.8rem] border border-slate-100 p-4 space-y-3">
                 {cartItems.map((item: any) => (
                   <div
                     key={item.cartId}
-                    className="flex justify-between items-start gap-4"
+                    className="flex justify-between items-start bg-white p-3 rounded-2xl shadow-sm border border-slate-100/50 group"
                   >
-                    <div className="flex gap-3">
-                      <span className="text-sm font-black text-orange-600 bg-orange-100/50 w-7 h-7 flex items-center justify-center rounded-lg">
+                    <div className="flex gap-3 items-start">
+                      <span className="font-extrabold text-white bg-slate-800 w-6 h-6 flex items-center justify-center rounded-lg text-xs mt-0.5 shadow-md shadow-slate-200">
                         {item.qty}
                       </span>
-                      <div>
-                        <p className="text-sm font-bold text-gray-800 leading-tight">
+                      <div className="flex flex-col">
+                        <span className="text-sm font-bold text-slate-800 leading-tight">
                           {item.product.name}
-                        </p>
+                        </span>
                         {item.options && (
-                          <p className="text-[10px] text-gray-400 mt-1 font-medium italic">
-                            {item.options.entrada} • {item.options.bebida}
-                          </p>
+                          <div className="flex flex-col mt-1 space-y-0.5">
+                            {item.options.entrada && (
+                              <span className="text-[10px] font-medium text-slate-400 flex items-center gap-1">
+                                <ArrowRight
+                                  size={8}
+                                  className="text-orange-400"
+                                />{" "}
+                                {item.options.entrada}
+                              </span>
+                            )}
+                            {item.options.bebida && (
+                              <span className="text-[10px] font-medium text-slate-400 flex items-center gap-1">
+                                <ArrowRight
+                                  size={8}
+                                  className="text-orange-400"
+                                />{" "}
+                                {item.options.bebida}
+                              </span>
+                            )}
+                          </div>
                         )}
                       </div>
                     </div>
-                    <span className="text-sm font-black text-gray-900 tracking-tighter">
-                      S/ {(item.product.price * item.qty).toFixed(2)}
-                    </span>
+
+                    <div className="flex flex-col items-end justify-between h-full gap-2">
+                      <span className="text-sm font-black text-slate-800">
+                        S/ {(item.product.price * item.qty).toFixed(2)}
+                      </span>
+                      {/* BOTÓN BORRAR ITEM */}
+                      <button
+                        type="button"
+                        onClick={() => removeFromCart(item.cartId)}
+                        className="p-1.5 bg-red-50 text-red-500 rounded-lg hover:bg-red-100 hover:scale-105 transition-all active:scale-95"
+                        title="Eliminar este producto"
+                      >
+                        <Trash2 size={12} strokeWidth={2.5} />
+                      </button>
+                    </div>
                   </div>
                 ))}
-                <div className="pt-4 border-t border-dashed border-gray-200 flex justify-between items-center">
-                  <span className="text-xs font-bold text-gray-500 uppercase tracking-widest">
-                    Total
+
+                <div className="border-t border-dashed border-slate-200 pt-3 flex justify-between items-end px-2">
+                  <span className="text-xs font-bold text-slate-400 uppercase tracking-wider">
+                    Total a Pagar
                   </span>
-                  <span className="text-3xl font-black text-gray-900 tracking-tighter">
-                    S/ {total.toFixed(2)}
-                  </span>
+                  <div className="flex items-baseline gap-1 text-slate-900">
+                    <span className="text-sm font-bold text-slate-400">S/</span>
+                    <span className="text-3xl font-black tracking-tight">
+                      {total.toFixed(2)}
+                    </span>
+                  </div>
                 </div>
               </div>
             </section>
 
-            {/* Información Personal - Mobile First (Regla 1) */}
-            <section className="space-y-4">
-              <span className="text-[11px] font-black text-gray-400 uppercase tracking-widest px-1">
-                Datos de Entrega
-              </span>
-              <div className="grid grid-cols-1 gap-4 bg-white p-2 rounded-[2rem] border border-gray-100 shadow-sm">
-                {/* DNI Field con Validaciones */}
-                <div className="relative">
-                  <div className="absolute left-5 top-1/2 -translate-y-1/2 text-gray-400">
+            {/* 2. DATOS DE ENTREGA (Auto-Search) */}
+            <section className="space-y-3">
+              <div className="flex items-center justify-between px-2">
+                <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">
+                  ¿Quién recibe?
+                </span>
+                {name && (
+                  <motion.span
+                    initial={{ scale: 0.8, opacity: 0 }}
+                    animate={{ scale: 1, opacity: 1 }}
+                    className="text-[9px] bg-green-100 text-green-700 px-2.5 py-1 rounded-full font-bold flex items-center gap-1.5"
+                  >
+                    <ShieldCheck size={11} /> RENIEC VALIDADO
+                  </motion.span>
+                )}
+              </div>
+
+              <div className="space-y-3">
+                {/* DNI con Feedback */}
+                <div className="relative group">
+                  <div className="absolute left-5 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-orange-500 transition-colors">
                     {isSearching ? (
                       <Loader2
                         size={18}
@@ -205,43 +285,46 @@ export default function CheckoutModal({
                     required
                     maxLength={8}
                     inputMode="numeric"
-                    placeholder="DNI del comensal"
+                    placeholder="Escribe el DNI aquí..."
                     value={dni}
                     onChange={handleDniChange}
-                    className="w-full pl-14 pr-4 py-5 bg-gray-50 border-none rounded-[1.5rem] focus:ring-2 focus:ring-orange-500/20 text-sm font-bold tracking-widest transition-all outline-none"
+                    className="w-full pl-14 pr-4 py-4 bg-slate-50 border border-slate-100 focus:bg-white focus:border-orange-200 focus:ring-4 focus:ring-orange-500/10 rounded-2xl outline-none text-sm font-bold text-slate-800 transition-all placeholder:text-slate-400"
                   />
-                  {name && (
-                    <ShieldCheck
-                      size={18}
-                      className="absolute right-5 top-1/2 -translate-y-1/2 text-green-500 animate-in zoom-in"
-                    />
-                  )}
+                  {/* Ayuda Visual para DNI */}
+                  <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none">
+                    {!name && dni.length > 0 && dni.length < 8 && (
+                      <span className="text-[9px] font-bold text-orange-400 bg-orange-50 px-2 py-1 rounded-md">
+                        Faltan {8 - dni.length}
+                      </span>
+                    )}
+                  </div>
                 </div>
 
+                {/* Nombre Readonly */}
                 <div className="relative group">
                   <User
-                    className="absolute left-5 top-1/2 -translate-y-1/2 text-gray-400"
+                    className="absolute left-5 top-1/2 -translate-y-1/2 text-slate-400"
                     size={18}
                   />
                   <input
                     name="name"
                     required
-                    placeholder="Nombre completo"
+                    placeholder="Nombre Completo (Automático)"
                     value={name}
                     onChange={(e) => setName(e.target.value)}
                     className={cn(
-                      "w-full pl-14 pr-4 py-5 rounded-[1.5rem] text-sm font-bold transition-all outline-none border border-transparent",
+                      "w-full pl-14 pr-4 py-4 rounded-2xl text-sm font-bold outline-none transition-all border",
                       name
-                        ? "bg-green-50/30 text-gray-900 border-green-100"
-                        : "bg-gray-50 text-gray-400 focus:bg-white focus:ring-2 focus:ring-orange-500/20 focus:border-orange-200",
+                        ? "bg-green-50/50 text-slate-900 border-green-100"
+                        : "bg-slate-50 text-slate-400 border-slate-100 focus:bg-white focus:border-orange-200",
                     )}
                   />
                 </div>
 
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="relative">
+                <div className="grid grid-cols-2 gap-3">
+                  <div className="relative group">
                     <Phone
-                      className="absolute left-5 top-1/2 -translate-y-1/2 text-gray-400"
+                      className="absolute left-5 top-1/2 -translate-y-1/2 text-slate-400"
                       size={18}
                     />
                     <input
@@ -253,42 +336,46 @@ export default function CheckoutModal({
                       onInput={(e: any) =>
                         (e.target.value = e.target.value.replace(/\D/g, ""))
                       }
-                      className="w-full pl-14 pr-4 py-5 bg-gray-50 rounded-[1.5rem] text-sm font-bold outline-none border border-transparent focus:bg-white focus:ring-2 focus:ring-orange-500/20"
+                      className="w-full pl-14 pr-4 py-4 bg-slate-50 border border-slate-100 focus:bg-white focus:border-orange-200 focus:ring-4 focus:ring-orange-500/10 rounded-2xl outline-none text-sm font-bold transition-all text-slate-800"
                     />
                   </div>
-                  <div className="relative">
+                  <div className="relative group">
                     <MapPin
-                      className="absolute left-5 top-1/2 -translate-y-1/2 text-gray-400"
+                      className="absolute left-5 top-1/2 -translate-y-1/2 text-slate-400"
                       size={18}
                     />
                     <input
                       name="office"
                       required
                       placeholder="Oficina"
-                      className="w-full pl-14 pr-4 py-5 bg-gray-50 rounded-[1.5rem] text-sm font-bold outline-none border border-transparent focus:bg-white focus:ring-2 focus:ring-orange-500/20"
+                      className="w-full pl-14 pr-4 py-4 bg-slate-50 border border-slate-100 focus:bg-white focus:border-orange-200 focus:ring-4 focus:ring-orange-500/10 rounded-2xl outline-none text-sm font-bold transition-all text-slate-800"
                     />
                   </div>
                 </div>
               </div>
             </section>
 
-            {/* Métodos de Pago Premium */}
+            {/* 3. MÉTODOS DE PAGO (Tabs Visuales) */}
             <section className="space-y-4">
-              <span className="text-[11px] font-black text-gray-400 uppercase tracking-widest px-1">
-                Forma de Pago
-              </span>
-              <div className="grid grid-cols-2 gap-4">
+              <div className="flex items-center gap-2 px-2">
+                <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">
+                  Forma de Pago
+                </span>
+                <div className="h-px flex-1 bg-slate-100"></div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-3">
                 <PaymentTab
                   active={method === "yape"}
                   onClick={() => setMethod("yape")}
-                  icon={<CreditCard size={24} />}
+                  icon={<CreditCard size={22} />}
                   label="Yape / Plin"
                   color="purple"
                 />
                 <PaymentTab
                   active={method === "monthly"}
                   onClick={() => setMethod("monthly")}
-                  icon={<CalendarDays size={24} />}
+                  icon={<CalendarDays size={22} />}
                   label="A Fin de Mes"
                   color="blue"
                 />
@@ -298,109 +385,145 @@ export default function CheckoutModal({
                 {method === "yape" ? (
                   <motion.div
                     key="yape"
-                    initial={{ opacity: 0, y: 10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, y: -10 }}
-                    className="bg-white rounded-[2rem] border border-purple-100 p-6 space-y-6 shadow-xl shadow-purple-500/5"
+                    initial={{ opacity: 0, height: 0 }}
+                    animate={{ opacity: 1, height: "auto" }}
+                    exit={{ opacity: 0, height: 0 }}
+                    className="overflow-hidden"
                   >
-                    <div className="flex bg-gray-100 p-1 rounded-[1.25rem]">
-                      <button
-                        type="button"
-                        onClick={() => setYapeMode("qr")}
-                        className={cn(
-                          "flex-1 py-3 rounded-xl text-[10px] font-black uppercase transition-all",
-                          yapeMode === "qr"
-                            ? "bg-white text-purple-600 shadow-sm"
-                            : "text-gray-400",
-                        )}
-                      >
-                        Escaneo QR
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => setYapeMode("number")}
-                        className={cn(
-                          "flex-1 py-3 rounded-xl text-[10px] font-black uppercase transition-all",
-                          yapeMode === "number"
-                            ? "bg-white text-purple-600 shadow-sm"
-                            : "text-gray-400",
-                        )}
-                      >
-                        Número
-                      </button>
-                    </div>
-
-                    {yapeMode === "qr" ? (
-                      <div className="text-center group flex flex-col items-center">
-                        <div className="p-3 bg-white border-2 border-dashed border-purple-100 rounded-3xl group-hover:scale-105 transition-transform duration-500 shadow-lg shadow-purple-200/20">
-                          <img
-                            src="/yape-qr.png"
-                            alt="QR"
-                            className="w-36 h-36 object-contain rounded-xl"
-                          />
+                    <div className="bg-white rounded-[2rem] border border-purple-100 shadow-xl shadow-purple-500/5 p-1">
+                      <div className="bg-purple-50/40 rounded-[1.8rem] p-5 space-y-6">
+                        {/* QR / Numero Switcher */}
+                        <div className="flex p-1 bg-white rounded-xl border border-purple-50 shadow-sm">
+                          <button
+                            type="button"
+                            onClick={() => setYapeMode("qr")}
+                            className={cn(
+                              "flex-1 py-2.5 text-[10px] font-black uppercase rounded-lg transition-all flex items-center justify-center gap-2",
+                              yapeMode === "qr"
+                                ? "bg-purple-600 text-white shadow-md"
+                                : "text-slate-400 hover:bg-slate-50",
+                            )}
+                          >
+                            <QrCode size={14} /> QR
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => setYapeMode("number")}
+                            className={cn(
+                              "flex-1 py-2.5 text-[10px] font-black uppercase rounded-lg transition-all flex items-center justify-center gap-2",
+                              yapeMode === "number"
+                                ? "bg-purple-600 text-white shadow-md"
+                                : "text-slate-400 hover:bg-slate-50",
+                            )}
+                          >
+                            <Smartphone size={14} /> Número
+                          </button>
                         </div>
-                        <p className="text-[10px] text-gray-400 font-bold uppercase mt-4 tracking-widest">
-                          Escanea desde tu App
-                        </p>
-                      </div>
-                    ) : (
-                      <div className="text-center py-4 bg-purple-50/50 rounded-2xl">
-                        <p className="text-3xl font-black text-purple-900 tracking-tighter italic">
-                          974 805 994
-                        </p>
-                        <p className="text-[11px] font-bold text-purple-500 mt-1">
-                          IRMA CERNA HOYOS
-                        </p>
-                        <button
-                          type="button"
-                          onClick={copyNumber}
-                          className="mt-4 inline-flex items-center gap-2 bg-white text-purple-600 px-5 py-2.5 rounded-full text-xs font-black shadow-sm hover:shadow-md transition-all active:scale-95 border border-purple-100"
-                        >
-                          {copied ? <Check size={14} /> : <Copy size={14} />}{" "}
-                          {copied ? "¡COPIADO!" : "COPIAR NÚMERO"}
-                        </button>
-                      </div>
-                    )}
 
-                    <div className="pt-4 border-t border-purple-50">
-                      <div className="flex justify-between items-center mb-3">
-                        <label className="text-[10px] font-black text-purple-400 uppercase tracking-widest px-1">
-                          Código de Seguridad
-                        </label>
-                        <Info size={14} className="text-purple-200" />
+                        {/* Contenido Visual */}
+                        <div className="min-h-[160px] flex items-center justify-center">
+                          {yapeMode === "qr" ? (
+                            <motion.div
+                              initial={{ scale: 0.9, opacity: 0 }}
+                              animate={{ scale: 1, opacity: 1 }}
+                              className="flex flex-col items-center"
+                            >
+                              <div className="bg-white p-3 rounded-2xl border-2 border-dashed border-purple-200 shadow-sm relative group cursor-pointer hover:border-purple-400 transition-colors">
+                                <Sparkles
+                                  size={18}
+                                  className="absolute -top-2 -right-2 text-purple-500 fill-purple-200 animate-bounce"
+                                />
+                                <img
+                                  src="/yape-qr.png"
+                                  alt="QR"
+                                  className="w-32 h-32 object-contain rounded-lg"
+                                />
+                              </div>
+                              <p className="text-[9px] font-bold text-purple-400 mt-3 uppercase tracking-widest bg-purple-100 px-3 py-1 rounded-full">
+                                Escanea desde tu app
+                              </p>
+                            </motion.div>
+                          ) : (
+                            <motion.div
+                              initial={{ scale: 0.9, opacity: 0 }}
+                              animate={{ scale: 1, opacity: 1 }}
+                              className="text-center w-full"
+                            >
+                              <p className="text-3xl font-black text-purple-900 tracking-tighter">
+                                974 805 994
+                              </p>
+                              <div className="inline-flex items-center gap-1.5 mt-2 px-3 py-1 bg-white border border-purple-100 rounded-full shadow-sm">
+                                <span className="w-1.5 h-1.5 bg-purple-500 rounded-full animate-pulse" />
+                                <span className="text-[10px] font-bold text-purple-700 uppercase">
+                                  Irma Cerna Hoyos
+                                </span>
+                              </div>
+                              <button
+                                type="button"
+                                onClick={copyNumber}
+                                className="w-full mt-5 bg-white text-purple-700 border border-purple-200 py-3 rounded-xl text-xs font-black hover:bg-purple-50 active:scale-95 transition-all flex items-center justify-center gap-2 shadow-sm"
+                              >
+                                {copied ? (
+                                  <Check size={14} />
+                                ) : (
+                                  <Copy size={14} />
+                                )}{" "}
+                                {copied ? "COPIADO" : "COPIAR NÚMERO"}
+                              </button>
+                            </motion.div>
+                          )}
+                        </div>
+
+                        {/* Input Código */}
+                        <div className="relative">
+                          <label className="text-[9px] font-black text-purple-400 uppercase tracking-widest pl-2 mb-1 block">
+                            Código de Operación
+                          </label>
+                          <div className="relative bg-white p-1 rounded-2xl border border-purple-100 shadow-sm focus-within:ring-2 focus-within:ring-purple-100 transition-all flex items-center">
+                            <div className="pl-4 text-purple-300">
+                              <Info size={16} />
+                            </div>
+                            <input
+                              name="operation_code"
+                              required
+                              type="text"
+                              inputMode="numeric"
+                              maxLength={6}
+                              placeholder="0000"
+                              onInput={(e: any) =>
+                                (e.target.value = e.target.value.replace(
+                                  /\D/g,
+                                  "",
+                                ))
+                              }
+                              className="w-full h-12 text-center text-2xl font-black text-purple-900 bg-transparent outline-none tracking-[0.3em] placeholder:text-purple-100"
+                            />
+                          </div>
+                          <p className="text-[9px] text-center text-purple-400/70 mt-2">
+                            Son los dígitos grandes al finalizar el pago.
+                          </p>
+                        </div>
                       </div>
-                      <input
-                        name="operation_code"
-                        required
-                        type="text"
-                        inputMode="numeric"
-                        maxLength={3}
-                        placeholder="Ej: 417"
-                        onInput={(e: any) =>
-                          (e.target.value = e.target.value.replace(/\D/g, ""))
-                        }
-                        className="w-full p-5 bg-purple-50/50 border-2 border-purple-100 rounded-2xl focus:border-purple-500 focus:bg-white outline-none text-center font-black text-purple-900 text-4xl tracking-[0.6em] transition-all placeholder:text-purple-200"
-                      />
                     </div>
                   </motion.div>
                 ) : (
                   <motion.div
                     key="monthly"
-                    initial={{ opacity: 0, y: 10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, y: -10 }}
-                    className="bg-blue-50/30 rounded-[2rem] border border-blue-100 p-8 flex flex-col items-center text-center space-y-4"
+                    initial={{ opacity: 0, height: 0 }}
+                    animate={{ opacity: 1, height: "auto" }}
+                    exit={{ opacity: 0, height: 0 }}
+                    className="bg-blue-50/50 rounded-3xl border border-blue-100 p-6 flex flex-col items-center justify-center text-center gap-4"
                   >
-                    <div className="w-14 h-14 bg-white rounded-2xl flex items-center justify-center text-blue-600 shadow-lg shadow-blue-500/10 border border-blue-50">
-                      <ShieldCheck size={28} />
+                    <div className="w-16 h-16 bg-white rounded-2xl shadow-md border border-blue-50 flex items-center justify-center text-blue-500">
+                      <Wallet size={32} strokeWidth={1.5} />
                     </div>
                     <div>
-                      <p className="text-sm font-black text-blue-900 uppercase tracking-wide">
-                        Crédito Interno Activo
-                      </p>
-                      <p className="text-[11px] text-blue-500 mt-2 leading-relaxed font-medium px-4">
-                        Este consumo será cargado a tu planilla y se liquidará
-                        al finalizar el periodo mensual de forma automática.
+                      <h4 className="text-lg font-black text-blue-900">
+                        Crédito Personal
+                      </h4>
+                      <p className="text-xs font-medium text-blue-600/70 leading-relaxed max-w-[240px] mx-auto mt-2 bg-blue-100/50 p-3 rounded-xl">
+                        Este consumo se agregará a tu cuenta corriente y se
+                        liquidará al cierre del mes.
                       </p>
                     </div>
                   </motion.div>
@@ -408,82 +531,81 @@ export default function CheckoutModal({
               </AnimatePresence>
             </section>
 
+            {/* Error State */}
             {state?.message && !state.success && (
-              <div className="p-5 bg-red-50 border border-red-100 text-red-600 rounded-[1.5rem] text-[11px] font-black text-center flex items-center justify-center gap-3 animate-bounce">
-                <Info size={16} /> {state.message.toUpperCase()}
+              <div className="p-4 bg-red-50 border border-red-100 text-red-600 rounded-2xl text-xs font-bold text-center animate-shake flex items-center justify-center gap-2">
+                <AlertCircle size={16} /> {state.message}
               </div>
             )}
           </div>
 
-          {/* Botón de Acción Senior - Apple Style */}
-          <footer className="p-8 bg-white border-t border-gray-100 shrink-0 pb-12 safe-area-bottom">
+          {/* Footer Call to Action (Floating) */}
+          <div className="absolute bottom-0 left-0 right-0 p-6 pt-4 bg-gradient-to-t from-white via-white/95 to-transparent z-20">
             <button
               type="submit"
               disabled={isPending || isSearching}
-              className="w-full bg-gradient-to-r from-orange-600 to-orange-500 text-white py-6 rounded-[1.75rem] font-black text-lg shadow-2xl shadow-orange-500/30 hover:shadow-orange-500/40 hover:scale-[1.01] active:scale-[0.97] transition-all disabled:opacity-50 flex items-center justify-between px-10 group relative overflow-hidden"
+              className="w-full bg-orange-600 text-white py-5 rounded-2xl font-bold text-lg shadow-xl shadow-orange-500/30 hover:bg-orange-700 hover:shadow-orange-600/40 hover:scale-[1.01] active:scale-[0.98] transition-all disabled:opacity-70 disabled:scale-100 flex items-center justify-between px-8 group relative overflow-hidden ring-1 ring-white/20"
             >
-              {isPending ? (
-                <div className="mx-auto flex items-center gap-3">
-                  <Loader2 className="animate-spin" size={24} /> PROCESANDO
-                  PEDIDO...
+              <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-1000" />
+
+              <span className="relative z-10 flex items-center gap-3">
+                {isPending ? (
+                  <div className="flex items-center gap-2">
+                    <Loader2 className="animate-spin" /> Procesando...
+                  </div>
+                ) : (
+                  "Confirmar Pedido"
+                )}
+              </span>
+
+              <div className="relative z-10 flex items-center gap-3">
+                <span className="bg-orange-700/40 px-3 py-1 rounded-lg text-base backdrop-blur-sm border border-white/10 shadow-inner">
+                  S/ {total.toFixed(2)}
+                </span>
+                <div className="bg-white text-orange-600 rounded-full p-1.5 group-hover:translate-x-1 transition-transform">
+                  <ChevronRight size={18} strokeWidth={3} />
                 </div>
-              ) : (
-                <>
-                  <span className="flex items-center gap-3 tracking-tight">
-                    SOLICITAR AHORA{" "}
-                    <ChevronRight
-                      size={22}
-                      className="group-hover:translate-x-2 transition-transform"
-                    />
-                  </span>
-                  <span className="bg-white/20 px-4 py-2 rounded-xl text-base backdrop-blur-md ring-1 ring-white/30 tracking-tighter">
-                    S/ {total.toFixed(2)}
-                  </span>
-                </>
-              )}
+              </div>
             </button>
-          </footer>
+          </div>
         </form>
       </motion.div>
     </div>
   );
 }
 
-// Subcomponente Atómico para los Tabs de Pago
 function PaymentTab({ active, onClick, icon, label, color }: any) {
-  const styles: any = {
-    purple: active
-      ? "bg-purple-600 border-purple-600 text-white shadow-xl shadow-purple-200"
-      : "hover:border-purple-200 text-gray-400 border-gray-100",
-    blue: active
-      ? "bg-blue-600 border-blue-600 text-white shadow-xl shadow-blue-200"
-      : "hover:border-blue-200 text-gray-400 border-gray-100",
-  };
+  const isPurple = color === "purple";
+  const activeClasses = isPurple
+    ? "bg-purple-600 text-white shadow-lg shadow-purple-500/20 border-purple-500"
+    : "bg-blue-600 text-white shadow-lg shadow-blue-500/20 border-blue-500";
 
   return (
     <button
       type="button"
       onClick={onClick}
       className={cn(
-        "p-6 rounded-[2rem] border-2 transition-all duration-300 flex flex-col items-center gap-3 relative overflow-hidden",
-        styles[color],
+        "relative p-4 rounded-2xl border transition-all duration-300 flex flex-col items-center gap-2 overflow-hidden group",
+        active
+          ? activeClasses
+          : "bg-white border-slate-100 text-slate-400 hover:border-orange-200 hover:text-orange-500",
       )}
     >
       <div
         className={cn(
-          "transition-transform duration-500",
-          active ? "scale-110" : "scale-100 opacity-60",
+          "transition-transform duration-300 p-2 rounded-full",
+          active ? "bg-white/20" : "bg-slate-50 group-hover:bg-orange-50",
         )}
       >
         {icon}
       </div>
-      <span className="text-[11px] font-black uppercase tracking-widest">
+      <span className="text-[10px] font-black uppercase tracking-widest">
         {label}
       </span>
       {active && (
         <motion.div
-          layoutId="activeDot"
-          className="absolute top-3 right-3 w-2 h-2 bg-white rounded-full shadow-[0_0_10px_white]"
+          layoutId="active-dot"
+          className="absolute top-3 right-3 w-2 h-2 bg-white rounded-full shadow-sm"
         />
       )}
     </button>
