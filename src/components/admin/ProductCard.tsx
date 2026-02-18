@@ -1,25 +1,21 @@
 "use client";
 import Image from "next/image";
-import { Trash2, Loader2 } from "lucide-react";
-
-interface ProductCardProps {
-  product: any;
-  onToggleStatus: (id: string, current: boolean) => void;
-  onDelete: (id: string) => void;
-  isToggling: boolean;
-}
+import { Trash2, Loader2, Power, PowerOff } from "lucide-react";
 
 export default function ProductCard({
   product,
   onToggleStatus,
   onDelete,
   isToggling,
-}: ProductCardProps) {
+}: any) {
+  const isAvailable = product.is_available;
+
   return (
     <div
-      className={`bg-white p-4 rounded-2xl shadow-sm border border-gray-100 flex items-center gap-4 transition-all ${!product.is_available ? "opacity-60 grayscale" : ""}`}
+      className={`bg-white p-3 rounded-[1.5rem] shadow-sm border border-slate-100 flex gap-4 transition-all hover:shadow-lg hover:border-orange-100 group relative overflow-hidden ${!isAvailable ? "opacity-70 grayscale" : ""}`}
     >
-      <div className="relative w-20 h-20 shrink-0 bg-gray-100 rounded-xl overflow-hidden">
+      {/* Imagen */}
+      <div className="relative w-24 h-24 shrink-0 bg-slate-50 rounded-2xl overflow-hidden">
         <Image
           src={
             product.image_url ||
@@ -27,40 +23,53 @@ export default function ProductCard({
           }
           alt={product.name}
           fill
-          className="object-cover"
-          sizes="80px"
+          className="object-cover transition-transform duration-500 group-hover:scale-110"
+          sizes="100px"
         />
+        {!isAvailable && (
+          <div className="absolute inset-0 bg-slate-900/10 flex items-center justify-center">
+            <PowerOff className="text-white drop-shadow-md" />
+          </div>
+        )}
       </div>
-      <div className="flex-1 min-w-0">
-        <div className="flex justify-between items-start">
-          <h3 className="font-bold text-sm text-gray-900 truncate pr-2">
-            {product.name}
-          </h3>
-          <button
-            onClick={() => onDelete(product.id)}
-            className="text-gray-300 hover:text-red-500 transition-colors"
-          >
-            <Trash2 size={16} />
-          </button>
-        </div>
-        <p className="text-base font-black text-gray-900 mt-1">
-          S/ {product.price.toFixed(2)}
-        </p>
 
-        {/* Toggle de Disponibilidad */}
-        <div className="flex justify-end mt-2">
+      {/* Info */}
+      <div className="flex-1 flex flex-col justify-between py-1 min-w-0">
+        <div>
+          <div className="flex justify-between items-start">
+            <h3 className="font-bold text-slate-900 text-sm leading-tight truncate pr-6">
+              {product.name}
+            </h3>
+            <button
+              onClick={() => onDelete(product.id)}
+              className="absolute top-3 right-3 text-slate-300 hover:text-red-500 transition-colors p-1"
+            >
+              <Trash2 size={16} />
+            </button>
+          </div>
+          <p className="text-xs text-slate-400 mt-1 line-clamp-1">
+            {product.description || "Sin descripción"}
+          </p>
+        </div>
+
+        <div className="flex justify-between items-end">
+          <span className="font-black text-slate-900">
+            S/ {product.price.toFixed(2)}
+          </span>
+
+          {/* Toggle Switch Custom */}
           <button
-            onClick={() => onToggleStatus(product.id, product.is_available)}
+            onClick={() => onToggleStatus(product.id, isAvailable)}
             disabled={isToggling}
-            className={`w-10 h-6 rounded-full transition-colors relative ${product.is_available ? "bg-green-500" : "bg-gray-300"}`}
+            className={`w-12 h-7 rounded-full p-1 transition-colors flex items-center ${isAvailable ? "bg-green-500" : "bg-slate-200"}`}
           >
-            <span
-              className={`absolute top-1 left-1 bg-white w-4 h-4 rounded-full transition-transform shadow-sm flex items-center justify-center ${product.is_available ? "translate-x-4" : ""}`}
+            <div
+              className={`bg-white w-5 h-5 rounded-full shadow-sm flex items-center justify-center transition-transform ${isAvailable ? "translate-x-5" : "translate-x-0"}`}
             >
               {isToggling && (
-                <Loader2 size={10} className="animate-spin text-gray-400" />
+                <Loader2 size={10} className="animate-spin text-slate-400" />
               )}
-            </span>
+            </div>
           </button>
         </div>
       </div>

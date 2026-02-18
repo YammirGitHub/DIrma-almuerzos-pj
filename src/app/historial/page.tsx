@@ -1,7 +1,9 @@
 "use client";
+
 import { useState, useEffect } from "react";
 import { createBrowserClient } from "@supabase/ssr";
 import Link from "next/link";
+import { motion, AnimatePresence } from "framer-motion";
 import {
   ArrowLeft,
   Search,
@@ -18,19 +20,23 @@ import {
   Copy,
   Check,
   Loader2,
+  Wallet,
+  ShieldCheck,
+  CalendarDays,
+  Clock,
 } from "lucide-react";
 import Toast from "@/components/ui/Toast";
-import { motion, AnimatePresence } from "framer-motion";
 
 export default function HistorialPage() {
-  const [phone, setPhone] = useState("");
+  // Estado
+  const [dni, setDni] = useState("");
   const [loading, setLoading] = useState(false);
   const [orders, setOrders] = useState<any[]>([]);
   const [searched, setSearched] = useState(false);
-  const [customerExists, setCustomerExists] = useState(false);
+  const [customerData, setCustomerData] = useState<any>(null); // Guardamos datos del cliente
   const [expandedOrder, setExpandedOrder] = useState<string | null>(null);
 
-  // --- ESTADOS PARA EL PAGO DE DEUDA ---
+  // Estado Pago
   const [showPayModal, setShowPayModal] = useState(false);
   const [yapeMode, setYapeMode] = useState<"qr" | "number">("qr");
   const [copied, setCopied] = useState(false);
@@ -48,17 +54,19 @@ export default function HistorialPage() {
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
   );
 
+  // --- REALTIME SUBSCRIPTION (Por DNI) ---
   useEffect(() => {
-    if (!searched || !phone) return;
+    if (!searched || !dni) return;
+
     const channel = supabase
-      .channel(`historial-${phone}`)
+      .channel(`historial-${dni}`)
       .on(
         "postgres_changes",
         {
           event: "UPDATE",
           schema: "public",
           table: "orders",
-          filter: `customer_phone=eq.${phone}`,
+          filter: `customer_dni=eq.${dni}`,
         },
         (payload) => {
           setOrders((prev) =>
@@ -69,42 +77,46 @@ export default function HistorialPage() {
         },
       )
       .subscribe();
+
     return () => {
       supabase.removeChannel(channel);
     };
-  }, [searched, phone]);
+  }, [searched, dni]);
 
-  const handlePhoneChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleDniChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value.replace(/\D/g, "");
-    if (value.length <= 9) setPhone(value);
+    if (value.length <= 8) setDni(value);
   };
 
   const handleSearch = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (phone.length !== 9 || !phone.startsWith("9")) {
+    if (dni.length !== 8) {
       setToast({
         show: true,
-        message: "Ingresa un celular válido",
+        message: "DNI inválido (debe tener 8 dígitos)",
         type: "error",
       });
       return;
     }
+
     setLoading(true);
     setSearched(true);
     setExpandedOrder(null);
 
+    // 1. Buscar Cliente (Para obtener el nombre real registrado)
     const { data: customer } = await supabase
       .from("customers")
-      .select("phone")
-      .eq("phone", phone)
+      .select("*")
+      .eq("dni", dni)
       .single();
-    setCustomerExists(!!customer);
+    setCustomerData(customer);
 
+    // 2. Buscar Historial
     if (customer) {
       const { data: ordersData } = await supabase
         .from("orders")
         .select("*")
-        .eq("customer_phone", phone)
+        .eq("customer_dni", dni)
         .order("created_at", { ascending: false })
         .limit(50);
       setOrders(ordersData || []);
@@ -114,60 +126,48 @@ export default function HistorialPage() {
     setLoading(false);
   };
 
-  // --- LÓGICA DE PAGO DE DEUDA ---
+  // --- LÓGICA DE PAGO ---
   const handlePayDebt = async () => {
     if (!opCode) {
       setToast({
         show: true,
-        message: "Ingresa el código de operación",
+        message: "Falta el código de operación",
         type: "error",
       });
       return;
     }
     setPaying(true);
 
-    // 1. Identificar pedidos pendientes
-    const unpaidOrderIds = orders
-      .filter(
-        (o) =>
-          o.payment_status === "on_account" || o.payment_status === "unpaid",
-      )
+    const unpaidIds = orders
+      .filter((o) => ["on_account", "unpaid"].includes(o.payment_status))
       .map((o) => o.id);
 
-    if (unpaidOrderIds.length === 0) {
+    if (unpaidIds.length === 0) {
       setPaying(false);
       return;
     }
 
-    // 2. Actualizar en Supabase (Lote)
     const { error } = await supabase
       .from("orders")
       .update({
         payment_status: "verifying",
-        payment_method: "yape", // Cambiamos a Yape porque ahora está pagando
+        payment_method: "yape",
         operation_code: opCode,
       })
-      .in("id", unpaidOrderIds);
+      .in("id", unpaidIds);
 
     setPaying(false);
+
     if (error) {
-      setToast({
-        show: true,
-        message: "Error al procesar pago",
-        type: "error",
-      });
+      setToast({ show: true, message: "Error al enviar", type: "error" });
     } else {
-      setToast({
-        show: true,
-        message: "Pago enviado a verificación",
-        type: "success",
-      });
+      setToast({ show: true, message: "Enviado a revisión", type: "success" });
       setShowPayModal(false);
       setOpCode("");
-      // Actualización optimista local
+      // Optimistic update
       setOrders(
         orders.map((o) =>
-          unpaidOrderIds.includes(o.id)
+          unpaidIds.includes(o.id)
             ? { ...o, payment_status: "verifying", operation_code: opCode }
             : o,
         ),
@@ -182,13 +182,11 @@ export default function HistorialPage() {
   };
 
   const deudaTotal = orders
-    .filter(
-      (o) => o.payment_status === "on_account" || o.payment_status === "unpaid",
-    )
+    .filter((o) => ["on_account", "unpaid"].includes(o.payment_status))
     .reduce((acc, curr) => acc + curr.total_amount, 0);
 
   return (
-    <div className="min-h-screen bg-[#F8F9FA] pb-24 font-sans text-gray-900">
+    <div className="min-h-screen bg-[#F8F9FA] pb-32 font-sans text-slate-800 selection:bg-orange-100 selection:text-orange-900">
       <Toast
         isVisible={toast.show}
         message={toast.message}
@@ -196,369 +194,429 @@ export default function HistorialPage() {
         onClose={() => setToast({ ...toast, show: false })}
       />
 
-      {/* HEADER */}
-      <div className="bg-white p-4 sticky top-0 z-10 border-b border-gray-100 flex items-center gap-4 safe-area-top">
+      {/* HEADER STICKY */}
+      <header className="sticky top-0 z-30 px-4 py-3 bg-white/80 backdrop-blur-xl border-b border-slate-200/60 flex items-center gap-4 safe-area-top">
         <Link
           href="/"
-          className="p-2 bg-gray-100 rounded-full hover:bg-gray-200 transition-colors"
+          className="p-2.5 bg-white border border-slate-200 rounded-full hover:bg-slate-50 transition-colors active:scale-90 shadow-sm text-slate-500"
         >
-          <ArrowLeft size={20} className="text-gray-600" />
+          <ArrowLeft size={20} />
         </Link>
-        <h1 className="font-black text-lg">Mi Historial</h1>
-      </div>
+        <h1 className="font-black text-lg text-slate-900 tracking-tight">
+          Estado de Cuenta
+        </h1>
+      </header>
 
-      <div className="max-w-md mx-auto p-4 md:p-6 mt-4">
-        {/* BUSCADOR */}
-        <div className="bg-white p-6 rounded-[2rem] shadow-xl shadow-gray-200/50 mb-8 border border-white">
-          <h2 className="text-xl font-black mb-1 text-gray-900">
-            Consulta tus consumos
-          </h2>
-          <p className="text-sm text-gray-400 mb-6">
-            Ingresa tu número para ver tu estado de cuenta.
-          </p>
-          <form onSubmit={handleSearch} className="flex flex-col gap-4">
-            <div className="relative">
+      <main className="max-w-md mx-auto p-4 mt-2 space-y-6">
+        {/* TARJETA BUSCADOR */}
+        <motion.div
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="bg-white p-6 rounded-[2rem] shadow-xl shadow-slate-200/50 border border-white"
+        >
+          <div className="flex items-center gap-3 mb-4">
+            <div className="bg-orange-100 text-orange-600 p-2.5 rounded-xl">
+              <ShieldCheck size={24} />
+            </div>
+            <div>
+              <h2 className="text-lg font-black text-slate-900 leading-none">
+                Consulta Segura
+              </h2>
+              <p className="text-xs text-slate-400 font-medium mt-1">
+                Ingresa tu DNI para ver tu historial.
+              </p>
+            </div>
+          </div>
+
+          <form onSubmit={handleSearch} className="flex flex-col gap-3">
+            <div className="relative group">
               <input
                 type="tel"
                 inputMode="numeric"
-                value={phone}
-                onChange={handlePhoneChange}
-                placeholder="999 999 999"
-                className="w-full p-4 pl-12 bg-gray-50 rounded-2xl font-bold text-center text-2xl outline-none focus:ring-2 focus:ring-orange-500/20 border border-transparent focus:border-orange-500 transition-all placeholder:text-gray-300 tracking-widest text-gray-900"
+                maxLength={8}
+                value={dni}
+                onChange={handleDniChange}
+                placeholder="DNI (8 dígitos)"
+                className="w-full p-4 pl-12 bg-slate-50 rounded-2xl font-bold text-lg outline-none focus:ring-4 focus:ring-orange-500/10 border-2 border-transparent focus:border-orange-200 transition-all placeholder:text-slate-300 tracking-widest text-slate-800"
               />
               <Search
-                className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400"
-                size={24}
+                className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-orange-500 transition-colors"
+                size={20}
               />
             </div>
             <button
-              disabled={loading || phone.length !== 9}
-              className="w-full bg-gray-900 text-white py-4 rounded-2xl font-bold text-lg active:scale-95 transition-all shadow-lg hover:bg-black disabled:opacity-50 flex items-center justify-center gap-2"
+              disabled={loading || dni.length !== 8}
+              className="w-full bg-slate-900 text-white py-4 rounded-2xl font-bold text-base shadow-lg shadow-slate-900/20 hover:bg-black active:scale-[0.98] transition-all disabled:opacity-50 disabled:scale-100 flex items-center justify-center gap-2"
             >
-              {loading ? "Buscando..." : "Ver Mis Pedidos"}
+              {loading ? (
+                <Loader2 className="animate-spin" />
+              ) : (
+                "Consultar Historial"
+              )}
             </button>
           </form>
-        </div>
+        </motion.div>
 
+        {/* RESULTADOS */}
         {searched && (
-          <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
-            {!customerExists && (
-              <div className="text-center py-8 bg-gray-50 rounded-[2rem] border border-gray-100 px-6">
-                <div className="bg-white p-4 rounded-full w-16 h-16 flex items-center justify-center mx-auto mb-4 shadow-sm">
-                  <HelpCircle className="text-gray-400" size={32} />
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 0.3 }}
+          >
+            {/* CASO: NO EXISTE */}
+            {!customerData && (
+              <div className="text-center py-10 px-6 bg-white rounded-[2rem] border border-slate-100 shadow-sm">
+                <div className="bg-slate-50 p-4 rounded-full w-20 h-20 flex items-center justify-center mx-auto mb-4 shadow-inner">
+                  <HelpCircle className="text-slate-300" size={40} />
                 </div>
-                <h3 className="font-black text-gray-900 text-lg mb-2">
-                  Número no registrado
+                <h3 className="font-black text-slate-900 text-lg mb-1">
+                  DNI No Registrado
                 </h3>
-                <p className="text-gray-500 text-sm mb-4">
-                  Este celular no tiene historial de pedidos.
+                <p className="text-slate-500 text-sm mb-6 leading-relaxed">
+                  No hemos encontrado pedidos asociados al DNI{" "}
+                  <span className="font-bold text-slate-800">{dni}</span>.
                 </p>
                 <Link
                   href="/"
-                  className="text-orange-600 font-bold text-sm hover:underline"
+                  className="inline-flex bg-orange-600 text-white px-6 py-3 rounded-xl font-bold text-sm shadow-lg shadow-orange-200 hover:bg-orange-700 transition-colors"
                 >
-                  ¡Haz tu primer pedido aquí!
+                  Hacer mi primer pedido
                 </Link>
               </div>
             )}
 
-            {customerExists && (
-              <>
-                {/* --- TARJETA DE DEUDA CON BOTÓN --- */}
+            {/* CASO: EXISTE */}
+            {customerData && (
+              <div className="space-y-6">
+                {/* 1. TARJETA DE ESTADO FINANCIERO */}
                 {deudaTotal > 0 ? (
-                  <div className="bg-orange-600 text-white p-6 rounded-[2rem] shadow-xl shadow-orange-600/30 mb-8 relative overflow-hidden">
-                    <div className="absolute -right-10 -top-10 w-40 h-40 bg-white/10 rounded-full blur-3xl"></div>
+                  <motion.div
+                    initial={{ scale: 0.95 }}
+                    animate={{ scale: 1 }}
+                    className="bg-gradient-to-br from-orange-500 to-orange-600 text-white p-6 rounded-[2.5rem] shadow-2xl shadow-orange-500/40 relative overflow-hidden"
+                  >
+                    {/* Decoración Fondo */}
+                    <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full blur-3xl -mr-10 -mt-10" />
+
                     <div className="relative z-10">
-                      <div className="flex items-center gap-2 mb-2 opacity-90">
-                        <AlertCircle size={18} />
-                        <p className="font-bold uppercase tracking-widest text-xs">
-                          Por Pagar
+                      <div className="flex items-center gap-2 mb-3 opacity-90">
+                        <div className="bg-white/20 p-1.5 rounded-lg">
+                          <AlertCircle size={16} />
+                        </div>
+                        <p className="font-bold uppercase tracking-widest text-[10px]">
+                          Saldo Pendiente
                         </p>
                       </div>
 
-                      {/* FILA DE MONTO Y BOTÓN */}
-                      <div className="flex justify-between items-end mb-2">
-                        <div className="text-5xl font-black tracking-tight">
+                      <div className="flex flex-col mb-6">
+                        <span className="text-5xl font-black tracking-tighter drop-shadow-md">
                           S/ {deudaTotal.toFixed(2)}
-                        </div>
-
-                        {/* BOTÓN PAGAR AQUI */}
-                        <button
-                          onClick={() => setShowPayModal(true)}
-                          className="bg-white text-orange-600 px-4 py-2.5 rounded-xl font-black text-xs uppercase tracking-wider shadow-lg hover:bg-orange-50 active:scale-95 transition-all flex items-center gap-2"
-                        >
-                          <CreditCard size={16} /> Pagar Ahora
-                        </button>
+                        </span>
+                        <span className="text-orange-100 text-sm font-medium mt-1">
+                          Tienes consumos por regularizar.
+                        </span>
                       </div>
 
-                      <p className="text-sm text-orange-100 font-medium">
-                        Tienes pedidos pendientes de regularizar.
-                      </p>
+                      <button
+                        onClick={() => setShowPayModal(true)}
+                        className="w-full bg-white text-orange-600 py-3.5 rounded-2xl font-black text-sm uppercase tracking-wide shadow-lg flex items-center justify-center gap-2 active:scale-95 transition-transform"
+                      >
+                        <CreditCard size={18} /> Pagar Deuda Ahora
+                      </button>
                     </div>
-                  </div>
+                  </motion.div>
                 ) : (
-                  <div className="bg-emerald-500 text-white p-6 rounded-[2rem] shadow-xl shadow-emerald-500/30 mb-8 flex items-center gap-5 relative overflow-hidden">
-                    <div className="absolute -right-10 -top-10 w-40 h-40 bg-white/10 rounded-full blur-3xl"></div>
-                    <div className="p-3 bg-white/20 rounded-full backdrop-blur-sm relative z-10">
-                      <CheckCircle size={32} strokeWidth={2.5} />
+                  <motion.div
+                    initial={{ scale: 0.95 }}
+                    animate={{ scale: 1 }}
+                    className="bg-emerald-500 text-white p-8 rounded-[2.5rem] shadow-2xl shadow-emerald-500/30 flex flex-col items-center text-center relative overflow-hidden"
+                  >
+                    <div className="absolute top-0 left-0 w-full h-full bg-gradient-to-b from-white/10 to-transparent" />
+                    <div className="bg-white/20 p-4 rounded-full backdrop-blur-md mb-4 shadow-inner">
+                      <CheckCircle size={40} strokeWidth={2.5} />
                     </div>
-                    <div className="relative z-10">
-                      <p className="font-black text-2xl leading-none mb-1">
-                        ¡Estás al día!
-                      </p>
-                      <p className="text-emerald-100 text-sm font-medium">
-                        Gracias por tu puntualidad.
-                      </p>
-                    </div>
-                  </div>
+                    <h3 className="font-black text-2xl mb-1 relative z-10">
+                      ¡Todo al día!
+                    </h3>
+                    <p className="text-emerald-100 text-sm font-medium relative z-10 px-4">
+                      No tienes deudas pendientes. Gracias por tu puntualidad.
+                    </p>
+                  </motion.div>
                 )}
 
-                <h3 className="font-bold text-gray-400 uppercase tracking-widest text-xs mb-4 ml-2 pl-2 border-l-2 border-orange-500">
-                  Historial Reciente
-                </h3>
+                {/* 2. LISTA DE MOVIMIENTOS */}
+                <div>
+                  <div className="flex items-center gap-2 mb-4 px-2">
+                    <Receipt size={16} className="text-slate-400" />
+                    <h3 className="font-black text-slate-400 uppercase tracking-widest text-xs">
+                      Movimientos Recientes
+                    </h3>
+                  </div>
 
-                <div className="space-y-4 pb-20">
-                  {orders.map((order) => {
-                    const isExpanded = expandedOrder === order.id;
-                    return (
-                      <div
-                        key={order.id}
-                        onClick={() =>
-                          setExpandedOrder(isExpanded ? null : order.id)
-                        }
-                        className={`bg-white p-5 rounded-[1.5rem] shadow-sm border border-gray-100 transition-all cursor-pointer ${isExpanded ? "ring-2 ring-orange-100" : "hover:shadow-md"}`}
-                      >
-                        <div className="flex justify-between items-start mb-3">
-                          <div>
-                            <p className="font-bold text-gray-900 text-lg capitalize">
-                              {new Date(order.created_at).toLocaleDateString(
-                                "es-PE",
-                                { weekday: "long", day: "numeric" },
-                              )}
-                            </p>
-                            <p className="text-xs text-gray-400 font-bold uppercase tracking-wider">
-                              {new Date(order.created_at).toLocaleTimeString(
-                                [],
-                                { hour: "2-digit", minute: "2-digit" },
-                              )}
-                            </p>
-                          </div>
-                          <div className="flex flex-col items-end gap-2">
-                            <span
-                              className={`px-3 py-1 rounded-lg text-[10px] font-black uppercase tracking-wide border ${order.payment_status === "on_account" ? "bg-orange-50 text-orange-700 border-orange-100" : order.payment_status === "verifying" ? "bg-purple-50 text-purple-700 border-purple-100" : "bg-emerald-50 text-emerald-700 border-emerald-100"}`}
-                            >
-                              {order.payment_status === "on_account"
-                                ? "Debe"
-                                : order.payment_status === "verifying"
-                                  ? "Verificando"
-                                  : "Pagado"}
-                            </span>
-                            {order.status === "delivered" ? (
-                              <span className="flex items-center gap-1.5 bg-gray-50 text-gray-600 px-2 py-0.5 rounded-md text-[9px] font-bold border border-gray-100 uppercase tracking-wider">
-                                <CheckCircle
-                                  size={12}
-                                  className="text-green-500"
-                                />{" "}
-                                Entregado
+                  <div className="space-y-4">
+                    {orders.map((order) => {
+                      const isExpanded = expandedOrder === order.id;
+                      const isPaid = order.payment_status === "paid";
+                      const isVerifying = order.payment_status === "verifying";
+
+                      return (
+                        <motion.div
+                          layout
+                          key={order.id}
+                          onClick={() =>
+                            setExpandedOrder(isExpanded ? null : order.id)
+                          }
+                          className={`bg-white p-5 rounded-[1.8rem] border transition-all cursor-pointer overflow-hidden ${isExpanded ? "border-orange-200 shadow-lg shadow-orange-500/5 ring-1 ring-orange-100" : "border-slate-100 shadow-sm hover:shadow-md"}`}
+                        >
+                          <div className="flex justify-between items-start">
+                            <div className="flex gap-4">
+                              <div
+                                className={`w-12 h-12 rounded-2xl flex items-center justify-center shrink-0 ${isPaid ? "bg-emerald-50 text-emerald-600" : isVerifying ? "bg-purple-50 text-purple-600" : "bg-orange-50 text-orange-600"}`}
+                              >
+                                {isPaid ? (
+                                  <CheckCircle size={20} />
+                                ) : isVerifying ? (
+                                  <Loader2 size={20} className="animate-spin" />
+                                ) : (
+                                  <AlertCircle size={20} />
+                                )}
+                              </div>
+                              <div>
+                                <p className="font-bold text-slate-900 text-base capitalize">
+                                  {new Date(
+                                    order.created_at,
+                                  ).toLocaleDateString("es-PE", {
+                                    weekday: "short",
+                                    day: "numeric",
+                                  })}
+                                </p>
+                                <div className="flex items-center gap-1.5 mt-0.5">
+                                  <Clock size={10} className="text-slate-400" />
+                                  <span className="text-xs text-slate-400 font-medium">
+                                    {new Date(
+                                      order.created_at,
+                                    ).toLocaleTimeString([], {
+                                      hour: "2-digit",
+                                      minute: "2-digit",
+                                    })}
+                                  </span>
+                                </div>
+                              </div>
+                            </div>
+
+                            <div className="text-right">
+                              <p className="font-black text-slate-900 text-lg tracking-tight">
+                                S/ {order.total_amount.toFixed(2)}
+                              </p>
+                              <span
+                                className={`inline-block px-2 py-0.5 rounded text-[9px] font-black uppercase tracking-wide ${isPaid ? "bg-emerald-100 text-emerald-700" : isVerifying ? "bg-purple-100 text-purple-700" : "bg-orange-100 text-orange-700"}`}
+                              >
+                                {isPaid
+                                  ? "Pagado"
+                                  : isVerifying
+                                    ? "Verificando"
+                                    : "Por Pagar"}
                               </span>
-                            ) : (
-                              <span className="flex items-center gap-1 text-[9px] text-orange-400 font-bold uppercase tracking-wider animate-pulse">
-                                ⏳ En preparación
-                              </span>
-                            )}
+                            </div>
                           </div>
-                        </div>
-                        {!isExpanded && (
-                          <div className="flex items-center gap-2 text-sm text-gray-500 mb-2">
-                            <Receipt size={14} />
-                            <span>{order.items.length} productos</span>
-                            <ChevronDown
-                              size={14}
-                              className="ml-auto text-gray-300"
-                            />
-                          </div>
-                        )}
-                        <AnimatePresence>
-                          {isExpanded && (
-                            <motion.div
-                              initial={{ height: 0, opacity: 0 }}
-                              animate={{ height: "auto", opacity: 1 }}
-                              exit={{ height: 0, opacity: 0 }}
-                              className="overflow-hidden"
-                            >
-                              <div className="pt-3 pb-2 space-y-3 border-t border-dashed border-gray-100 mt-2">
-                                {order.items.map((item: any, i: number) => (
-                                  <div
-                                    key={i}
-                                    className="flex justify-between items-start text-sm"
-                                  >
-                                    <div className="flex gap-2">
-                                      <span className="font-black text-gray-900 bg-gray-100 px-1.5 rounded text-xs h-fit mt-0.5">
-                                        {item.qty}
-                                      </span>
-                                      <div>
-                                        <p className="font-bold text-gray-700 leading-tight">
-                                          {item.name}
-                                        </p>
-                                        {item.options && (
-                                          <div className="text-[10px] text-gray-400 mt-0.5 flex flex-col">
-                                            {item.options.entrada && (
-                                              <span>
-                                                • {item.options.entrada}
-                                              </span>
-                                            )}
-                                            {item.options.bebida && (
-                                              <span>
-                                                • {item.options.bebida}
-                                              </span>
-                                            )}
-                                          </div>
-                                        )}
+
+                          <AnimatePresence>
+                            {isExpanded && (
+                              <motion.div
+                                initial={{ height: 0, opacity: 0 }}
+                                animate={{ height: "auto", opacity: 1 }}
+                                exit={{ height: 0, opacity: 0 }}
+                                className="overflow-hidden"
+                              >
+                                <div className="mt-4 pt-4 border-t border-dashed border-slate-100 space-y-3">
+                                  {order.items.map((item: any, i: number) => (
+                                    <div
+                                      key={i}
+                                      className="flex justify-between items-start text-sm"
+                                    >
+                                      <div className="flex gap-2.5">
+                                        <span className="font-bold text-slate-500 text-xs mt-0.5">
+                                          {item.qty}x
+                                        </span>
+                                        <div>
+                                          <p className="font-bold text-slate-700 leading-tight">
+                                            {item.name}
+                                          </p>
+                                          {item.options && (
+                                            <div className="text-[10px] text-slate-400 mt-0.5 flex flex-col gap-0.5">
+                                              {item.options.entrada && (
+                                                <span>
+                                                  • {item.options.entrada}
+                                                </span>
+                                              )}
+                                              {item.options.bebida && (
+                                                <span>
+                                                  • {item.options.bebida}
+                                                </span>
+                                              )}
+                                            </div>
+                                          )}
+                                        </div>
                                       </div>
+                                      <span className="font-medium text-slate-900 text-xs">
+                                        S/ {(item.price * item.qty).toFixed(2)}
+                                      </span>
                                     </div>
-                                    <span className="font-mono text-gray-500 text-xs mt-0.5">
-                                      S/ {(item.price * item.qty).toFixed(2)}
-                                    </span>
-                                  </div>
-                                ))}
-                              </div>
-                              <div className="flex justify-center pt-2">
-                                <ChevronUp
-                                  size={16}
-                                  className="text-gray-300"
-                                />
-                              </div>
-                            </motion.div>
-                          )}
-                        </AnimatePresence>
-                        <div className="flex justify-between items-center pt-3 border-t border-gray-100 mt-1">
-                          <span className="text-xs font-bold text-gray-400 uppercase">
-                            {order.payment_method === "yape"
-                              ? "Yape"
-                              : "A Cuenta"}
-                          </span>
-                          <span className="font-black text-xl text-gray-900">
-                            S/ {order.total_amount.toFixed(2)}
-                          </span>
-                        </div>
-                      </div>
-                    );
-                  })}
-                </div>
-              </>
-            )}
-          </div>
-        )}
-      </div>
+                                  ))}
 
-      {/* --- MODAL DE PAGO DE DEUDA --- */}
+                                  <div className="pt-2 flex justify-center">
+                                    <ChevronUp
+                                      size={16}
+                                      className="text-slate-300"
+                                    />
+                                  </div>
+                                </div>
+                              </motion.div>
+                            )}
+                          </AnimatePresence>
+
+                          {!isExpanded && (
+                            <div className="mt-3 flex justify-center">
+                              <ChevronDown
+                                size={16}
+                                className="text-slate-300"
+                              />
+                            </div>
+                          )}
+                        </motion.div>
+                      );
+                    })}
+                  </div>
+                </div>
+              </div>
+            )}
+          </motion.div>
+        )}
+      </main>
+
+      {/* --- MODAL PAGO (Estilo Clean White) --- */}
       <AnimatePresence>
         {showPayModal && (
-          <div className="fixed inset-0 z-[9999] flex items-end sm:items-center justify-center isolate">
-            <div
-              className="absolute inset-0 bg-black/40 backdrop-blur-xl transition-opacity animate-in fade-in duration-300"
+          <div className="fixed inset-0 z-[9999] flex items-end sm:items-center justify-center p-4 isolate">
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
               onClick={() => setShowPayModal(false)}
+              className="absolute inset-0 bg-slate-900/60 backdrop-blur-sm"
             />
+
             <motion.div
               initial={{ y: "100%" }}
               animate={{ y: 0 }}
               exit={{ y: "100%" }}
-              className="relative w-full max-w-md bg-white sm:rounded-[2.5rem] rounded-t-[2.5rem] shadow-2xl p-6 pb-12 flex flex-col max-h-[90vh] overflow-y-auto"
+              transition={{ type: "spring", damping: 25, stiffness: 300 }}
+              className="relative bg-white w-full max-w-md rounded-[2.5rem] shadow-2xl p-6 pb-8 flex flex-col max-h-[90vh] overflow-y-auto"
             >
               <div className="flex justify-between items-center mb-6">
                 <div>
-                  <h2 className="text-xl font-black text-gray-900">
-                    Pagar Deuda Total
+                  <h2 className="text-xl font-black text-slate-900 leading-tight">
+                    Pagar Deuda
                   </h2>
-                  <p className="text-xs text-gray-400 uppercase tracking-widest">
-                    Regulariza tus pedidos
+                  <p className="text-xs text-slate-400 font-bold uppercase tracking-widest mt-0.5">
+                    Regularización
                   </p>
                 </div>
                 <button
                   onClick={() => setShowPayModal(false)}
-                  className="p-2 bg-gray-50 rounded-full hover:bg-gray-100 text-gray-400"
+                  className="p-2 bg-slate-50 rounded-full hover:bg-slate-100 text-slate-400 transition-colors"
                 >
                   <X size={20} />
                 </button>
               </div>
 
-              <div className="text-center mb-6">
-                <div className="text-4xl font-black text-orange-600 tracking-tighter mb-1">
+              <div className="text-center mb-8">
+                <p className="text-xs text-orange-500 font-bold uppercase tracking-widest mb-1">
+                  Total a Pagar
+                </p>
+                <p className="text-5xl font-black text-slate-900 tracking-tighter">
                   S/ {deudaTotal.toFixed(2)}
-                </div>
-                <div className="inline-block bg-orange-50 text-orange-700 px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wide">
-                  Monto Pendiente
-                </div>
+                </p>
               </div>
 
-              {/* TABS QR / NUMERO */}
-              <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden mb-6">
-                <div className="flex border-b border-gray-100">
-                  <button
-                    onClick={() => setYapeMode("qr")}
-                    className={`flex-1 py-3 text-xs font-bold uppercase tracking-wider flex items-center justify-center gap-2 transition-colors ${yapeMode === "qr" ? "bg-purple-50 text-purple-700 border-b-2 border-purple-500" : "text-gray-400 hover:bg-gray-50"}`}
-                  >
-                    <QrCode size={16} /> QR Yape
-                  </button>
-                  <button
-                    onClick={() => setYapeMode("number")}
-                    className={`flex-1 py-3 text-xs font-bold uppercase tracking-wider flex items-center justify-center gap-2 transition-colors ${yapeMode === "number" ? "bg-purple-50 text-purple-700 border-b-2 border-purple-500" : "text-gray-400 hover:bg-gray-50"}`}
-                  >
-                    <Smartphone size={16} /> Número
-                  </button>
-                </div>
-                <div className="p-5 text-center">
-                  {yapeMode === "qr" && (
-                    <div className="animate-in zoom-in duration-300">
-                      <div className="bg-white p-2 rounded-xl border-2 border-dashed border-purple-200 inline-block mb-3">
+              {/* TABS YAPE */}
+              <div className="bg-white rounded-3xl border border-purple-100 shadow-xl shadow-purple-500/5 p-1 mb-6">
+                <div className="bg-purple-50/40 rounded-[1.5rem] p-5">
+                  <div className="flex bg-white p-1 rounded-xl shadow-sm border border-purple-50 mb-6">
+                    <button
+                      onClick={() => setYapeMode("qr")}
+                      className={`flex-1 py-2.5 rounded-lg text-[10px] font-black uppercase transition-all flex items-center justify-center gap-2 ${yapeMode === "qr" ? "bg-purple-600 text-white shadow-md" : "text-slate-400 hover:bg-purple-50"}`}
+                    >
+                      <QrCode size={14} /> QR
+                    </button>
+                    <button
+                      onClick={() => setYapeMode("number")}
+                      className={`flex-1 py-2.5 rounded-lg text-[10px] font-black uppercase transition-all flex items-center justify-center gap-2 ${yapeMode === "number" ? "bg-purple-600 text-white shadow-md" : "text-slate-400 hover:bg-purple-50"}`}
+                    >
+                      <Smartphone size={14} /> Número
+                    </button>
+                  </div>
+
+                  <div className="flex flex-col items-center text-center">
+                    {yapeMode === "qr" ? (
+                      <motion.div
+                        initial={{ scale: 0.9, opacity: 0 }}
+                        animate={{ scale: 1, opacity: 1 }}
+                        className="bg-white p-3 rounded-2xl border-2 border-dashed border-purple-200 shadow-sm mb-4"
+                      >
                         <img
                           src="/yape-qr.png"
                           alt="QR Yape"
-                          className="w-40 h-40 object-contain rounded-lg"
+                          className="w-32 h-32 object-contain rounded-lg"
                         />
-                      </div>
-                      <p className="text-[10px] text-gray-400 font-bold uppercase">
-                        Escanea desde tu app
-                      </p>
-                    </div>
-                  )}
-                  {yapeMode === "number" && (
-                    <div className="animate-in zoom-in duration-300 py-4">
-                      <div className="text-3xl font-black text-purple-900 font-mono tracking-wider mb-2">
-                        974 805 994
-                      </div>
-                      <p className="text-sm font-bold text-purple-600 mb-4">
-                        Irma Cerna Hoyos
-                      </p>
-                      <button
-                        onClick={copyNumber}
-                        className="mx-auto flex items-center gap-2 bg-purple-100 hover:bg-purple-200 text-purple-700 px-4 py-2 rounded-full text-xs font-bold transition-colors"
+                      </motion.div>
+                    ) : (
+                      <motion.div
+                        initial={{ scale: 0.9, opacity: 0 }}
+                        animate={{ scale: 1, opacity: 1 }}
+                        className="mb-4 w-full"
                       >
-                        {copied ? <Check size={14} /> : <Copy size={14} />}
-                        {copied ? "¡Copiado!" : "Copiar Número"}
-                      </button>
-                    </div>
-                  )}
-                </div>
-              </div>
+                        <p className="text-3xl font-black text-purple-900 tracking-tighter">
+                          974 805 994
+                        </p>
+                        <p className="text-[10px] font-bold text-purple-600 uppercase mt-1">
+                          Irma Cerna Hoyos
+                        </p>
+                        <button
+                          onClick={copyNumber}
+                          className="mt-3 w-full py-2.5 bg-white border border-purple-200 rounded-xl text-purple-700 text-xs font-bold shadow-sm flex items-center justify-center gap-2 active:scale-95 transition-transform"
+                        >
+                          {copied ? <Check size={14} /> : <Copy size={14} />}{" "}
+                          {copied ? "Copiado" : "Copiar"}
+                        </button>
+                      </motion.div>
+                    )}
+                  </div>
 
-              {/* INPUT CÓDIGO */}
-              <div className="space-y-2">
-                <label className="text-xs font-black text-gray-400 uppercase tracking-widest pl-1">
-                  Código de Operación
-                </label>
-                <input
-                  value={opCode}
-                  onChange={(e) => setOpCode(e.target.value)}
-                  placeholder="Ej: 123456"
-                  className="w-full p-4 bg-gray-50 border border-gray-200 rounded-2xl focus:border-orange-500 focus:bg-white outline-none text-center font-bold text-gray-900 text-lg placeholder:text-gray-300 transition-all"
-                />
+                  <div className="relative">
+                    <label className="text-[9px] font-black text-purple-400 uppercase tracking-widest pl-2 mb-1 block">
+                      Código de Operación
+                    </label>
+                    <input
+                      value={opCode}
+                      onChange={(e) => {
+                        const v = e.target.value.replace(/\D/g, "");
+                        setOpCode(v);
+                      }}
+                      maxLength={6}
+                      placeholder="000000"
+                      inputMode="numeric"
+                      className="w-full h-14 text-center text-2xl font-black text-purple-900 bg-white border border-purple-100 rounded-2xl focus:border-purple-300 focus:ring-4 focus:ring-purple-500/10 outline-none tracking-[0.3em] placeholder:text-purple-100 transition-all"
+                    />
+                  </div>
+                </div>
               </div>
 
               <button
                 onClick={handlePayDebt}
                 disabled={paying}
-                className="w-full bg-gray-900 text-white py-4 rounded-2xl font-bold text-lg shadow-xl hover:bg-black mt-6 active:scale-95 transition-all disabled:opacity-70 flex items-center justify-center gap-2"
+                className="w-full bg-slate-900 text-white py-4 rounded-2xl font-bold text-base shadow-xl shadow-slate-900/20 hover:bg-black active:scale-[0.98] transition-all disabled:opacity-70 flex items-center justify-center gap-2"
               >
                 {paying ? (
                   <Loader2 className="animate-spin" />
