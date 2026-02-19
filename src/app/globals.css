@@ -25,17 +25,14 @@
     -webkit-tap-highlight-color: transparent;
     -webkit-text-size-adjust: 100%;
     background-color: #0f172a;
-    /* Fondo de seguridad */
+    /* Fondo de seguridad (Notch) */
   }
 
   body {
-    /* CORRECCIÓN VISUAL: Usar 100vh evita que el fondo se corte */
     min-height: 100vh;
     width: 100%;
     background-color: #F8F9FA;
     -webkit-font-smoothing: antialiased;
-
-    /* Configuración de Scroll invisible pero funcional */
     overflow-x: hidden;
     overflow-y: auto;
 
@@ -53,7 +50,6 @@
     min-height: 100dvh;
   }
 
-  /* Áreas seguras para elementos fijos */
   .pb-safe {
     padding-bottom: env(safe-area-inset-bottom);
   }
@@ -66,7 +62,6 @@
     padding-bottom: max(1rem, env(safe-area-inset-bottom));
   }
 
-  /* Utilidad para contenedores con scroll interno */
   .custom-scrollbar {
     overflow-y: auto;
     -webkit-overflow-scrolling: touch;
@@ -74,28 +69,36 @@
 }
 
 /* =========================================
-   3. ESTADOS DE INTERFAZ (MODALES)
+   3. ESTADOS DE INTERFAZ (MODO MODAL / BLOQUEO)
    ========================================= */
-/* Bloqueo total al abrir modal */
+
+/* BLOQUEO DE SCROLL TOTAL
+   Esta combinación es la única que funciona bien en iOS y Android a la vez.
+*/
 body.modal-open {
   overflow: hidden !important;
   position: fixed;
   width: 100%;
   height: 100%;
+  touch-action: none;
+  /* Desactiva gestos táctiles de scroll */
 }
 
-/* Animaciones de salida para limpiar la pantalla */
+/* HEADER: Se desliza hacia ARRIBA
+   Nota: La transición (transition-all) ya debe estar en el componente <Header /> 
+*/
 body.modal-open #app-header {
   transform: translateY(-150%);
   opacity: 0;
   pointer-events: none;
-  transition: transform 0.4s ease, opacity 0.3s ease;
 }
 
+/* BOTTOM NAV & BOTÓN FLOTANTE: Se deslizan hacia ABAJO
+   Nota: La transición ya debe estar en los componentes <BottomNav /> y el botón flotante
+*/
 body.modal-open #app-bottom-nav,
 body.modal-open #floating-cart-btn {
   transform: translateY(150%);
   opacity: 0;
   pointer-events: none;
-  transition: transform 0.4s ease, opacity 0.3s ease;
 }

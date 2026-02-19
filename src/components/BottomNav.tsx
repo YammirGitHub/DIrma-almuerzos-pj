@@ -8,7 +8,6 @@ import { motion } from "framer-motion";
 export default function BottomNav() {
   const pathname = usePathname();
 
-  // Ocultar en rutas de admin
   if (pathname.startsWith("/admin")) return null;
 
   const navItems = [
@@ -17,8 +16,10 @@ export default function BottomNav() {
   ];
 
   return (
-    <div className="fixed bottom-0 left-0 right-0 z-40 flex justify-center pb-safe pointer-events-none">
-      {/* Contenedor Flotante (Isla Dinámica) */}
+    <div
+      id="app-bottom-nav" // <--- 1. ID OBLIGATORIO PARA EL EFECTO
+      className="fixed bottom-0 left-0 right-0 z-40 flex justify-center pb-safe pointer-events-none transition-all duration-500 ease-in-out" // <--- 2. TRANSICIÓN BASE SUAVE
+    >
       <nav className="pointer-events-auto bg-white/95 backdrop-blur-xl border-t border-slate-100 shadow-[0_-4px_20px_rgba(0,0,0,0.03)] w-full pb-[env(safe-area-inset-bottom)] pt-2 md:w-auto md:min-w-[320px] md:rounded-full md:mb-6 md:border md:pb-2 md:px-8 md:shadow-2xl">
         <ul className="flex items-center justify-around h-14 md:gap-12 relative">
           {navItems.map((item) => {
@@ -38,7 +39,6 @@ export default function BottomNav() {
                       : "text-slate-400 hover:text-slate-600"
                   }`}
                 >
-                  {/* Fondo activo animado (Píldora sutil) */}
                   {isActive && (
                     <motion.div
                       layoutId="nav-pill"
@@ -50,7 +50,6 @@ export default function BottomNav() {
                       }}
                     />
                   )}
-
                   <div className="relative">
                     <Icon
                       size={24}
@@ -64,7 +63,6 @@ export default function BottomNav() {
                       />
                     )}
                   </div>
-
                   <span
                     className={`text-[10px] font-bold tracking-tight transition-all ${isActive ? "opacity-100 translate-y-0" : "opacity-70 translate-y-0.5"}`}
                   >

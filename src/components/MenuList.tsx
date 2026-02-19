@@ -124,12 +124,17 @@ export default function MenuList({
     };
   }, [supabase]);
 
-  useEffect(() => {
-    if (selectedProduct || isCheckoutOpen)
-      document.body.style.overflow = "hidden";
-    else document.body.style.overflow = "unset";
-  }, [selectedProduct, isCheckoutOpen]);
-
+useEffect(() => {
+  if (selectedProduct || isCheckoutOpen) {
+    // ESTO ACTIVA LA ANIMACIÓN DEL HEADER
+    document.body.classList.add("modal-open"); 
+  } else {
+    // ESTO LO TRAE DE VUELTA
+    document.body.classList.remove("modal-open");
+  }
+  // Limpieza al desmontar
+  return () => document.body.classList.remove("modal-open");
+}, [selectedProduct, isCheckoutOpen]);
   // --- LÓGICA ---
   const groupedProducts = useMemo(() => {
     const active = products.filter((p) => p.is_available);
@@ -270,23 +275,22 @@ export default function MenuList({
         </div>
       </div>
 
-      {/* 1. NAVEGACIÓN DE FILTROS (SIN FONDO GRIS, SOLO BLUR) */}
-      <div className="sticky top-[5rem] z-30 w-full mb-8">
-        {/* Aquí eliminamos bg-[#F8F9FA]/85 y dejamos solo backdrop-blur-xl para que sea transparente */}
-        <div className="absolute inset-0 backdrop-blur-xl -mx-4 md:-mx-8 lg:-mx-12 mask-gradient-b pointer-events-none" />
-
-        {/* CONTENEDOR FILTROS */}
-        <div className="relative py-3 flex flex-wrap justify-center gap-2.5 max-w-[1400px] mx-auto px-2">
+      {/* 1. NAVEGACIÓN DE FILTROS (Clean & Floating) */}
+      {/* Eliminamos el fondo global y dejamos que los botones "floten" sobre el contenido al hacer scroll */}
+      <div className="sticky top-[5rem] z-30 w-full mb-8 pointer-events-none">
+        {/* CONTENEDOR FILTROS: Pointer-events-auto para que los botones sean clickeables */}
+        <div className="relative py-3 flex flex-wrap justify-center gap-2.5 max-w-[1400px] mx-auto px-2 pointer-events-auto">
           {CATEGORIES.map((cat) => {
             const isActive = filter === cat.id;
             return (
               <button
                 key={cat.id}
                 onClick={() => setFilter(cat.id)}
-                className={`relative px-5 py-2.5 rounded-full text-xs font-bold transition-all duration-300 shadow-sm border active:scale-95 ${
+                // Añadimos shadow-lg y backdrop-blur A CADA BOTÓN para que se lean bien sobre el contenido
+                className={`relative px-5 py-2.5 rounded-full text-xs font-bold transition-all duration-300 shadow-sm border active:scale-95 backdrop-blur-md ${
                   isActive
                     ? "bg-orange-600 text-white border-orange-600 shadow-orange-500/40 z-10"
-                    : "bg-white text-slate-500 border-slate-200 hover:border-orange-200 hover:text-orange-600 hover:shadow-md"
+                    : "bg-white/90 text-slate-500 border-slate-200 hover:border-orange-200 hover:text-orange-600 hover:shadow-md"
                 }`}
               >
                 {isActive && (
@@ -484,34 +488,41 @@ export default function MenuList({
         )}
       </AnimatePresence>
 
-      {/* 4. BOTÓN FLOTANTE CARRITO */}
+      {/* 4. BOTÓN FLOTANTE CARRITO (Premium & Responsivo) */}
       <AnimatePresence>
         {totalItems > 0 && (
           <motion.div
+            id="floating-cart-btn"
             initial={{ y: 100, opacity: 0 }}
             animate={{ y: 0, opacity: 1 }}
             exit={{ y: 100, opacity: 0 }}
             transition={{ type: "spring", stiffness: 260, damping: 20 }}
-            className="fixed bottom-24 left-0 right-0 z-50 flex justify-center px-6 pointer-events-none safe-area-bottom"
+            // CLASES CLAVE PARA POSICIONAMIENTO:
+            // Móvil: Centro, sobre el BottomNav (bottom-24)
+            // Desktop (md:): Esquina inferior derecha (md:bottom-8 md:right-8 md:justify-end md:w-auto)
+            className="fixed bottom-24 left-0 right-0 z-50 flex justify-center md:justify-end md:bottom-8 md:right-8 px-6 md:px-0 pointer-events-none safe-area-bottom"
           >
             <button
               onClick={() => setIsCheckoutOpen(true)}
-              className="pointer-events-auto w-full max-w-sm bg-slate-900 text-white p-2.5 pl-4 pr-2.5 rounded-[1.75rem] shadow-2xl shadow-slate-900/50 flex items-center justify-between active:scale-[0.97] transition-all group backdrop-blur-2xl ring-1 ring-white/10 hover:shadow-slate-900/60 hover:-translate-y-1"
+              // Cambio de Color a Naranja Premium (bg-orange-600)
+              className="pointer-events-auto w-full max-w-sm md:w-auto md:min-w-[300px] bg-orange-600 text-white p-2.5 pl-4 pr-2.5 rounded-[1.75rem] shadow-2xl shadow-orange-600/40 flex items-center justify-between active:scale-[0.97] transition-all group backdrop-blur-2xl ring-1 ring-white/20 hover:bg-orange-500 hover:-translate-y-1"
             >
               <div className="flex items-center gap-4">
-                <div className="bg-orange-500 text-white h-11 w-11 flex items-center justify-center rounded-full text-sm font-black shadow-lg shadow-orange-500/40 ring-2 ring-slate-900">
+                {/* Círculo indicador de cantidad (Blanco con texto naranja) */}
+                <div className="bg-white text-orange-600 h-11 w-11 flex items-center justify-center rounded-full text-sm font-black shadow-inner">
                   {totalItems}
                 </div>
-                <div className="flex flex-col items-start">
-                  <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest leading-tight">
+                <div className="flex flex-col items-start pr-4">
+                  <span className="text-[10px] font-bold text-orange-100 uppercase tracking-widest leading-tight">
                     Total
                   </span>
-                  <span className="font-bold text-white text-base leading-none group-hover:text-orange-400 transition-colors">
+                  <span className="font-bold text-white text-base leading-none drop-shadow-sm">
                     Ver mi pedido
                   </span>
                 </div>
               </div>
-              <div className="bg-white/10 px-5 py-3 rounded-[1.25rem] text-white font-mono font-bold group-hover:bg-white/20 transition-colors border border-white/5">
+              {/* Píldora del precio (Fondo oscuro semitransparente) */}
+              <div className="bg-black/20 px-5 py-3 rounded-[1.25rem] text-white font-mono font-bold border border-white/10 shadow-inner group-hover:bg-black/30 transition-colors">
                 S/ {totalPrice.toFixed(2)}
               </div>
             </button>
