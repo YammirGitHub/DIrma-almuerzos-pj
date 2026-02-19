@@ -1,0 +1,32 @@
+{
+  "node": {
+    "40a31ad3cc716699f722893494082d5961160d86eb": {
+      "workers": {
+        "app/(client)/page": {
+          "moduleId": "(action-browser)/./node_modules/next/dist/build/webpack/loaders/next-flight-action-entry-loader.js?actions=%5B%5B%22%2FUsers%2Fyammir%2FDocuments%2FYammir%2FDOCUMENTOSSSS%20ANTES%20DE%20LA%20ACRTUALIZACION%2FWEB%C2%B4S%2Fd-irma%2Fsrc%2Fapp%2Factions.ts%22%2C%5B%7B%22id%22%3A%2240a31ad3cc716699f722893494082d5961160d86eb%22%2C%22exportedName%22%3A%22searchDni%22%2C%22filename%22%3A%22app%2Factions.ts%22%7D%2C%7B%22id%22%3A%2260c058891ef8c79877bf951b8e8d8c71a499b4e6f3%22%2C%22exportedName%22%3A%22createOrder%22%2C%22filename%22%3A%22app%2Factions.ts%22%7D%5D%5D%5D&__client_imported__=true!",
+          "async": false
+        }
+      },
+      "layer": {
+        "app/(client)/page": "action-browser"
+      },
+      "filename": "app/actions.ts",
+      "exportedName": "searchDni"
+    },
+    "60c058891ef8c79877bf951b8e8d8c71a499b4e6f3": {
+      "workers": {
+        "app/(client)/page": {
+          "moduleId": "(action-browser)/./node_modules/next/dist/build/webpack/loaders/next-flight-action-entry-loader.js?actions=%5B%5B%22%2FUsers%2Fyammir%2FDocuments%2FYammir%2FDOCUMENTOSSSS%20ANTES%20DE%20LA%20ACRTUALIZACION%2FWEB%C2%B4S%2Fd-irma%2Fsrc%2Fapp%2Factions.ts%22%2C%5B%7B%22id%22%3A%2240a31ad3cc716699f722893494082d5961160d86eb%22%2C%22exportedName%22%3A%22searchDni%22%2C%22filename%22%3A%22app%2Factions.ts%22%7D%2C%7B%22id%22%3A%2260c058891ef8c79877bf951b8e8d8c71a499b4e6f3%22%2C%22exportedName%22%3A%22createOrder%22%2C%22filename%22%3A%22app%2Factions.ts%22%7D%5D%5D%5D&__client_imported__=true!",
+          "async": false
+        }
+      },
+      "layer": {
+        "app/(client)/page": "action-browser"
+      },
+      "filename": "app/actions.ts",
+      "exportedName": "createOrder"
+    }
+  },
+  "edge": {},
+  "encryptionKey": "ArJQ99vtiw/Y+nlflYMAT8uLHs5LPgLaAkR+tewsrHQ="
+}

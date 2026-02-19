@@ -1,0 +1,150 @@
+[01:15:15.773] Server  ERROR   ⨯ Error: ENOENT: no such file or directory, open '/Users/yammir/Documents/Yammir/DOCUMENTOSSSS ANTES DE LA ACRTUALIZACION/WEB´S/d-irma/.next/dev/server/app/(client)/page.js'
+[01:15:15.790] Server  ERROR   ⨯ Error: Cannot find module '/Users/yammir/Documents/Yammir/DOCUMENTOSSSS ANTES DE LA ACRTUALIZACION/WEB´S/d-irma/.next/dev/server/pages/_document.js'
+Require stack:
+- /Users/yammir/Documents/Yammir/DOCUMENTOSSSS ANTES DE LA ACRTUALIZACION/WEB´S/d-irma/node_modules/next/dist/server/require.js
+- /Users/yammir/Documents/Yammir/DOCUMENTOSSSS ANTES DE LA ACRTUALIZACION/WEB´S/d-irma/node_modules/next/dist/server/load-components.js
+- /Users/yammir/Documents/Yammir/DOCUMENTOSSSS ANTES DE LA ACRTUALIZACION/WEB´S/d-irma/node_modules/next/dist/build/utils.js
+- /Users/yammir/Documents/Yammir/DOCUMENTOSSSS ANTES DE LA ACRTUALIZACION/WEB´S/d-irma/node_modules/next/dist/build/swc/options.js
+- /Users/yammir/Documents/Yammir/DOCUMENTOSSSS ANTES DE LA ACRTUALIZACION/WEB´S/d-irma/node_modules/next/dist/build/swc/index.js
+- /Users/yammir/Documents/Yammir/DOCUMENTOSSSS ANTES DE LA ACRTUALIZACION/WEB´S/d-irma/node_modules/next/dist/build/next-config-ts/transpile-config.js
+- /Users/yammir/Documents/Yammir/DOCUMENTOSSSS ANTES DE LA ACRTUALIZACION/WEB´S/d-irma/node_modules/next/dist/server/config.js
+- /Users/yammir/Documents/Yammir/DOCUMENTOSSSS ANTES DE LA ACRTUALIZACION/WEB´S/d-irma/node_modules/next/dist/server/next.js
+- /Users/yammir/Documents/Yammir/DOCUMENTOSSSS ANTES DE LA ACRTUALIZACION/WEB´S/d-irma/node_modules/next/dist/server/lib/start-server.js
+[01:15:15.818] Server  ERROR   Error: ENOENT: no such file or directory, open '/Users/yammir/Documents/Yammir/DOCUMENTOSSSS ANTES DE LA ACRTUALIZACION/WEB´S/d-irma/.next/dev/server/app/(client)/page.js'
+[01:15:15.834] Server  ERROR   ⨯ Error: Cannot find module '/Users/yammir/Documents/Yammir/DOCUMENTOSSSS ANTES DE LA ACRTUALIZACION/WEB´S/d-irma/.next/dev/server/pages/_document.js'
+Require stack:
+- /Users/yammir/Documents/Yammir/DOCUMENTOSSSS ANTES DE LA ACRTUALIZACION/WEB´S/d-irma/node_modules/next/dist/server/require.js
+- /Users/yammir/Documents/Yammir/DOCUMENTOSSSS ANTES DE LA ACRTUALIZACION/WEB´S/d-irma/node_modules/next/dist/server/load-components.js
+- /Users/yammir/Documents/Yammir/DOCUMENTOSSSS ANTES DE LA ACRTUALIZACION/WEB´S/d-irma/node_modules/next/dist/build/utils.js
+- /Users/yammir/Documents/Yammir/DOCUMENTOSSSS ANTES DE LA ACRTUALIZACION/WEB´S/d-irma/node_modules/next/dist/build/swc/options.js
+- /Users/yammir/Documents/Yammir/DOCUMENTOSSSS ANTES DE LA ACRTUALIZACION/WEB´S/d-irma/node_modules/next/dist/build/swc/index.js
+- /Users/yammir/Documents/Yammir/DOCUMENTOSSSS ANTES DE LA ACRTUALIZACION/WEB´S/d-irma/node_modules/next/dist/build/next-config-ts/transpile-config.js
+- /Users/yammir/Documents/Yammir/DOCUMENTOSSSS ANTES DE LA ACRTUALIZACION/WEB´S/d-irma/node_modules/next/dist/server/config.js
+- /Users/yammir/Documents/Yammir/DOCUMENTOSSSS ANTES DE LA ACRTUALIZACION/WEB´S/d-irma/node_modules/next/dist/server/next.js
+- /Users/yammir/Documents/Yammir/DOCUMENTOSSSS ANTES DE LA ACRTUALIZACION/WEB´S/d-irma/node_modules/next/dist/server/lib/start-server.js
+[01:15:15.853] Server  ERROR   ⨯ Error: ENOENT: no such file or directory, open '/Users/yammir/Documents/Yammir/DOCUMENTOSSSS ANTES DE LA ACRTUALIZACION/WEB´S/d-irma/.next/dev/server/app/(admin)/admin/dashboard/page.js'
+[01:15:15.869] Server  ERROR   ⨯ Error: Cannot find module '/Users/yammir/Documents/Yammir/DOCUMENTOSSSS ANTES DE LA ACRTUALIZACION/WEB´S/d-irma/.next/dev/server/pages/_document.js'
+Require stack:
+- /Users/yammir/Documents/Yammir/DOCUMENTOSSSS ANTES DE LA ACRTUALIZACION/WEB´S/d-irma/node_modules/next/dist/server/require.js
+- /Users/yammir/Documents/Yammir/DOCUMENTOSSSS ANTES DE LA ACRTUALIZACION/WEB´S/d-irma/node_modules/next/dist/server/load-components.js
+- /Users/yammir/Documents/Yammir/DOCUMENTOSSSS ANTES DE LA ACRTUALIZACION/WEB´S/d-irma/node_modules/next/dist/build/utils.js
+- /Users/yammir/Documents/Yammir/DOCUMENTOSSSS ANTES DE LA ACRTUALIZACION/WEB´S/d-irma/node_modules/next/dist/build/swc/options.js
+- /Users/yammir/Documents/Yammir/DOCUMENTOSSSS ANTES DE LA ACRTUALIZACION/WEB´S/d-irma/node_modules/next/dist/build/swc/index.js
+- /Users/yammir/Documents/Yammir/DOCUMENTOSSSS ANTES DE LA ACRTUALIZACION/WEB´S/d-irma/node_modules/next/dist/build/next-config-ts/transpile-config.js
+- /Users/yammir/Documents/Yammir/DOCUMENTOSSSS ANTES DE LA ACRTUALIZACION/WEB´S/d-irma/node_modules/next/dist/server/config.js
+- /Users/yammir/Documents/Yammir/DOCUMENTOSSSS ANTES DE LA ACRTUALIZACION/WEB´S/d-irma/node_modules/next/dist/server/next.js
+- /Users/yammir/Documents/Yammir/DOCUMENTOSSSS ANTES DE LA ACRTUALIZACION/WEB´S/d-irma/node_modules/next/dist/server/lib/start-server.js
+[01:15:15.883] Server  ERROR   Error: ENOENT: no such file or directory, open '/Users/yammir/Documents/Yammir/DOCUMENTOSSSS ANTES DE LA ACRTUALIZACION/WEB´S/d-irma/.next/dev/routes-manifest.json'
+[01:15:15.901] Server  ERROR   ⨯ Error: ENOENT: no such file or directory, open '/Users/yammir/Documents/Yammir/DOCUMENTOSSSS ANTES DE LA ACRTUALIZACION/WEB´S/d-irma/.next/dev/server/app/(client)/page.js'
+[01:15:15.935] Server  ERROR   ⨯ Error: Cannot find module '/Users/yammir/Documents/Yammir/DOCUMENTOSSSS ANTES DE LA ACRTUALIZACION/WEB´S/d-irma/.next/dev/server/pages/_document.js'
+Require stack:
+- /Users/yammir/Documents/Yammir/DOCUMENTOSSSS ANTES DE LA ACRTUALIZACION/WEB´S/d-irma/node_modules/next/dist/server/require.js
+- /Users/yammir/Documents/Yammir/DOCUMENTOSSSS ANTES DE LA ACRTUALIZACION/WEB´S/d-irma/node_modules/next/dist/server/load-components.js
+- /Users/yammir/Documents/Yammir/DOCUMENTOSSSS ANTES DE LA ACRTUALIZACION/WEB´S/d-irma/node_modules/next/dist/build/utils.js
+- /Users/yammir/Documents/Yammir/DOCUMENTOSSSS ANTES DE LA ACRTUALIZACION/WEB´S/d-irma/node_modules/next/dist/build/swc/options.js
+- /Users/yammir/Documents/Yammir/DOCUMENTOSSSS ANTES DE LA ACRTUALIZACION/WEB´S/d-irma/node_modules/next/dist/build/swc/index.js
+- /Users/yammir/Documents/Yammir/DOCUMENTOSSSS ANTES DE LA ACRTUALIZACION/WEB´S/d-irma/node_modules/next/dist/build/next-config-ts/transpile-config.js
+- /Users/yammir/Documents/Yammir/DOCUMENTOSSSS ANTES DE LA ACRTUALIZACION/WEB´S/d-irma/node_modules/next/dist/server/config.js
+- /Users/yammir/Documents/Yammir/DOCUMENTOSSSS ANTES DE LA ACRTUALIZACION/WEB´S/d-irma/node_modules/next/dist/server/next.js
+- /Users/yammir/Documents/Yammir/DOCUMENTOSSSS ANTES DE LA ACRTUALIZACION/WEB´S/d-irma/node_modules/next/dist/server/lib/start-server.js
+[01:15:15.947] Server  ERROR   Error: ENOENT: no such file or directory, open '/Users/yammir/Documents/Yammir/DOCUMENTOSSSS ANTES DE LA ACRTUALIZACION/WEB´S/d-irma/.next/dev/server/app/(admin)/admin/dashboard/page.js'
+[01:15:16.002] Server  ERROR   ⨯ Error: Cannot find module '/Users/yammir/Documents/Yammir/DOCUMENTOSSSS ANTES DE LA ACRTUALIZACION/WEB´S/d-irma/.next/dev/server/pages/_document.js'
+Require stack:
+- /Users/yammir/Documents/Yammir/DOCUMENTOSSSS ANTES DE LA ACRTUALIZACION/WEB´S/d-irma/node_modules/next/dist/server/require.js
+- /Users/yammir/Documents/Yammir/DOCUMENTOSSSS ANTES DE LA ACRTUALIZACION/WEB´S/d-irma/node_modules/next/dist/server/load-components.js
+- /Users/yammir/Documents/Yammir/DOCUMENTOSSSS ANTES DE LA ACRTUALIZACION/WEB´S/d-irma/node_modules/next/dist/build/utils.js
+- /Users/yammir/Documents/Yammir/DOCUMENTOSSSS ANTES DE LA ACRTUALIZACION/WEB´S/d-irma/node_modules/next/dist/build/swc/options.js
+- /Users/yammir/Documents/Yammir/DOCUMENTOSSSS ANTES DE LA ACRTUALIZACION/WEB´S/d-irma/node_modules/next/dist/build/swc/index.js
+- /Users/yammir/Documents/Yammir/DOCUMENTOSSSS ANTES DE LA ACRTUALIZACION/WEB´S/d-irma/node_modules/next/dist/build/next-config-ts/transpile-config.js
+- /Users/yammir/Documents/Yammir/DOCUMENTOSSSS ANTES DE LA ACRTUALIZACION/WEB´S/d-irma/node_modules/next/dist/server/config.js
+- /Users/yammir/Documents/Yammir/DOCUMENTOSSSS ANTES DE LA ACRTUALIZACION/WEB´S/d-irma/node_modules/next/dist/server/next.js
+- /Users/yammir/Documents/Yammir/DOCUMENTOSSSS ANTES DE LA ACRTUALIZACION/WEB´S/d-irma/node_modules/next/dist/server/lib/start-server.js
+[01:15:16.024] Server  ERROR   Error: ENOENT: no such file or directory, open '/Users/yammir/Documents/Yammir/DOCUMENTOSSSS ANTES DE LA ACRTUALIZACION/WEB´S/d-irma/.next/dev/server/app/(client)/page.js'
+[01:15:16.050] Server  ERROR   ⨯ Error: Cannot find module '/Users/yammir/Documents/Yammir/DOCUMENTOSSSS ANTES DE LA ACRTUALIZACION/WEB´S/d-irma/.next/dev/server/pages/_document.js'
+Require stack:
+- /Users/yammir/Documents/Yammir/DOCUMENTOSSSS ANTES DE LA ACRTUALIZACION/WEB´S/d-irma/node_modules/next/dist/server/require.js
+- /Users/yammir/Documents/Yammir/DOCUMENTOSSSS ANTES DE LA ACRTUALIZACION/WEB´S/d-irma/node_modules/next/dist/server/load-components.js
+- /Users/yammir/Documents/Yammir/DOCUMENTOSSSS ANTES DE LA ACRTUALIZACION/WEB´S/d-irma/node_modules/next/dist/build/utils.js
+- /Users/yammir/Documents/Yammir/DOCUMENTOSSSS ANTES DE LA ACRTUALIZACION/WEB´S/d-irma/node_modules/next/dist/build/swc/options.js
+- /Users/yammir/Documents/Yammir/DOCUMENTOSSSS ANTES DE LA ACRTUALIZACION/WEB´S/d-irma/node_modules/next/dist/build/swc/index.js
+- /Users/yammir/Documents/Yammir/DOCUMENTOSSSS ANTES DE LA ACRTUALIZACION/WEB´S/d-irma/node_modules/next/dist/build/next-config-ts/transpile-config.js
+- /Users/yammir/Documents/Yammir/DOCUMENTOSSSS ANTES DE LA ACRTUALIZACION/WEB´S/d-irma/node_modules/next/dist/server/config.js
+- /Users/yammir/Documents/Yammir/DOCUMENTOSSSS ANTES DE LA ACRTUALIZACION/WEB´S/d-irma/node_modules/next/dist/server/next.js
+- /Users/yammir/Documents/Yammir/DOCUMENTOSSSS ANTES DE LA ACRTUALIZACION/WEB´S/d-irma/node_modules/next/dist/server/lib/start-server.js
+[01:15:16.069] Server  ERROR   Error: ENOENT: no such file or directory, open '/Users/yammir/Documents/Yammir/DOCUMENTOSSSS ANTES DE LA ACRTUALIZACION/WEB´S/d-irma/.next/dev/routes-manifest.json'
+[01:15:16.092] Server  ERROR   Error: ENOENT: no such file or directory, open '/Users/yammir/Documents/Yammir/DOCUMENTOSSSS ANTES DE LA ACRTUALIZACION/WEB´S/d-irma/.next/dev/routes-manifest.json'
+[01:15:16.121] Server  ERROR   ⨯ Error: ENOENT: no such file or directory, open '/Users/yammir/Documents/Yammir/DOCUMENTOSSSS ANTES DE LA ACRTUALIZACION/WEB´S/d-irma/.next/dev/server/app/(client)/page.js'
+[01:15:16.200] Server  ERROR   ⨯ Error: Cannot find module '/Users/yammir/Documents/Yammir/DOCUMENTOSSSS ANTES DE LA ACRTUALIZACION/WEB´S/d-irma/.next/dev/server/pages/_document.js'
+Require stack:
+- /Users/yammir/Documents/Yammir/DOCUMENTOSSSS ANTES DE LA ACRTUALIZACION/WEB´S/d-irma/node_modules/next/dist/server/require.js
+- /Users/yammir/Documents/Yammir/DOCUMENTOSSSS ANTES DE LA ACRTUALIZACION/WEB´S/d-irma/node_modules/next/dist/server/load-components.js
+- /Users/yammir/Documents/Yammir/DOCUMENTOSSSS ANTES DE LA ACRTUALIZACION/WEB´S/d-irma/node_modules/next/dist/build/utils.js
+- /Users/yammir/Documents/Yammir/DOCUMENTOSSSS ANTES DE LA ACRTUALIZACION/WEB´S/d-irma/node_modules/next/dist/build/swc/options.js
+- /Users/yammir/Documents/Yammir/DOCUMENTOSSSS ANTES DE LA ACRTUALIZACION/WEB´S/d-irma/node_modules/next/dist/build/swc/index.js
+- /Users/yammir/Documents/Yammir/DOCUMENTOSSSS ANTES DE LA ACRTUALIZACION/WEB´S/d-irma/node_modules/next/dist/build/next-config-ts/transpile-config.js
+- /Users/yammir/Documents/Yammir/DOCUMENTOSSSS ANTES DE LA ACRTUALIZACION/WEB´S/d-irma/node_modules/next/dist/server/config.js
+- /Users/yammir/Documents/Yammir/DOCUMENTOSSSS ANTES DE LA ACRTUALIZACION/WEB´S/d-irma/node_modules/next/dist/server/next.js
+- /Users/yammir/Documents/Yammir/DOCUMENTOSSSS ANTES DE LA ACRTUALIZACION/WEB´S/d-irma/node_modules/next/dist/server/lib/start-server.js
+[01:15:16.240] Server  ERROR   ⨯ Error: ENOENT: no such file or directory, open '/Users/yammir/Documents/Yammir/DOCUMENTOSSSS ANTES DE LA ACRTUALIZACION/WEB´S/d-irma/.next/dev/server/app/(admin)/admin/dashboard/page.js'
+[01:15:16.268] Server  ERROR   ⨯ Error: Cannot find module '/Users/yammir/Documents/Yammir/DOCUMENTOSSSS ANTES DE LA ACRTUALIZACION/WEB´S/d-irma/.next/dev/server/pages/_document.js'
+Require stack:
+- /Users/yammir/Documents/Yammir/DOCUMENTOSSSS ANTES DE LA ACRTUALIZACION/WEB´S/d-irma/node_modules/next/dist/server/require.js
+- /Users/yammir/Documents/Yammir/DOCUMENTOSSSS ANTES DE LA ACRTUALIZACION/WEB´S/d-irma/node_modules/next/dist/server/load-components.js
+- /Users/yammir/Documents/Yammir/DOCUMENTOSSSS ANTES DE LA ACRTUALIZACION/WEB´S/d-irma/node_modules/next/dist/build/utils.js
+- /Users/yammir/Documents/Yammir/DOCUMENTOSSSS ANTES DE LA ACRTUALIZACION/WEB´S/d-irma/node_modules/next/dist/build/swc/options.js
+- /Users/yammir/Documents/Yammir/DOCUMENTOSSSS ANTES DE LA ACRTUALIZACION/WEB´S/d-irma/node_modules/next/dist/build/swc/index.js
+- /Users/yammir/Documents/Yammir/DOCUMENTOSSSS ANTES DE LA ACRTUALIZACION/WEB´S/d-irma/node_modules/next/dist/build/next-config-ts/transpile-config.js
+- /Users/yammir/Documents/Yammir/DOCUMENTOSSSS ANTES DE LA ACRTUALIZACION/WEB´S/d-irma/node_modules/next/dist/server/config.js
+- /Users/yammir/Documents/Yammir/DOCUMENTOSSSS ANTES DE LA ACRTUALIZACION/WEB´S/d-irma/node_modules/next/dist/server/next.js
+- /Users/yammir/Documents/Yammir/DOCUMENTOSSSS ANTES DE LA ACRTUALIZACION/WEB´S/d-irma/node_modules/next/dist/server/lib/start-server.js
+[01:15:16.289] Server  ERROR   Error: ENOENT: no such file or directory, open '/Users/yammir/Documents/Yammir/DOCUMENTOSSSS ANTES DE LA ACRTUALIZACION/WEB´S/d-irma/.next/dev/server/app/(client)/page.js'
+[01:15:16.427] Server  ERROR   ⨯ Error: ENOENT: no such file or directory, open '/Users/yammir/Documents/Yammir/DOCUMENTOSSSS ANTES DE LA ACRTUALIZACION/WEB´S/d-irma/.next/dev/server/app/(client)/page.js'
+[01:15:16.869] Server  ERROR   ⨯ Error: Cannot find module '/Users/yammir/Documents/Yammir/DOCUMENTOSSSS ANTES DE LA ACRTUALIZACION/WEB´S/d-irma/.next/dev/server/pages/_document.js'
+Require stack:
+- /Users/yammir/Documents/Yammir/DOCUMENTOSSSS ANTES DE LA ACRTUALIZACION/WEB´S/d-irma/node_modules/next/dist/server/require.js
+- /Users/yammir/Documents/Yammir/DOCUMENTOSSSS ANTES DE LA ACRTUALIZACION/WEB´S/d-irma/node_modules/next/dist/server/load-components.js
+- /Users/yammir/Documents/Yammir/DOCUMENTOSSSS ANTES DE LA ACRTUALIZACION/WEB´S/d-irma/node_modules/next/dist/build/utils.js
+- /Users/yammir/Documents/Yammir/DOCUMENTOSSSS ANTES DE LA ACRTUALIZACION/WEB´S/d-irma/node_modules/next/dist/build/swc/options.js
+- /Users/yammir/Documents/Yammir/DOCUMENTOSSSS ANTES DE LA ACRTUALIZACION/WEB´S/d-irma/node_modules/next/dist/build/swc/index.js
+- /Users/yammir/Documents/Yammir/DOCUMENTOSSSS ANTES DE LA ACRTUALIZACION/WEB´S/d-irma/node_modules/next/dist/build/next-config-ts/transpile-config.js
+- /Users/yammir/Documents/Yammir/DOCUMENTOSSSS ANTES DE LA ACRTUALIZACION/WEB´S/d-irma/node_modules/next/dist/server/config.js
+- /Users/yammir/Documents/Yammir/DOCUMENTOSSSS ANTES DE LA ACRTUALIZACION/WEB´S/d-irma/node_modules/next/dist/server/next.js
+- /Users/yammir/Documents/Yammir/DOCUMENTOSSSS ANTES DE LA ACRTUALIZACION/WEB´S/d-irma/node_modules/next/dist/server/lib/start-server.js
+[01:15:16.882] Server  ERROR   ⨯ Error: Cannot find module '/Users/yammir/Documents/Yammir/DOCUMENTOSSSS ANTES DE LA ACRTUALIZACION/WEB´S/d-irma/.next/dev/server/pages/_document.js'
+Require stack:
+- /Users/yammir/Documents/Yammir/DOCUMENTOSSSS ANTES DE LA ACRTUALIZACION/WEB´S/d-irma/node_modules/next/dist/server/require.js
+- /Users/yammir/Documents/Yammir/DOCUMENTOSSSS ANTES DE LA ACRTUALIZACION/WEB´S/d-irma/node_modules/next/dist/server/load-components.js
+- /Users/yammir/Documents/Yammir/DOCUMENTOSSSS ANTES DE LA ACRTUALIZACION/WEB´S/d-irma/node_modules/next/dist/build/utils.js
+- /Users/yammir/Documents/Yammir/DOCUMENTOSSSS ANTES DE LA ACRTUALIZACION/WEB´S/d-irma/node_modules/next/dist/build/swc/options.js
+- /Users/yammir/Documents/Yammir/DOCUMENTOSSSS ANTES DE LA ACRTUALIZACION/WEB´S/d-irma/node_modules/next/dist/build/swc/index.js
+- /Users/yammir/Documents/Yammir/DOCUMENTOSSSS ANTES DE LA ACRTUALIZACION/WEB´S/d-irma/node_modules/next/dist/build/next-config-ts/transpile-config.js
+- /Users/yammir/Documents/Yammir/DOCUMENTOSSSS ANTES DE LA ACRTUALIZACION/WEB´S/d-irma/node_modules/next/dist/server/config.js
+- /Users/yammir/Documents/Yammir/DOCUMENTOSSSS ANTES DE LA ACRTUALIZACION/WEB´S/d-irma/node_modules/next/dist/server/next.js
+- /Users/yammir/Documents/Yammir/DOCUMENTOSSSS ANTES DE LA ACRTUALIZACION/WEB´S/d-irma/node_modules/next/dist/server/lib/start-server.js
+[01:15:16.894] Server  ERROR   Error: ENOENT: no such file or directory, open '/Users/yammir/Documents/Yammir/DOCUMENTOSSSS ANTES DE LA ACRTUALIZACION/WEB´S/d-irma/.next/dev/server/app/(admin)/admin/dashboard/page.js'
+[01:15:16.914] Server  ERROR   ⨯ Error: Cannot find module '/Users/yammir/Documents/Yammir/DOCUMENTOSSSS ANTES DE LA ACRTUALIZACION/WEB´S/d-irma/.next/dev/server/pages/_document.js'
+Require stack:
+- /Users/yammir/Documents/Yammir/DOCUMENTOSSSS ANTES DE LA ACRTUALIZACION/WEB´S/d-irma/node_modules/next/dist/server/require.js
+- /Users/yammir/Documents/Yammir/DOCUMENTOSSSS ANTES DE LA ACRTUALIZACION/WEB´S/d-irma/node_modules/next/dist/server/load-components.js
+- /Users/yammir/Documents/Yammir/DOCUMENTOSSSS ANTES DE LA ACRTUALIZACION/WEB´S/d-irma/node_modules/next/dist/build/utils.js
+- /Users/yammir/Documents/Yammir/DOCUMENTOSSSS ANTES DE LA ACRTUALIZACION/WEB´S/d-irma/node_modules/next/dist/build/swc/options.js
+- /Users/yammir/Documents/Yammir/DOCUMENTOSSSS ANTES DE LA ACRTUALIZACION/WEB´S/d-irma/node_modules/next/dist/build/swc/index.js
+- /Users/yammir/Documents/Yammir/DOCUMENTOSSSS ANTES DE LA ACRTUALIZACION/WEB´S/d-irma/node_modules/next/dist/build/next-config-ts/transpile-config.js
+- /Users/yammir/Documents/Yammir/DOCUMENTOSSSS ANTES DE LA ACRTUALIZACION/WEB´S/d-irma/node_modules/next/dist/server/config.js
+- /Users/yammir/Documents/Yammir/DOCUMENTOSSSS ANTES DE LA ACRTUALIZACION/WEB´S/d-irma/node_modules/next/dist/server/next.js
+- /Users/yammir/Documents/Yammir/DOCUMENTOSSSS ANTES DE LA ACRTUALIZACION/WEB´S/d-irma/node_modules/next/dist/server/lib/start-server.js
+[01:15:16.925] Server  ERROR   Error: ENOENT: no such file or directory, open '/Users/yammir/Documents/Yammir/DOCUMENTOSSSS ANTES DE LA ACRTUALIZACION/WEB´S/d-irma/.next/dev/routes-manifest.json'
+[01:15:16.937] Server  ERROR   Error: ENOENT: no such file or directory, open '/Users/yammir/Documents/Yammir/DOCUMENTOSSSS ANTES DE LA ACRTUALIZACION/WEB´S/d-irma/.next/dev/server/app/(client)/page.js'
+[01:15:16.954] Server  ERROR   ⨯ Error: Cannot find module '/Users/yammir/Documents/Yammir/DOCUMENTOSSSS ANTES DE LA ACRTUALIZACION/WEB´S/d-irma/.next/dev/server/pages/_document.js'
+Require stack:
+- /Users/yammir/Documents/Yammir/DOCUMENTOSSSS ANTES DE LA ACRTUALIZACION/WEB´S/d-irma/node_modules/next/dist/server/require.js
+- /Users/yammir/Documents/Yammir/DOCUMENTOSSSS ANTES DE LA ACRTUALIZACION/WEB´S/d-irma/node_modules/next/dist/server/load-components.js
+- /Users/yammir/Documents/Yammir/DOCUMENTOSSSS ANTES DE LA ACRTUALIZACION/WEB´S/d-irma/node_modules/next/dist/build/utils.js
+- /Users/yammir/Documents/Yammir/DOCUMENTOSSSS ANTES DE LA ACRTUALIZACION/WEB´S/d-irma/node_modules/next/dist/build/swc/options.js
+- /Users/yammir/Documents/Yammir/DOCUMENTOSSSS ANTES DE LA ACRTUALIZACION/WEB´S/d-irma/node_modules/next/dist/build/swc/index.js
+- /Users/yammir/Documents/Yammir/DOCUMENTOSSSS ANTES DE LA ACRTUALIZACION/WEB´S/d-irma/node_modules/next/dist/build/next-config-ts/transpile-config.js
+- /Users/yammir/Documents/Yammir/DOCUMENTOSSSS ANTES DE LA ACRTUALIZACION/WEB´S/d-irma/node_modules/next/dist/server/config.js
+- /Users/yammir/Documents/Yammir/DOCUMENTOSSSS ANTES DE LA ACRTUALIZACION/WEB´S/d-irma/node_modules/next/dist/server/next.js
+- /Users/yammir/Documents/Yammir/DOCUMENTOSSSS ANTES DE LA ACRTUALIZACION/WEB´S/d-irma/node_modules/next/dist/server/lib/start-server.js
+[01:15:16.966] Server  ERROR   Error: ENOENT: no such file or directory, open '/Users/yammir/Documents/Yammir/DOCUMENTOSSSS ANTES DE LA ACRTUALIZACION/WEB´S/d-irma/.next/dev/routes-manifest.json'
+[01:15:16.978] Server  ERROR   Error: ENOENT: no such file or directory, open '/Users/yammir/Documents/Yammir/DOCUMENTOSSSS ANTES DE LA ACRTUALIZACION/WEB´S/d-irma/.next/dev/routes-manifest.json'

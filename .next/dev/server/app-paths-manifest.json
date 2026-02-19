@@ -1,0 +1,6 @@
+{
+  "/pedido/[id]/page": "app/pedido/[id]/page.js",
+  "/historial/page": "app/historial/page.js",
+  "/(admin)/admin/dashboard/page": "app/(admin)/admin/dashboard/page.js",
+  "/(client)/page": "app/(client)/page.js"
+}

@@ -46,7 +46,7 @@ const formatOrderNumber = (id: string, dateStr: string) => {
     .slice(0, 4)
     .toUpperCase();
 
-  return `${yy}${mm}${dd}-${hh}${min}-${shortHash}`;
+  return `PED-${shortHash}-${yy}${mm}${dd}-${hh}${min}`;
 };
 
 const formatDate = (dateString: string) => {
