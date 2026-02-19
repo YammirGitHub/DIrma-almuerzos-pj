@@ -25,6 +25,7 @@ import { twMerge } from "tailwind-merge";
 function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }
+
 // --- TIPOS ESTRICTOS ---
 type Product = {
   id: string;
@@ -34,24 +35,23 @@ type Product = {
   category: string;
   image_url: string;
   is_available: boolean;
+  stock?: number | null;
+  options?: { entradas?: string[]; bebidas?: string[] } | null;
 };
 
 type CartItem = {
   product: Product;
   qty: number;
-  options?: { entrada?: string; bebida?: string; cremas?: string };
+  options?: { entrada?: string; bebida?: string };
 };
-
 type Cart = { [key: string]: CartItem };
 
-// --- CONFIGURACIÓN DE CATEGORÍAS ---
 const CATEGORIES = [
   { id: "all", label: "Todo" },
-  { id: "menu", label: "Menú" },
+  { id: "menu", label: "Menú Ejecutivo" },
+  { id: "plato", label: "A la Carta" },
   { id: "diet", label: "Dietas" },
-  { id: "plato", label: "Carta" },
-  { id: "extra", label: "Extras" },
-  { id: "bebida", label: "Bebidas" },
+  { id: "adicional", label: "Adicionales" },
 ];
 
 export default function MenuList({
@@ -59,47 +59,21 @@ export default function MenuList({
 }: {
   products: Product[];
 }) {
-  // --- ESTADO GLOBAL ---
   const [products, setProducts] = useState<Product[]>(initialProducts);
   const [cart, setCart] = useState<Cart>({});
   const [isCartLoaded, setIsCartLoaded] = useState(false);
-
-  // --- ESTADO UI ---
   const [filter, setFilter] = useState("all");
   const [isCheckoutOpen, setIsCheckoutOpen] = useState(false);
-  const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
 
-  // Opciones Temporales (Se inicializan dinámicamente al abrir el modal)
-  const [tempOptions, setTempOptions] = useState({
-    entrada: "",
-    bebida: "",
-  });
+  // MODAL DINÁMICO
+  const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
+  const [tempOptions, setTempOptions] = useState({ entrada: "", bebida: "" });
 
   const supabase = createBrowserClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
   );
 
-  // --- 1. LECTURA DINÁMICA DE OPCIONES (DESDE LA BD) ---
-  // Filtramos los productos activos que son "extra" (Entradas) y "bebida"
-  const dynamicOptions = useMemo(() => {
-    const activeProducts = products.filter((p) => p.is_available);
-
-    const entradas = activeProducts
-      .filter((p) => p.category === "extra")
-      .map((p) => p.name);
-
-    const bebidas = activeProducts
-      .filter((p) => p.category === "bebida")
-      .map((p) => p.name);
-
-    return {
-      entrada: entradas.length > 0 ? entradas : ["Sin entradas disponibles"],
-      bebida: bebidas.length > 0 ? bebidas : ["Sin bebidas disponibles"],
-    };
-  }, [products]);
-
-  // --- 2. EFECTOS (Persistencia y Realtime) ---
   useEffect(() => {
     const savedCart = localStorage.getItem("d-irma-cart");
     if (savedCart) {
@@ -118,7 +92,7 @@ export default function MenuList({
 
   useEffect(() => {
     const channel = supabase
-      .channel("menu_realtime_v7")
+      .channel("menu_realtime_v8")
       .on(
         "postgres_changes",
         { event: "*", schema: "public", table: "products" },
@@ -141,25 +115,28 @@ export default function MenuList({
     };
   }, [supabase]);
 
-  // Bloqueo de scroll elegante
   useEffect(() => {
-    if (selectedProduct || isCheckoutOpen) {
+    if (selectedProduct || isCheckoutOpen)
       document.body.classList.add("modal-open");
-    } else {
-      document.body.classList.remove("modal-open");
-    }
+    else document.body.classList.remove("modal-open");
     return () => document.body.classList.remove("modal-open");
   }, [selectedProduct, isCheckoutOpen]);
 
-  // --- 3. LÓGICA DE NEGOCIO ---
   const groupedProducts = useMemo(() => {
-    const active = products.filter((p) => p.is_available);
+    const active = products.filter(
+      (p) =>
+        p.is_available &&
+        (p.stock === null || p.stock === undefined || p.stock > 0),
+    );
     return {
       menu: active.filter((p) => p.category === "menu"),
       plato: active.filter((p) => p.category === "plato"),
       diet: active.filter((p) => p.category === "diet"),
-      extra: active.filter((p) => p.category === "extra"),
-      bebida: active.filter((p) => p.category === "bebida"),
+      // Cambiamos 'extra' y 'bebida' por 'adicional'.
+      // (Añado "extra" en el filter por si tienes platos antiguos ya guardados en tu base de datos con esa palabra)
+      adicional: active.filter(
+        (p) => p.category === "adicional" || p.category === "extra",
+      ),
     };
   }, [products]);
 
@@ -189,27 +166,28 @@ export default function MenuList({
     });
   };
 
-  const getProductQty = (productId: string) => {
-    return Object.values(cart)
+  const getProductQty = (productId: string) =>
+    Object.values(cart)
       .filter((item) => item.product.id === productId)
       .reduce((acc, item) => acc + item.qty, 0);
-  };
 
   const handleProductAction = (product: Product, action: "add" | "remove") => {
-    const isMenu = ["menu", "diet"].includes(product.category);
+    // Si la accion es "añadir", revisamos si ESTE producto específico tiene opciones configuradas en la BD.
+    const hasEntradas =
+      product.options?.entradas && product.options.entradas.length > 0;
+    const hasBebidas =
+      product.options?.bebidas && product.options.bebidas.length > 0;
 
-    if (action === "add" && isMenu) {
-      // Seteamos las primeras opciones dinámicas disponibles por defecto
+    if (action === "add" && (hasEntradas || hasBebidas)) {
       setTempOptions({
-        entrada: dynamicOptions.entrada[0],
-        bebida: dynamicOptions.bebida[0],
+        entrada: hasEntradas ? product.options!.entradas![0] : "",
+        bebida: hasBebidas ? product.options!.bebidas![0] : "",
       });
       setSelectedProduct(product);
-      return;
-    }
-
-    if (action === "add") addToCart(product);
-    else {
+    } else if (action === "add") {
+      // Si no tiene opciones (ej. Dieta sin entradas, o Carta), directo al carrito
+      addToCart(product);
+    } else {
       const simpleId = product.id;
       if (cart[simpleId]) removeFromCart(simpleId);
       else setIsCheckoutOpen(true);
@@ -225,7 +203,6 @@ export default function MenuList({
     0,
   );
 
-  // --- RENDER SECCIONES ---
   const renderSection = (
     key: keyof typeof groupedProducts,
     title: string,
@@ -255,7 +232,6 @@ export default function MenuList({
             </h3>
           </div>
         )}
-
         <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6 px-2">
           {items.map((product) => (
             <ProductCard
@@ -273,7 +249,6 @@ export default function MenuList({
 
   return (
     <>
-      {/* 0. HEADER "NUESTRA CARTA" */}
       <div className="mb-6 px-2 md:px-0 flex flex-col md:flex-row md:items-end justify-between gap-6">
         <div>
           <div className="flex items-center gap-2 mb-2">
@@ -294,7 +269,6 @@ export default function MenuList({
         </div>
       </div>
 
-      {/* 1. NAVEGACIÓN DE FILTROS */}
       <div className="sticky top-[5rem] z-30 w-full mb-8 pointer-events-none">
         <div className="absolute inset-0 backdrop-blur-xl -mx-4 md:-mx-8 lg:-mx-12 mask-gradient-b pointer-events-none" />
         <div className="relative py-3 flex flex-wrap justify-center gap-2.5 max-w-[1400px] mx-auto px-2 pointer-events-auto">
@@ -304,11 +278,12 @@ export default function MenuList({
               <button
                 key={cat.id}
                 onClick={() => setFilter(cat.id)}
-                className={`relative px-5 py-2.5 rounded-full text-xs font-bold transition-all duration-300 shadow-sm border active:scale-95 backdrop-blur-md ${
+                className={cn(
+                  "relative px-5 py-2.5 rounded-full text-xs font-bold transition-all duration-300 shadow-sm border active:scale-95 backdrop-blur-md",
                   isActive
                     ? "bg-orange-600 text-white border-orange-600 shadow-orange-500/20 z-10"
-                    : "bg-white/90 text-slate-500 border-slate-200 hover:border-orange-200 hover:text-orange-600"
-                }`}
+                    : "bg-white/90 text-slate-500 border-slate-200 hover:border-orange-200 hover:text-orange-600",
+                )}
               >
                 {isActive && (
                   <motion.div
@@ -324,7 +299,6 @@ export default function MenuList({
         </div>
       </div>
 
-      {/* 2. CONTENIDO PRINCIPAL */}
       <div className="pb-32 min-h-[60vh] max-w-[1400px] mx-auto">
         {renderSection(
           "menu",
@@ -333,28 +307,22 @@ export default function MenuList({
           "bg-orange-500",
         )}
         {renderSection(
-          "diet",
-          "Dietas Saludables",
-          <Salad size={20} />,
-          "bg-green-500",
-        )}
-        {renderSection(
           "plato",
           "Especiales a la Carta",
           <Soup size={20} />,
           "bg-red-500",
         )}
         {renderSection(
-          "extra",
-          "Extras & Guarniciones",
-          <Coffee size={20} />,
-          "bg-yellow-500",
+          "diet",
+          "Dietas Saludables",
+          <Salad size={20} />,
+          "bg-green-500",
         )}
         {renderSection(
-          "bebida",
-          "Bebidas",
-          <GlassWater size={20} />,
-          "bg-cyan-500",
+          "adicional",
+          "Para Acompañar",
+          <Coffee size={20} />,
+          "bg-yellow-500",
         )}
 
         {Object.values(groupedProducts).every((arr) => arr.length === 0) && (
@@ -376,7 +344,7 @@ export default function MenuList({
         )}
       </div>
 
-      {/* 3. MODAL DE OPCIONES (REDISEÑO PREMIUM APPLE/LINEAR STYLE) */}
+      {/* --- MODAL DE OPCIONES DINÁMICO --- */}
       <AnimatePresence>
         {selectedProduct && (
           <div className="fixed inset-0 z-[60] flex items-end sm:items-center justify-center sm:p-4 isolate overflow-hidden">
@@ -396,7 +364,6 @@ export default function MenuList({
               transition={{ type: "spring", damping: 25, stiffness: 300 }}
               className="relative bg-white w-full sm:max-w-[500px] rounded-t-[2.5rem] sm:rounded-[2.5rem] shadow-2xl flex flex-col max-h-[90vh] z-10 overflow-hidden ring-1 ring-black/5"
             >
-              {/* Imagen Hero Elegante */}
               <div className="relative h-56 sm:h-64 shrink-0 bg-slate-100 w-full">
                 <Image
                   src={
@@ -407,10 +374,7 @@ export default function MenuList({
                   fill
                   className="object-cover"
                 />
-                {/* Gradiente suave, no oscuro fuerte */}
                 <div className="absolute inset-0 bg-gradient-to-t from-white via-white/20 to-transparent" />
-
-                {/* Botón Cerrar (Glassmorphism sutil) */}
                 <button
                   onClick={() => setSelectedProduct(null)}
                   className="absolute top-5 right-5 bg-white/70 backdrop-blur-md p-2.5 rounded-full text-slate-800 hover:bg-white transition-all shadow-sm border border-white"
@@ -420,7 +384,6 @@ export default function MenuList({
               </div>
 
               <div className="flex-1 overflow-y-auto px-6 pb-6 custom-scrollbar bg-white">
-                {/* Título y Precio (Clean UI) */}
                 <div className="relative -mt-12 bg-white rounded-3xl p-5 shadow-sm border border-slate-100 mb-8 flex justify-between items-start gap-4">
                   <div>
                     <h2 className="text-2xl font-black text-slate-900 leading-tight tracking-tight">
@@ -441,91 +404,99 @@ export default function MenuList({
                 </div>
 
                 <div className="space-y-8">
-                  {/* Opción 1: Entrada */}
-                  <div className="space-y-3">
-                    <div className="flex items-center gap-2">
-                      <span className="w-1.5 h-1.5 rounded-full bg-slate-900"></span>
-                      <h3 className="text-xs font-bold uppercase tracking-widest text-slate-400">
-                        1. Elige tu Entrada
-                      </h3>
-                    </div>
-                    <div className="grid grid-cols-1 gap-2.5">
-                      {dynamicOptions.entrada.map((opt) => {
-                        const isSelected = tempOptions.entrada === opt;
-                        return (
-                          <label
-                            key={opt}
-                            className={cn(
-                              "flex items-center justify-between p-4 rounded-2xl border-2 cursor-pointer transition-all duration-200 group",
-                              isSelected
-                                ? "border-slate-900 bg-slate-50"
-                                : "border-slate-100 hover:border-slate-300",
-                            )}
-                          >
-                            <div className="flex items-center gap-3">
-                              <div
+                  {/* Bloque Entradas (Solo si hay creadas para este plato) */}
+                  {selectedProduct.options?.entradas &&
+                    selectedProduct.options.entradas.length > 0 && (
+                      <div className="space-y-3">
+                        <div className="flex items-center gap-2">
+                          <span className="w-1.5 h-1.5 rounded-full bg-slate-900"></span>
+                          <h3 className="text-xs font-bold uppercase tracking-widest text-slate-400">
+                            1. Elige tu Entrada
+                          </h3>
+                        </div>
+                        <div className="grid grid-cols-1 gap-2.5">
+                          {selectedProduct.options.entradas.map((opt) => {
+                            const isSelected = tempOptions.entrada === opt;
+                            return (
+                              <label
+                                key={opt}
                                 className={cn(
-                                  "w-5 h-5 rounded-full flex items-center justify-center transition-all border-2",
+                                  "flex items-center justify-between p-4 rounded-2xl border-2 cursor-pointer transition-all duration-200 group",
                                   isSelected
-                                    ? "border-slate-900 bg-slate-900 text-white"
-                                    : "border-slate-300 group-hover:border-slate-400",
+                                    ? "border-slate-900 bg-slate-50"
+                                    : "border-slate-100 hover:border-slate-300",
                                 )}
                               >
-                                {isSelected && (
-                                  <CheckCircle2 size={12} strokeWidth={3} />
-                                )}
-                              </div>
-                              <span
+                                <div className="flex items-center gap-3">
+                                  <div
+                                    className={cn(
+                                      "w-5 h-5 rounded-full flex items-center justify-center transition-all border-2",
+                                      isSelected
+                                        ? "border-slate-900 bg-slate-900 text-white"
+                                        : "border-slate-300 group-hover:border-slate-400",
+                                    )}
+                                  >
+                                    {isSelected && (
+                                      <CheckCircle2 size={12} strokeWidth={3} />
+                                    )}
+                                  </div>
+                                  <span
+                                    className={cn(
+                                      "text-sm font-bold transition-colors",
+                                      isSelected
+                                        ? "text-slate-900"
+                                        : "text-slate-600 group-hover:text-slate-900",
+                                    )}
+                                  >
+                                    {opt}
+                                  </span>
+                                </div>
+                              </label>
+                            );
+                          })}
+                        </div>
+                      </div>
+                    )}
+
+                  {/* Bloque Bebidas (Solo si hay creadas para este plato) */}
+                  {selectedProduct.options?.bebidas &&
+                    selectedProduct.options.bebidas.length > 0 && (
+                      <div className="space-y-3">
+                        <div className="flex items-center gap-2">
+                          <span className="w-1.5 h-1.5 rounded-full bg-slate-900"></span>
+                          <h3 className="text-xs font-bold uppercase tracking-widest text-slate-400">
+                            2. Elige tu Bebida
+                          </h3>
+                        </div>
+                        <div className="flex flex-wrap gap-2.5">
+                          {selectedProduct.options.bebidas.map((opt) => {
+                            const isSelected = tempOptions.bebida === opt;
+                            return (
+                              <button
+                                key={opt}
+                                onClick={() =>
+                                  setTempOptions({
+                                    ...tempOptions,
+                                    bebida: opt,
+                                  })
+                                }
                                 className={cn(
-                                  "text-sm font-bold transition-colors",
+                                  "px-5 py-3 rounded-2xl text-sm font-bold border-2 transition-all duration-200 active:scale-95",
                                   isSelected
-                                    ? "text-slate-900"
-                                    : "text-slate-600 group-hover:text-slate-900",
+                                    ? "border-slate-900 bg-slate-900 text-white shadow-md"
+                                    : "border-slate-100 text-slate-500 hover:border-slate-300 hover:text-slate-800 bg-white",
                                 )}
                               >
                                 {opt}
-                              </span>
-                            </div>
-                          </label>
-                        );
-                      })}
-                    </div>
-                  </div>
-
-                  {/* Opción 2: Bebida */}
-                  <div className="space-y-3">
-                    <div className="flex items-center gap-2">
-                      <span className="w-1.5 h-1.5 rounded-full bg-slate-900"></span>
-                      <h3 className="text-xs font-bold uppercase tracking-widest text-slate-400">
-                        2. Elige tu Bebida
-                      </h3>
-                    </div>
-                    <div className="flex flex-wrap gap-2.5">
-                      {dynamicOptions.bebida.map((opt) => {
-                        const isSelected = tempOptions.bebida === opt;
-                        return (
-                          <button
-                            key={opt}
-                            onClick={() =>
-                              setTempOptions({ ...tempOptions, bebida: opt })
-                            }
-                            className={cn(
-                              "px-5 py-3 rounded-2xl text-sm font-bold border-2 transition-all duration-200 active:scale-95",
-                              isSelected
-                                ? "border-slate-900 bg-slate-900 text-white shadow-md"
-                                : "border-slate-100 text-slate-500 hover:border-slate-300 hover:text-slate-800 bg-white",
-                            )}
-                          >
-                            {opt}
-                          </button>
-                        );
-                      })}
-                    </div>
-                  </div>
+                              </button>
+                            );
+                          })}
+                        </div>
+                      </div>
+                    )}
                 </div>
               </div>
 
-              {/* Footer CTA (Diseño Premium sin sombra exagerada) */}
               <div className="p-5 border-t border-slate-100 bg-white safe-area-bottom">
                 <button
                   onClick={() => addToCart(selectedProduct, tempOptions)}
@@ -536,7 +507,7 @@ export default function MenuList({
                       size={20}
                       strokeWidth={2.5}
                       className="opacity-70 group-hover:opacity-100 transition-opacity"
-                    />
+                    />{" "}
                     Añadir al pedido
                   </span>
                   <div className="flex items-center gap-3">
@@ -552,7 +523,6 @@ export default function MenuList({
         )}
       </AnimatePresence>
 
-      {/* 4. BOTÓN FLOTANTE CARRITO */}
       <AnimatePresence>
         {totalItems > 0 && (
           <motion.div
@@ -601,19 +571,23 @@ export default function MenuList({
   );
 }
 
-// --- SUBCOMPONENTE: TARJETA DE PRODUCTO ---
-function ProductCard({
-  product,
-  qty,
-  onAdd,
-  onRemove,
-}: {
-  product: Product;
-  qty: number;
-  onAdd: () => void;
-  onRemove: () => void;
-}) {
-  const isMenu = ["menu", "diet"].includes(product.category);
+// Escudo protector de URL
+const getSafeUrl = (url: string) => {
+  if (!url) return "https://images.unsplash.com/photo-1546069901-ba9599a7e63c";
+  try {
+    new URL(url);
+    return url;
+  } catch {
+    return "https://images.unsplash.com/photo-1546069901-ba9599a7e63c";
+  }
+};
+
+function ProductCard({ product, qty, onAdd, onRemove }: any) {
+  const isMenu =
+    product.options &&
+    (product.options.entradas?.length > 0 ||
+      product.options.bebidas?.length > 0);
+  const safeImg = getSafeUrl(product.image_url);
 
   return (
     <motion.div
@@ -625,16 +599,12 @@ function ProductCard({
     >
       <div className="relative w-28 h-28 md:w-full md:h-48 shrink-0 bg-slate-50 rounded-[1.5rem] overflow-hidden shadow-inner group-hover:shadow-sm transition-shadow">
         <Image
-          src={
-            product.image_url ||
-            "https://images.unsplash.com/photo-1546069901-ba9599a7e63c"
-          }
+          src={safeImg}
           alt={product.name}
           fill
           className="object-cover transition-transform duration-700 group-hover:scale-105"
           sizes="(max-width: 768px) 120px, 300px"
         />
-
         {isMenu && (
           <div className="absolute bottom-0 inset-x-0 bg-black/50 backdrop-blur-md py-1.5 flex justify-center opacity-0 group-hover:opacity-100 md:opacity-100 transition-opacity">
             <span className="text-[10px] font-bold text-white uppercase tracking-widest flex items-center gap-1.5">
@@ -642,7 +612,6 @@ function ProductCard({
             </span>
           </div>
         )}
-
         <AnimatePresence>
           {qty > 0 && (
             <motion.div
@@ -666,12 +635,10 @@ function ProductCard({
             {product.description || "Ingredientes frescos y seleccionados."}
           </p>
         </div>
-
         <div className="flex justify-between items-end mt-4">
           <span className="font-black text-xl text-slate-900 tracking-tight">
             S/ {product.price.toFixed(2)}
           </span>
-
           {qty > 0 && !isMenu ? (
             <div
               className="flex items-center bg-slate-50 rounded-full h-10 p-1 shadow-inner ring-1 ring-slate-100"
