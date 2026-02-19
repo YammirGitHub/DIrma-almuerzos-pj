@@ -1,150 +1,100 @@
-[01:15:15.773] Server  ERROR   ⨯ Error: ENOENT: no such file or directory, open '/Users/yammir/Documents/Yammir/DOCUMENTOSSSS ANTES DE LA ACRTUALIZACION/WEB´S/d-irma/.next/dev/server/app/(client)/page.js'
-[01:15:15.790] Server  ERROR   ⨯ Error: Cannot find module '/Users/yammir/Documents/Yammir/DOCUMENTOSSSS ANTES DE LA ACRTUALIZACION/WEB´S/d-irma/.next/dev/server/pages/_document.js'
-Require stack:
-- /Users/yammir/Documents/Yammir/DOCUMENTOSSSS ANTES DE LA ACRTUALIZACION/WEB´S/d-irma/node_modules/next/dist/server/require.js
-- /Users/yammir/Documents/Yammir/DOCUMENTOSSSS ANTES DE LA ACRTUALIZACION/WEB´S/d-irma/node_modules/next/dist/server/load-components.js
-- /Users/yammir/Documents/Yammir/DOCUMENTOSSSS ANTES DE LA ACRTUALIZACION/WEB´S/d-irma/node_modules/next/dist/build/utils.js
-- /Users/yammir/Documents/Yammir/DOCUMENTOSSSS ANTES DE LA ACRTUALIZACION/WEB´S/d-irma/node_modules/next/dist/build/swc/options.js
-- /Users/yammir/Documents/Yammir/DOCUMENTOSSSS ANTES DE LA ACRTUALIZACION/WEB´S/d-irma/node_modules/next/dist/build/swc/index.js
-- /Users/yammir/Documents/Yammir/DOCUMENTOSSSS ANTES DE LA ACRTUALIZACION/WEB´S/d-irma/node_modules/next/dist/build/next-config-ts/transpile-config.js
-- /Users/yammir/Documents/Yammir/DOCUMENTOSSSS ANTES DE LA ACRTUALIZACION/WEB´S/d-irma/node_modules/next/dist/server/config.js
-- /Users/yammir/Documents/Yammir/DOCUMENTOSSSS ANTES DE LA ACRTUALIZACION/WEB´S/d-irma/node_modules/next/dist/server/next.js
-- /Users/yammir/Documents/Yammir/DOCUMENTOSSSS ANTES DE LA ACRTUALIZACION/WEB´S/d-irma/node_modules/next/dist/server/lib/start-server.js
-[01:15:15.818] Server  ERROR   Error: ENOENT: no such file or directory, open '/Users/yammir/Documents/Yammir/DOCUMENTOSSSS ANTES DE LA ACRTUALIZACION/WEB´S/d-irma/.next/dev/server/app/(client)/page.js'
-[01:15:15.834] Server  ERROR   ⨯ Error: Cannot find module '/Users/yammir/Documents/Yammir/DOCUMENTOSSSS ANTES DE LA ACRTUALIZACION/WEB´S/d-irma/.next/dev/server/pages/_document.js'
-Require stack:
-- /Users/yammir/Documents/Yammir/DOCUMENTOSSSS ANTES DE LA ACRTUALIZACION/WEB´S/d-irma/node_modules/next/dist/server/require.js
-- /Users/yammir/Documents/Yammir/DOCUMENTOSSSS ANTES DE LA ACRTUALIZACION/WEB´S/d-irma/node_modules/next/dist/server/load-components.js
-- /Users/yammir/Documents/Yammir/DOCUMENTOSSSS ANTES DE LA ACRTUALIZACION/WEB´S/d-irma/node_modules/next/dist/build/utils.js
-- /Users/yammir/Documents/Yammir/DOCUMENTOSSSS ANTES DE LA ACRTUALIZACION/WEB´S/d-irma/node_modules/next/dist/build/swc/options.js
-- /Users/yammir/Documents/Yammir/DOCUMENTOSSSS ANTES DE LA ACRTUALIZACION/WEB´S/d-irma/node_modules/next/dist/build/swc/index.js
-- /Users/yammir/Documents/Yammir/DOCUMENTOSSSS ANTES DE LA ACRTUALIZACION/WEB´S/d-irma/node_modules/next/dist/build/next-config-ts/transpile-config.js
-- /Users/yammir/Documents/Yammir/DOCUMENTOSSSS ANTES DE LA ACRTUALIZACION/WEB´S/d-irma/node_modules/next/dist/server/config.js
-- /Users/yammir/Documents/Yammir/DOCUMENTOSSSS ANTES DE LA ACRTUALIZACION/WEB´S/d-irma/node_modules/next/dist/server/next.js
-- /Users/yammir/Documents/Yammir/DOCUMENTOSSSS ANTES DE LA ACRTUALIZACION/WEB´S/d-irma/node_modules/next/dist/server/lib/start-server.js
-[01:15:15.853] Server  ERROR   ⨯ Error: ENOENT: no such file or directory, open '/Users/yammir/Documents/Yammir/DOCUMENTOSSSS ANTES DE LA ACRTUALIZACION/WEB´S/d-irma/.next/dev/server/app/(admin)/admin/dashboard/page.js'
-[01:15:15.869] Server  ERROR   ⨯ Error: Cannot find module '/Users/yammir/Documents/Yammir/DOCUMENTOSSSS ANTES DE LA ACRTUALIZACION/WEB´S/d-irma/.next/dev/server/pages/_document.js'
-Require stack:
-- /Users/yammir/Documents/Yammir/DOCUMENTOSSSS ANTES DE LA ACRTUALIZACION/WEB´S/d-irma/node_modules/next/dist/server/require.js
-- /Users/yammir/Documents/Yammir/DOCUMENTOSSSS ANTES DE LA ACRTUALIZACION/WEB´S/d-irma/node_modules/next/dist/server/load-components.js
-- /Users/yammir/Documents/Yammir/DOCUMENTOSSSS ANTES DE LA ACRTUALIZACION/WEB´S/d-irma/node_modules/next/dist/build/utils.js
-- /Users/yammir/Documents/Yammir/DOCUMENTOSSSS ANTES DE LA ACRTUALIZACION/WEB´S/d-irma/node_modules/next/dist/build/swc/options.js
-- /Users/yammir/Documents/Yammir/DOCUMENTOSSSS ANTES DE LA ACRTUALIZACION/WEB´S/d-irma/node_modules/next/dist/build/swc/index.js
-- /Users/yammir/Documents/Yammir/DOCUMENTOSSSS ANTES DE LA ACRTUALIZACION/WEB´S/d-irma/node_modules/next/dist/build/next-config-ts/transpile-config.js
-- /Users/yammir/Documents/Yammir/DOCUMENTOSSSS ANTES DE LA ACRTUALIZACION/WEB´S/d-irma/node_modules/next/dist/server/config.js
-- /Users/yammir/Documents/Yammir/DOCUMENTOSSSS ANTES DE LA ACRTUALIZACION/WEB´S/d-irma/node_modules/next/dist/server/next.js
-- /Users/yammir/Documents/Yammir/DOCUMENTOSSSS ANTES DE LA ACRTUALIZACION/WEB´S/d-irma/node_modules/next/dist/server/lib/start-server.js
-[01:15:15.883] Server  ERROR   Error: ENOENT: no such file or directory, open '/Users/yammir/Documents/Yammir/DOCUMENTOSSSS ANTES DE LA ACRTUALIZACION/WEB´S/d-irma/.next/dev/routes-manifest.json'
-[01:15:15.901] Server  ERROR   ⨯ Error: ENOENT: no such file or directory, open '/Users/yammir/Documents/Yammir/DOCUMENTOSSSS ANTES DE LA ACRTUALIZACION/WEB´S/d-irma/.next/dev/server/app/(client)/page.js'
-[01:15:15.935] Server  ERROR   ⨯ Error: Cannot find module '/Users/yammir/Documents/Yammir/DOCUMENTOSSSS ANTES DE LA ACRTUALIZACION/WEB´S/d-irma/.next/dev/server/pages/_document.js'
-Require stack:
-- /Users/yammir/Documents/Yammir/DOCUMENTOSSSS ANTES DE LA ACRTUALIZACION/WEB´S/d-irma/node_modules/next/dist/server/require.js
-- /Users/yammir/Documents/Yammir/DOCUMENTOSSSS ANTES DE LA ACRTUALIZACION/WEB´S/d-irma/node_modules/next/dist/server/load-components.js
-- /Users/yammir/Documents/Yammir/DOCUMENTOSSSS ANTES DE LA ACRTUALIZACION/WEB´S/d-irma/node_modules/next/dist/build/utils.js
-- /Users/yammir/Documents/Yammir/DOCUMENTOSSSS ANTES DE LA ACRTUALIZACION/WEB´S/d-irma/node_modules/next/dist/build/swc/options.js
-- /Users/yammir/Documents/Yammir/DOCUMENTOSSSS ANTES DE LA ACRTUALIZACION/WEB´S/d-irma/node_modules/next/dist/build/swc/index.js
-- /Users/yammir/Documents/Yammir/DOCUMENTOSSSS ANTES DE LA ACRTUALIZACION/WEB´S/d-irma/node_modules/next/dist/build/next-config-ts/transpile-config.js
-- /Users/yammir/Documents/Yammir/DOCUMENTOSSSS ANTES DE LA ACRTUALIZACION/WEB´S/d-irma/node_modules/next/dist/server/config.js
-- /Users/yammir/Documents/Yammir/DOCUMENTOSSSS ANTES DE LA ACRTUALIZACION/WEB´S/d-irma/node_modules/next/dist/server/next.js
-- /Users/yammir/Documents/Yammir/DOCUMENTOSSSS ANTES DE LA ACRTUALIZACION/WEB´S/d-irma/node_modules/next/dist/server/lib/start-server.js
-[01:15:15.947] Server  ERROR   Error: ENOENT: no such file or directory, open '/Users/yammir/Documents/Yammir/DOCUMENTOSSSS ANTES DE LA ACRTUALIZACION/WEB´S/d-irma/.next/dev/server/app/(admin)/admin/dashboard/page.js'
-[01:15:16.002] Server  ERROR   ⨯ Error: Cannot find module '/Users/yammir/Documents/Yammir/DOCUMENTOSSSS ANTES DE LA ACRTUALIZACION/WEB´S/d-irma/.next/dev/server/pages/_document.js'
-Require stack:
-- /Users/yammir/Documents/Yammir/DOCUMENTOSSSS ANTES DE LA ACRTUALIZACION/WEB´S/d-irma/node_modules/next/dist/server/require.js
-- /Users/yammir/Documents/Yammir/DOCUMENTOSSSS ANTES DE LA ACRTUALIZACION/WEB´S/d-irma/node_modules/next/dist/server/load-components.js
-- /Users/yammir/Documents/Yammir/DOCUMENTOSSSS ANTES DE LA ACRTUALIZACION/WEB´S/d-irma/node_modules/next/dist/build/utils.js
-- /Users/yammir/Documents/Yammir/DOCUMENTOSSSS ANTES DE LA ACRTUALIZACION/WEB´S/d-irma/node_modules/next/dist/build/swc/options.js
-- /Users/yammir/Documents/Yammir/DOCUMENTOSSSS ANTES DE LA ACRTUALIZACION/WEB´S/d-irma/node_modules/next/dist/build/swc/index.js
-- /Users/yammir/Documents/Yammir/DOCUMENTOSSSS ANTES DE LA ACRTUALIZACION/WEB´S/d-irma/node_modules/next/dist/build/next-config-ts/transpile-config.js
-- /Users/yammir/Documents/Yammir/DOCUMENTOSSSS ANTES DE LA ACRTUALIZACION/WEB´S/d-irma/node_modules/next/dist/server/config.js
-- /Users/yammir/Documents/Yammir/DOCUMENTOSSSS ANTES DE LA ACRTUALIZACION/WEB´S/d-irma/node_modules/next/dist/server/next.js
-- /Users/yammir/Documents/Yammir/DOCUMENTOSSSS ANTES DE LA ACRTUALIZACION/WEB´S/d-irma/node_modules/next/dist/server/lib/start-server.js
-[01:15:16.024] Server  ERROR   Error: ENOENT: no such file or directory, open '/Users/yammir/Documents/Yammir/DOCUMENTOSSSS ANTES DE LA ACRTUALIZACION/WEB´S/d-irma/.next/dev/server/app/(client)/page.js'
-[01:15:16.050] Server  ERROR   ⨯ Error: Cannot find module '/Users/yammir/Documents/Yammir/DOCUMENTOSSSS ANTES DE LA ACRTUALIZACION/WEB´S/d-irma/.next/dev/server/pages/_document.js'
-Require stack:
-- /Users/yammir/Documents/Yammir/DOCUMENTOSSSS ANTES DE LA ACRTUALIZACION/WEB´S/d-irma/node_modules/next/dist/server/require.js
-- /Users/yammir/Documents/Yammir/DOCUMENTOSSSS ANTES DE LA ACRTUALIZACION/WEB´S/d-irma/node_modules/next/dist/server/load-components.js
-- /Users/yammir/Documents/Yammir/DOCUMENTOSSSS ANTES DE LA ACRTUALIZACION/WEB´S/d-irma/node_modules/next/dist/build/utils.js
-- /Users/yammir/Documents/Yammir/DOCUMENTOSSSS ANTES DE LA ACRTUALIZACION/WEB´S/d-irma/node_modules/next/dist/build/swc/options.js
-- /Users/yammir/Documents/Yammir/DOCUMENTOSSSS ANTES DE LA ACRTUALIZACION/WEB´S/d-irma/node_modules/next/dist/build/swc/index.js
-- /Users/yammir/Documents/Yammir/DOCUMENTOSSSS ANTES DE LA ACRTUALIZACION/WEB´S/d-irma/node_modules/next/dist/build/next-config-ts/transpile-config.js
-- /Users/yammir/Documents/Yammir/DOCUMENTOSSSS ANTES DE LA ACRTUALIZACION/WEB´S/d-irma/node_modules/next/dist/server/config.js
-- /Users/yammir/Documents/Yammir/DOCUMENTOSSSS ANTES DE LA ACRTUALIZACION/WEB´S/d-irma/node_modules/next/dist/server/next.js
-- /Users/yammir/Documents/Yammir/DOCUMENTOSSSS ANTES DE LA ACRTUALIZACION/WEB´S/d-irma/node_modules/next/dist/server/lib/start-server.js
-[01:15:16.069] Server  ERROR   Error: ENOENT: no such file or directory, open '/Users/yammir/Documents/Yammir/DOCUMENTOSSSS ANTES DE LA ACRTUALIZACION/WEB´S/d-irma/.next/dev/routes-manifest.json'
-[01:15:16.092] Server  ERROR   Error: ENOENT: no such file or directory, open '/Users/yammir/Documents/Yammir/DOCUMENTOSSSS ANTES DE LA ACRTUALIZACION/WEB´S/d-irma/.next/dev/routes-manifest.json'
-[01:15:16.121] Server  ERROR   ⨯ Error: ENOENT: no such file or directory, open '/Users/yammir/Documents/Yammir/DOCUMENTOSSSS ANTES DE LA ACRTUALIZACION/WEB´S/d-irma/.next/dev/server/app/(client)/page.js'
-[01:15:16.200] Server  ERROR   ⨯ Error: Cannot find module '/Users/yammir/Documents/Yammir/DOCUMENTOSSSS ANTES DE LA ACRTUALIZACION/WEB´S/d-irma/.next/dev/server/pages/_document.js'
-Require stack:
-- /Users/yammir/Documents/Yammir/DOCUMENTOSSSS ANTES DE LA ACRTUALIZACION/WEB´S/d-irma/node_modules/next/dist/server/require.js
-- /Users/yammir/Documents/Yammir/DOCUMENTOSSSS ANTES DE LA ACRTUALIZACION/WEB´S/d-irma/node_modules/next/dist/server/load-components.js
-- /Users/yammir/Documents/Yammir/DOCUMENTOSSSS ANTES DE LA ACRTUALIZACION/WEB´S/d-irma/node_modules/next/dist/build/utils.js
-- /Users/yammir/Documents/Yammir/DOCUMENTOSSSS ANTES DE LA ACRTUALIZACION/WEB´S/d-irma/node_modules/next/dist/build/swc/options.js
-- /Users/yammir/Documents/Yammir/DOCUMENTOSSSS ANTES DE LA ACRTUALIZACION/WEB´S/d-irma/node_modules/next/dist/build/swc/index.js
-- /Users/yammir/Documents/Yammir/DOCUMENTOSSSS ANTES DE LA ACRTUALIZACION/WEB´S/d-irma/node_modules/next/dist/build/next-config-ts/transpile-config.js
-- /Users/yammir/Documents/Yammir/DOCUMENTOSSSS ANTES DE LA ACRTUALIZACION/WEB´S/d-irma/node_modules/next/dist/server/config.js
-- /Users/yammir/Documents/Yammir/DOCUMENTOSSSS ANTES DE LA ACRTUALIZACION/WEB´S/d-irma/node_modules/next/dist/server/next.js
-- /Users/yammir/Documents/Yammir/DOCUMENTOSSSS ANTES DE LA ACRTUALIZACION/WEB´S/d-irma/node_modules/next/dist/server/lib/start-server.js
-[01:15:16.240] Server  ERROR   ⨯ Error: ENOENT: no such file or directory, open '/Users/yammir/Documents/Yammir/DOCUMENTOSSSS ANTES DE LA ACRTUALIZACION/WEB´S/d-irma/.next/dev/server/app/(admin)/admin/dashboard/page.js'
-[01:15:16.268] Server  ERROR   ⨯ Error: Cannot find module '/Users/yammir/Documents/Yammir/DOCUMENTOSSSS ANTES DE LA ACRTUALIZACION/WEB´S/d-irma/.next/dev/server/pages/_document.js'
-Require stack:
-- /Users/yammir/Documents/Yammir/DOCUMENTOSSSS ANTES DE LA ACRTUALIZACION/WEB´S/d-irma/node_modules/next/dist/server/require.js
-- /Users/yammir/Documents/Yammir/DOCUMENTOSSSS ANTES DE LA ACRTUALIZACION/WEB´S/d-irma/node_modules/next/dist/server/load-components.js
-- /Users/yammir/Documents/Yammir/DOCUMENTOSSSS ANTES DE LA ACRTUALIZACION/WEB´S/d-irma/node_modules/next/dist/build/utils.js
-- /Users/yammir/Documents/Yammir/DOCUMENTOSSSS ANTES DE LA ACRTUALIZACION/WEB´S/d-irma/node_modules/next/dist/build/swc/options.js
-- /Users/yammir/Documents/Yammir/DOCUMENTOSSSS ANTES DE LA ACRTUALIZACION/WEB´S/d-irma/node_modules/next/dist/build/swc/index.js
-- /Users/yammir/Documents/Yammir/DOCUMENTOSSSS ANTES DE LA ACRTUALIZACION/WEB´S/d-irma/node_modules/next/dist/build/next-config-ts/transpile-config.js
-- /Users/yammir/Documents/Yammir/DOCUMENTOSSSS ANTES DE LA ACRTUALIZACION/WEB´S/d-irma/node_modules/next/dist/server/config.js
-- /Users/yammir/Documents/Yammir/DOCUMENTOSSSS ANTES DE LA ACRTUALIZACION/WEB´S/d-irma/node_modules/next/dist/server/next.js
-- /Users/yammir/Documents/Yammir/DOCUMENTOSSSS ANTES DE LA ACRTUALIZACION/WEB´S/d-irma/node_modules/next/dist/server/lib/start-server.js
-[01:15:16.289] Server  ERROR   Error: ENOENT: no such file or directory, open '/Users/yammir/Documents/Yammir/DOCUMENTOSSSS ANTES DE LA ACRTUALIZACION/WEB´S/d-irma/.next/dev/server/app/(client)/page.js'
-[01:15:16.427] Server  ERROR   ⨯ Error: ENOENT: no such file or directory, open '/Users/yammir/Documents/Yammir/DOCUMENTOSSSS ANTES DE LA ACRTUALIZACION/WEB´S/d-irma/.next/dev/server/app/(client)/page.js'
-[01:15:16.869] Server  ERROR   ⨯ Error: Cannot find module '/Users/yammir/Documents/Yammir/DOCUMENTOSSSS ANTES DE LA ACRTUALIZACION/WEB´S/d-irma/.next/dev/server/pages/_document.js'
-Require stack:
-- /Users/yammir/Documents/Yammir/DOCUMENTOSSSS ANTES DE LA ACRTUALIZACION/WEB´S/d-irma/node_modules/next/dist/server/require.js
-- /Users/yammir/Documents/Yammir/DOCUMENTOSSSS ANTES DE LA ACRTUALIZACION/WEB´S/d-irma/node_modules/next/dist/server/load-components.js
-- /Users/yammir/Documents/Yammir/DOCUMENTOSSSS ANTES DE LA ACRTUALIZACION/WEB´S/d-irma/node_modules/next/dist/build/utils.js
-- /Users/yammir/Documents/Yammir/DOCUMENTOSSSS ANTES DE LA ACRTUALIZACION/WEB´S/d-irma/node_modules/next/dist/build/swc/options.js
-- /Users/yammir/Documents/Yammir/DOCUMENTOSSSS ANTES DE LA ACRTUALIZACION/WEB´S/d-irma/node_modules/next/dist/build/swc/index.js
-- /Users/yammir/Documents/Yammir/DOCUMENTOSSSS ANTES DE LA ACRTUALIZACION/WEB´S/d-irma/node_modules/next/dist/build/next-config-ts/transpile-config.js
-- /Users/yammir/Documents/Yammir/DOCUMENTOSSSS ANTES DE LA ACRTUALIZACION/WEB´S/d-irma/node_modules/next/dist/server/config.js
-- /Users/yammir/Documents/Yammir/DOCUMENTOSSSS ANTES DE LA ACRTUALIZACION/WEB´S/d-irma/node_modules/next/dist/server/next.js
-- /Users/yammir/Documents/Yammir/DOCUMENTOSSSS ANTES DE LA ACRTUALIZACION/WEB´S/d-irma/node_modules/next/dist/server/lib/start-server.js
-[01:15:16.882] Server  ERROR   ⨯ Error: Cannot find module '/Users/yammir/Documents/Yammir/DOCUMENTOSSSS ANTES DE LA ACRTUALIZACION/WEB´S/d-irma/.next/dev/server/pages/_document.js'
-Require stack:
-- /Users/yammir/Documents/Yammir/DOCUMENTOSSSS ANTES DE LA ACRTUALIZACION/WEB´S/d-irma/node_modules/next/dist/server/require.js
-- /Users/yammir/Documents/Yammir/DOCUMENTOSSSS ANTES DE LA ACRTUALIZACION/WEB´S/d-irma/node_modules/next/dist/server/load-components.js
-- /Users/yammir/Documents/Yammir/DOCUMENTOSSSS ANTES DE LA ACRTUALIZACION/WEB´S/d-irma/node_modules/next/dist/build/utils.js
-- /Users/yammir/Documents/Yammir/DOCUMENTOSSSS ANTES DE LA ACRTUALIZACION/WEB´S/d-irma/node_modules/next/dist/build/swc/options.js
-- /Users/yammir/Documents/Yammir/DOCUMENTOSSSS ANTES DE LA ACRTUALIZACION/WEB´S/d-irma/node_modules/next/dist/build/swc/index.js
-- /Users/yammir/Documents/Yammir/DOCUMENTOSSSS ANTES DE LA ACRTUALIZACION/WEB´S/d-irma/node_modules/next/dist/build/next-config-ts/transpile-config.js
-- /Users/yammir/Documents/Yammir/DOCUMENTOSSSS ANTES DE LA ACRTUALIZACION/WEB´S/d-irma/node_modules/next/dist/server/config.js
-- /Users/yammir/Documents/Yammir/DOCUMENTOSSSS ANTES DE LA ACRTUALIZACION/WEB´S/d-irma/node_modules/next/dist/server/next.js
-- /Users/yammir/Documents/Yammir/DOCUMENTOSSSS ANTES DE LA ACRTUALIZACION/WEB´S/d-irma/node_modules/next/dist/server/lib/start-server.js
-[01:15:16.894] Server  ERROR   Error: ENOENT: no such file or directory, open '/Users/yammir/Documents/Yammir/DOCUMENTOSSSS ANTES DE LA ACRTUALIZACION/WEB´S/d-irma/.next/dev/server/app/(admin)/admin/dashboard/page.js'
-[01:15:16.914] Server  ERROR   ⨯ Error: Cannot find module '/Users/yammir/Documents/Yammir/DOCUMENTOSSSS ANTES DE LA ACRTUALIZACION/WEB´S/d-irma/.next/dev/server/pages/_document.js'
-Require stack:
-- /Users/yammir/Documents/Yammir/DOCUMENTOSSSS ANTES DE LA ACRTUALIZACION/WEB´S/d-irma/node_modules/next/dist/server/require.js
-- /Users/yammir/Documents/Yammir/DOCUMENTOSSSS ANTES DE LA ACRTUALIZACION/WEB´S/d-irma/node_modules/next/dist/server/load-components.js
-- /Users/yammir/Documents/Yammir/DOCUMENTOSSSS ANTES DE LA ACRTUALIZACION/WEB´S/d-irma/node_modules/next/dist/build/utils.js
-- /Users/yammir/Documents/Yammir/DOCUMENTOSSSS ANTES DE LA ACRTUALIZACION/WEB´S/d-irma/node_modules/next/dist/build/swc/options.js
-- /Users/yammir/Documents/Yammir/DOCUMENTOSSSS ANTES DE LA ACRTUALIZACION/WEB´S/d-irma/node_modules/next/dist/build/swc/index.js
-- /Users/yammir/Documents/Yammir/DOCUMENTOSSSS ANTES DE LA ACRTUALIZACION/WEB´S/d-irma/node_modules/next/dist/build/next-config-ts/transpile-config.js
-- /Users/yammir/Documents/Yammir/DOCUMENTOSSSS ANTES DE LA ACRTUALIZACION/WEB´S/d-irma/node_modules/next/dist/server/config.js
-- /Users/yammir/Documents/Yammir/DOCUMENTOSSSS ANTES DE LA ACRTUALIZACION/WEB´S/d-irma/node_modules/next/dist/server/next.js
-- /Users/yammir/Documents/Yammir/DOCUMENTOSSSS ANTES DE LA ACRTUALIZACION/WEB´S/d-irma/node_modules/next/dist/server/lib/start-server.js
-[01:15:16.925] Server  ERROR   Error: ENOENT: no such file or directory, open '/Users/yammir/Documents/Yammir/DOCUMENTOSSSS ANTES DE LA ACRTUALIZACION/WEB´S/d-irma/.next/dev/routes-manifest.json'
-[01:15:16.937] Server  ERROR   Error: ENOENT: no such file or directory, open '/Users/yammir/Documents/Yammir/DOCUMENTOSSSS ANTES DE LA ACRTUALIZACION/WEB´S/d-irma/.next/dev/server/app/(client)/page.js'
-[01:15:16.954] Server  ERROR   ⨯ Error: Cannot find module '/Users/yammir/Documents/Yammir/DOCUMENTOSSSS ANTES DE LA ACRTUALIZACION/WEB´S/d-irma/.next/dev/server/pages/_document.js'
-Require stack:
-- /Users/yammir/Documents/Yammir/DOCUMENTOSSSS ANTES DE LA ACRTUALIZACION/WEB´S/d-irma/node_modules/next/dist/server/require.js
-- /Users/yammir/Documents/Yammir/DOCUMENTOSSSS ANTES DE LA ACRTUALIZACION/WEB´S/d-irma/node_modules/next/dist/server/load-components.js
-- /Users/yammir/Documents/Yammir/DOCUMENTOSSSS ANTES DE LA ACRTUALIZACION/WEB´S/d-irma/node_modules/next/dist/build/utils.js
-- /Users/yammir/Documents/Yammir/DOCUMENTOSSSS ANTES DE LA ACRTUALIZACION/WEB´S/d-irma/node_modules/next/dist/build/swc/options.js
-- /Users/yammir/Documents/Yammir/DOCUMENTOSSSS ANTES DE LA ACRTUALIZACION/WEB´S/d-irma/node_modules/next/dist/build/swc/index.js
-- /Users/yammir/Documents/Yammir/DOCUMENTOSSSS ANTES DE LA ACRTUALIZACION/WEB´S/d-irma/node_modules/next/dist/build/next-config-ts/transpile-config.js
-- /Users/yammir/Documents/Yammir/DOCUMENTOSSSS ANTES DE LA ACRTUALIZACION/WEB´S/d-irma/node_modules/next/dist/server/config.js
-- /Users/yammir/Documents/Yammir/DOCUMENTOSSSS ANTES DE LA ACRTUALIZACION/WEB´S/d-irma/node_modules/next/dist/server/next.js
-- /Users/yammir/Documents/Yammir/DOCUMENTOSSSS ANTES DE LA ACRTUALIZACION/WEB´S/d-irma/node_modules/next/dist/server/lib/start-server.js
-[01:15:16.966] Server  ERROR   Error: ENOENT: no such file or directory, open '/Users/yammir/Documents/Yammir/DOCUMENTOSSSS ANTES DE LA ACRTUALIZACION/WEB´S/d-irma/.next/dev/routes-manifest.json'
-[01:15:16.978] Server  ERROR   Error: ENOENT: no such file or directory, open '/Users/yammir/Documents/Yammir/DOCUMENTOSSSS ANTES DE LA ACRTUALIZACION/WEB´S/d-irma/.next/dev/routes-manifest.json'
+[00:00:01.803] Server  LOG      ○ (pwa) "PWA support is disabled."
+[00:00:01.973] Server  LOG     ✓ Ready in 1764ms
+[00:00:13.099] Server  LOG     ○ Compiling / ...
+[00:00:16.234] Server  WARN    Image with src "https://images.unsplash.com/photo-1543353071-873f17a7a088?q=80&w=2070&auto=format&fit=crop" is using quality "90" which is not configured in images.qualities [75]. Please update your config to [75, 90].
+Read more: https://nextjs.org/docs/messages/next-image-unconfigured-qualities
+[00:00:16.936] Browser WARN    Image with src "https://images.unsplash.com/photo-1543353071-873f17a7a088?q=80&w=2070&auto=format&fit=crop" is using quality "90" which is not configured in images.qualities [75]. Please update your config to [75, 90].
+Read more: https://nextjs.org/docs/messages/next-image-unconfigured-qualities
+[00:00:18.905] Server  WARN    Image with src "https://images.unsplash.com/photo-1543353071-873f17a7a088?q=80&w=2070&auto=format&fit=crop" is using quality "90" which is not configured in images.qualities [75]. Please update your config to [75, 90].
+Read more: https://nextjs.org/docs/messages/next-image-unconfigured-qualities
+[00:00:19.450] Browser INFO    %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
+[00:00:19.583] Browser WARN    Image with src "https://images.unsplash.com/photo-1543353071-873f17a7a088?q=80&w=2070&auto=format&fit=crop" is using quality "90" which is not configured in images.qualities [75]. Please update your config to [75, 90].
+Read more: https://nextjs.org/docs/messages/next-image-unconfigured-qualities
+[00:00:20.060] Browser WARN    Image with src "https://images.unsplash.com/photo-1543353071-873f17a7a088?q=80&w=2070&auto=format&fit=crop" is using quality "90" which is not configured in images.qualities [75]. Please update your config to [75, 90].
+Read more: https://nextjs.org/docs/messages/next-image-unconfigured-qualities
+[00:00:26.284] Browser WARN    Image with src "https://images.unsplash.com/photo-1604908176997-125f25cc6f3d?auto=format&fit=crop&w=800" has "fill" but is missing "sizes" prop. Please add it to improve page performance. Read more: https://nextjs.org/docs/api-reference/next/image#sizes
+[00:00:58.366] Server  LOG     🔍 Consultando Cache Permanente para: 76210290...
+[00:00:58.623] Server  LOG     💎 ¡DNI encontrado en Cache! Costo: S/ 0.00
+[00:01:08.517] Browser INFO    %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
+[00:01:08.641] Browser WARN    Image with src "https://images.unsplash.com/photo-1543353071-873f17a7a088?q=80&w=2070&auto=format&fit=crop" is using quality "90" which is not configured in images.qualities [75]. Please update your config to [75, 90].
+Read more: https://nextjs.org/docs/messages/next-image-unconfigured-qualities
+[00:01:27.434] Browser INFO    %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
+[00:01:27.559] Browser WARN    Image with src "https://images.unsplash.com/photo-1543353071-873f17a7a088?q=80&w=2070&auto=format&fit=crop" is using quality "90" which is not configured in images.qualities [75]. Please update your config to [75, 90].
+Read more: https://nextjs.org/docs/messages/next-image-unconfigured-qualities
+[00:07:44.562] Server  WARN    ⚠ Fast Refresh had to perform a full reload due to a runtime error.
+[00:07:44.565] Server  WARN    ⚠ Fast Refresh had to perform a full reload due to a runtime error.
+[00:07:45.650] Server  WARN    Image with src "https://images.unsplash.com/photo-1543353071-873f17a7a088?q=80&w=2070&auto=format&fit=crop" is using quality "90" which is not configured in images.qualities [75]. Please update your config to [75, 90].
+Read more: https://nextjs.org/docs/messages/next-image-unconfigured-qualities
+[00:07:45.776] Server  ERROR   ⨯ ReferenceError: EXTRAS_OPTIONS is not defined
+[00:07:45.809] Server  ERROR   ⨯ ReferenceError: EXTRAS_OPTIONS is not defined
+[00:07:46.090] Server  ERROR   ⨯ ReferenceError: EXTRAS_OPTIONS is not defined
+[00:07:46.110] Server  ERROR   ⨯ ReferenceError: EXTRAS_OPTIONS is not defined
+[00:07:46.950] Browser INFO    %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
+[00:07:46.973] Browser WARN    Image with src "https://images.unsplash.com/photo-1543353071-873f17a7a088?q=80&w=2070&auto=format&fit=crop" is using quality "90" which is not configured in images.qualities [75]. Please update your config to [75, 90].
+Read more: https://nextjs.org/docs/messages/next-image-unconfigured-qualities
+[00:07:46.973] Browser ERROR   uncaughtError: ReferenceError: Can't find variable: EXTRAS_OPTIONS
+[00:07:47.099] Browser WARN    Image with src "https://images.unsplash.com/photo-1543353071-873f17a7a088?q=80&w=2070&auto=format&fit=crop" is using quality "90" which is not configured in images.qualities [75]. Please update your config to [75, 90].
+Read more: https://nextjs.org/docs/messages/next-image-unconfigured-qualities
+[00:07:47.099] Browser ERROR   uncaughtError: ReferenceError: EXTRAS_OPTIONS is not defined
+[00:08:07.577] Server  WARN    Image with src "https://images.unsplash.com/photo-1543353071-873f17a7a088?q=80&w=2070&auto=format&fit=crop" is using quality "90" which is not configured in images.qualities [75]. Please update your config to [75, 90].
+Read more: https://nextjs.org/docs/messages/next-image-unconfigured-qualities
+[00:08:08.137] Browser INFO    %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
+[00:08:08.264] Browser WARN    Image with src "https://images.unsplash.com/photo-1543353071-873f17a7a088?q=80&w=2070&auto=format&fit=crop" is using quality "90" which is not configured in images.qualities [75]. Please update your config to [75, 90].
+Read more: https://nextjs.org/docs/messages/next-image-unconfigured-qualities
+[00:11:27.034] Server  WARN    ⚠ Fast Refresh had to perform a full reload due to a runtime error.
+[00:11:27.311] Server  WARN    ⚠ Fast Refresh had to perform a full reload due to a runtime error.
+[00:11:28.202] Server  WARN    Image with src "https://images.unsplash.com/photo-1543353071-873f17a7a088?q=80&w=2070&auto=format&fit=crop" is using quality "90" which is not configured in images.qualities [75]. Please update your config to [75, 90].
+Read more: https://nextjs.org/docs/messages/next-image-unconfigured-qualities
+[00:11:28.804] Browser WARN    Image with src "https://images.unsplash.com/photo-1543353071-873f17a7a088?q=80&w=2070&auto=format&fit=crop" is using quality "90" which is not configured in images.qualities [75]. Please update your config to [75, 90].
+Read more: https://nextjs.org/docs/messages/next-image-unconfigured-qualities
+[00:11:29.345] Browser INFO    %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
+[00:11:29.472] Browser WARN    Image with src "https://images.unsplash.com/photo-1543353071-873f17a7a088?q=80&w=2070&auto=format&fit=crop" is using quality "90" which is not configured in images.qualities [75]. Please update your config to [75, 90].
+Read more: https://nextjs.org/docs/messages/next-image-unconfigured-qualities
+[00:12:07.729] Server  WARN    Image with src "https://images.unsplash.com/photo-1543353071-873f17a7a088?q=80&w=2070&auto=format&fit=crop" is using quality "90" which is not configured in images.qualities [75]. Please update your config to [75, 90].
+Read more: https://nextjs.org/docs/messages/next-image-unconfigured-qualities
+[00:12:08.246] Browser INFO    %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
+[00:12:08.371] Browser WARN    Image with src "https://images.unsplash.com/photo-1543353071-873f17a7a088?q=80&w=2070&auto=format&fit=crop" is using quality "90" which is not configured in images.qualities [75]. Please update your config to [75, 90].
+Read more: https://nextjs.org/docs/messages/next-image-unconfigured-qualities
+[00:12:09.184] Browser WARN    Image with src "https://images.unsplash.com/photo-1543353071-873f17a7a088?q=80&w=2070&auto=format&fit=crop" is using quality "90" which is not configured in images.qualities [75]. Please update your config to [75, 90].
+Read more: https://nextjs.org/docs/messages/next-image-unconfigured-qualities
+[00:12:09.478] Browser INFO    %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
+[00:12:10.224] Browser WARN    Image with src "https://images.unsplash.com/photo-1543353071-873f17a7a088?q=80&w=2070&auto=format&fit=crop" is using quality "90" which is not configured in images.qualities [75]. Please update your config to [75, 90].
+Read more: https://nextjs.org/docs/messages/next-image-unconfigured-qualities
+[00:12:17.044] Browser INFO    %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
+[00:12:17.170] Browser WARN    Image with src "https://images.unsplash.com/photo-1543353071-873f17a7a088?q=80&w=2070&auto=format&fit=crop" is using quality "90" which is not configured in images.qualities [75]. Please update your config to [75, 90].
+Read more: https://nextjs.org/docs/messages/next-image-unconfigured-qualities
+[00:12:22.448] Browser INFO    %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
+[00:12:22.687] Server  WARN    Image with src "https://images.unsplash.com/photo-1543353071-873f17a7a088?q=80&w=2070&auto=format&fit=crop" is using quality "90" which is not configured in images.qualities [75]. Please update your config to [75, 90].
+Read more: https://nextjs.org/docs/messages/next-image-unconfigured-qualities
+[00:12:23.314] Browser WARN    Image with src "https://images.unsplash.com/photo-1543353071-873f17a7a088?q=80&w=2070&auto=format&fit=crop" is using quality "90" which is not configured in images.qualities [75]. Please update your config to [75, 90].
+Read more: https://nextjs.org/docs/messages/next-image-unconfigured-qualities
+[00:12:23.742] Browser INFO    %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
+[00:12:24.517] Browser WARN    Image with src "https://images.unsplash.com/photo-1543353071-873f17a7a088?q=80&w=2070&auto=format&fit=crop" is using quality "90" which is not configured in images.qualities [75]. Please update your config to [75, 90].
+Read more: https://nextjs.org/docs/messages/next-image-unconfigured-qualities
+[00:12:34.218] Browser WARN    Detected `scroll-behavior: smooth` on the `<html>` element. To disable smooth scrolling during route transitions, add `data-scroll-behavior="smooth"` to your <html> element. Learn more: https://nextjs.org/docs/messages/missing-data-scroll-behavior
+[00:13:11.347] Server  WARN    Image with src "https://images.unsplash.com/photo-1543353071-873f17a7a088?q=80&w=2070&auto=format&fit=crop" is using quality "90" which is not configured in images.qualities [75]. Please update your config to [75, 90].
+Read more: https://nextjs.org/docs/messages/next-image-unconfigured-qualities
+[00:13:11.818] Browser INFO    %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
+[00:13:11.951] Browser WARN    Image with src "https://images.unsplash.com/photo-1543353071-873f17a7a088?q=80&w=2070&auto=format&fit=crop" is using quality "90" which is not configured in images.qualities [75]. Please update your config to [75, 90].
+Read more: https://nextjs.org/docs/messages/next-image-unconfigured-qualities
+[00:13:12.521] Browser WARN    Image with src "https://images.unsplash.com/photo-1543353071-873f17a7a088?q=80&w=2070&auto=format&fit=crop" is using quality "90" which is not configured in images.qualities [75]. Please update your config to [75, 90].
+Read more: https://nextjs.org/docs/messages/next-image-unconfigured-qualities
+[00:13:12.664] Browser INFO    %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
+[00:13:24.930] Browser INFO    %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
+[00:13:25.054] Browser WARN    Image with src "https://images.unsplash.com/photo-1543353071-873f17a7a088?q=80&w=2070&auto=format&fit=crop" is using quality "90" which is not configured in images.qualities [75]. Please update your config to [75, 90].
+Read more: https://nextjs.org/docs/messages/next-image-unconfigured-qualities
+[00:14:54.821] Browser ERROR   uncaughtError: ReferenceError: cn is not defined
+[00:14:58.024] Browser INFO    %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
+[00:14:58.145] Browser WARN    Image with src "https://images.unsplash.com/photo-1543353071-873f17a7a088?q=80&w=2070&auto=format&fit=crop" is using quality "90" which is not configured in images.qualities [75]. Please update your config to [75, 90].
+Read more: https://nextjs.org/docs/messages/next-image-unconfigured-qualities
+[00:15:01.904] Browser ERROR   uncaughtError: ReferenceError: cn is not defined
+[00:17:59.823] Server  WARN    ⚠ Fast Refresh had to perform a full reload due to a runtime error.
+[00:18:01.438] Server  WARN    Image with src "https://images.unsplash.com/photo-1543353071-873f17a7a088?q=80&w=2070&auto=format&fit=crop" is using quality "90" which is not configured in images.qualities [75]. Please update your config to [75, 90].
+Read more: https://nextjs.org/docs/messages/next-image-unconfigured-qualities
+[00:18:02.052] Browser INFO    %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
+[00:18:02.109] Browser WARN    Image with src "https://images.unsplash.com/photo-1543353071-873f17a7a088?q=80&w=2070&auto=format&fit=crop" is using quality "90" which is not configured in images.qualities [75]. Please update your config to [75, 90].
+Read more: https://nextjs.org/docs/messages/next-image-unconfigured-qualities
+[00:18:02.124] Browser INFO    %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
+[00:18:02.254] Browser WARN    Image with src "https://images.unsplash.com/photo-1543353071-873f17a7a088?q=80&w=2070&auto=format&fit=crop" is using quality "90" which is not configured in images.qualities [75]. Please update your config to [75, 90].
+Read more: https://nextjs.org/docs/messages/next-image-unconfigured-qualities
+[00:18:30.055] Browser WARN    Image with src "https://images.unsplash.com/photo-1604908176997-125f25cc6f3d?auto=format&fit=crop&w=800" has "fill" but is missing "sizes" prop. Please add it to improve page performance. Read more: https://nextjs.org/docs/api-reference/next/image#sizes
