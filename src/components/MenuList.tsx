@@ -56,10 +56,10 @@ type Cart = { [key: string]: CartItem };
 
 // FILTROS PRINCIPALES SIMPLIFICADOS
 const CATEGORIES = [
-  { id: "all", label: "Todo" },
-  { id: "menu", label: "Menú Ejecutivo" },
-  { id: "plato", label: "A la Carta" },
-  { id: "diet", label: "Dietas" },
+  { id: "all", label: "Todo", shortLabel: "Todo" },
+  { id: "menu", label: "Menú Ejecutivo", shortLabel: "Menú" },
+  { id: "plato", label: "A la Carta", shortLabel: "Carta" },
+  { id: "diet", label: "Dietas Saludables", shortLabel: "Dietas" },
 ];
 
 export default function MenuList({
@@ -308,36 +308,52 @@ export default function MenuList({
         </div>
       </div>
 
-      {/* FILTROS PRINCIPALES */}
-      <div className="sticky top-[5rem] z-30 w-full mb-8 pointer-events-none">
-        <div className="absolute inset-0 backdrop-blur-xl -mx-4 md:-mx-8 lg:-mx-12 mask-gradient-b pointer-events-none" />
-        <div className="relative py-3 flex flex-wrap justify-center gap-2.5 max-w-[1400px] mx-auto px-2 pointer-events-auto">
-          {CATEGORIES.map((cat) => {
-            const isActive = filter === cat.id;
-            return (
-              <button
-                key={cat.id}
-                onClick={() => setFilter(cat.id)}
-                className={cn(
-                  "relative px-5 py-2.5 rounded-full text-xs font-bold transition-all duration-300 shadow-sm border active:scale-95 backdrop-blur-md",
-                  isActive
-                    ? "bg-orange-600 text-white border-orange-600 shadow-orange-500/20 z-10"
-                    : "bg-white/90 text-slate-500 border-slate-200 hover:border-orange-300 hover:text-orange-600",
-                )}
-              >
-                {isActive && (
-                  <motion.div
-                    layoutId="activeFilter"
-                    className="absolute inset-0 bg-orange-600 rounded-full -z-10"
-                    transition={{ type: "spring", stiffness: 300, damping: 30 }}
-                  />
-                )}
-                {cat.label}
-              </button>
-            );
-          })}
+     
+
+
+{/* ============================================================== */}
+      {/* FILTROS PRINCIPALES: DOCK MINIMALISTA (Estilo Senior/Premium)  */}
+      {/* ============================================================== */}
+      <div className="sticky top-0 z-30 w-full mb-8 pt-4 pb-8 -mt-4 pointer-events-none">
+        
+        {/* Contenedor interactivo */}
+        <div className="relative pointer-events-auto flex overflow-x-auto no-scrollbar justify-start md:justify-center max-w-[1400px] mx-auto px-4 md:px-0">
+          
+          {/* La Cápsula Contenedora (Dock) */}
+          <div className="flex items-center gap-1 p-1 bg-white/70 border border-slate-200/60 rounded-full shadow-sm backdrop-blur-xl">
+            {CATEGORIES.map((cat) => {
+              const isActive = filter === cat.id;
+              return (
+                <button
+                  key={cat.id}
+                  onClick={() => setFilter(cat.id)}
+                  className={cn(
+                    "relative px-5 sm:px-7 py-2.5 rounded-full text-[12px] sm:text-sm font-bold transition-all duration-300 outline-none shrink-0 active:scale-95",
+                    isActive
+                      ? "text-white"
+                      : "text-slate-500 hover:text-slate-800 hover:bg-slate-100/50"
+                  )}
+                >
+                  {/* Animación fluida: Color sólido, mate y discreto */}
+                  {isActive && (
+                    <motion.div
+                      layoutId="activeFilter"
+                      className="absolute inset-0 bg-orange-600 rounded-full shadow-sm border border-orange-500/50"
+                      transition={{ type: "spring", stiffness: 500, damping: 35 }}
+                    />
+                  )}
+                  
+                  {/* Textos elevados sobre el fondo animado */}
+                  <span className="relative z-10 sm:hidden tracking-tight">{cat.shortLabel}</span>
+                  <span className="relative z-10 hidden sm:inline tracking-tight">{cat.label}</span>
+                </button>
+              );
+            })}
+          </div>
         </div>
       </div>
+
+     
 
       <div className="pb-32 min-h-[60vh] max-w-[1400px] mx-auto">
         {renderSection(
