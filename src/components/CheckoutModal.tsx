@@ -28,6 +28,7 @@ import {
   Smartphone,
   Shield,
   Building,
+  Plus, // <---- ¡AGREGA ESTO AQUÍ!
 } from "lucide-react";
 import { clsx, type ClassValue } from "clsx";
 import { twMerge } from "tailwind-merge";
@@ -245,12 +246,13 @@ export default function CheckoutModal({
                         <span className="text-sm font-bold text-slate-800 leading-tight">
                           {item.product.name}
                         </span>
+                        {/* REEMPLAZA ESTE BLOQUE EN CheckoutModal.tsx */}
                         {item.options && (
-                          <div className="flex flex-col mt-1 space-y-0.5">
+                          <div className="flex flex-col mt-1.5 space-y-1">
                             {item.options.entrada && (
                               <span className="text-[10px] font-medium text-slate-500 flex items-center gap-1">
                                 <ArrowRight
-                                  size={8}
+                                  size={10}
                                   className="text-orange-400"
                                 />{" "}
                                 {item.options.entrada}
@@ -259,12 +261,30 @@ export default function CheckoutModal({
                             {item.options.bebida && (
                               <span className="text-[10px] font-medium text-slate-500 flex items-center gap-1">
                                 <ArrowRight
-                                  size={8}
+                                  size={10}
                                   className="text-orange-400"
                                 />{" "}
                                 {item.options.bebida}
                               </span>
                             )}
+
+                            {/* ESTO ES LO NUEVO: Mostrar los Adicionales cobrados */}
+                            {item.options.adicionales &&
+                              item.options.adicionales.length > 0 && (
+                                <div className="pt-1 mt-1 border-t border-slate-100/70 flex flex-col gap-1">
+                                  {item.options.adicionales.map(
+                                    (ext: any, i: number) => (
+                                      <span
+                                        key={i}
+                                        className="text-[10px] font-bold text-orange-600 flex items-center gap-1 bg-orange-50 w-fit px-2 py-0.5 rounded border border-orange-100/50"
+                                      >
+                                        <Plus size={10} strokeWidth={3} />{" "}
+                                        {ext.name} (S/ {ext.price.toFixed(2)})
+                                      </span>
+                                    ),
+                                  )}
+                                </div>
+                              )}
                           </div>
                         )}
                       </div>

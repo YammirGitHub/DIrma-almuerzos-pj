@@ -1,7 +1,0 @@
-[00:00:01.509] Server  LOG      ○ (pwa) "PWA support is disabled."
-[00:00:01.673] Server  LOG     ✓ Ready in 1492ms
-[00:00:06.136] Server  LOG     ○ Compiling / ...
-[00:00:08.139] Server  WARN    Image with src "https://images.unsplash.com/photo-1543353071-873f17a7a088?q=80&w=2070&auto=format&fit=crop" is using quality "90" which is not configured in images.qualities [75]. Please update your config to [75, 90].
-Read more: https://nextjs.org/docs/messages/next-image-unconfigured-qualities
-[00:00:09.099] Browser WARN    Image with src "https://images.unsplash.com/photo-1543353071-873f17a7a088?q=80&w=2070&auto=format&fit=crop" is using quality "90" which is not configured in images.qualities [75]. Please update your config to [75, 90].
-Read more: https://nextjs.org/docs/messages/next-image-unconfigured-qualities

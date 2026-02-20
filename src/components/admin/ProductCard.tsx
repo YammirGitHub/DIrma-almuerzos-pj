@@ -1,6 +1,6 @@
 "use client";
 import Image from "next/image";
-import { Trash2, Edit2, Loader2, Package } from "lucide-react";
+import { Trash2, Edit2, Loader2, Package, LayoutList } from "lucide-react";
 
 // ESCUDO PROTECTOR: Valida que el texto sea realmente una URL.
 const getValidImageUrl = (url: string) => {
@@ -22,20 +22,27 @@ export default function ProductCard({
   onEdit,
   isToggling,
 }: any) {
-  // LÓGICA DE STOCK: No disponible si lo apagas manualmente OR si el stock llega a 0
+  // LÓGICA DE STOCK
   const isAvailable =
     product.is_available && (product.stock === null || product.stock > 0);
   const hasStockLimit = product.stock !== null && product.stock !== undefined;
 
   const safeImageUrl = getValidImageUrl(product.image_url);
 
+  // LÓGICA DE OPCIONES (Contar cuántas hay configuradas)
+  const entradasCount = product.options?.entradas?.length || 0;
+  const bebidasCount = product.options?.bebidas?.length || 0;
+  const adicionalesCount = product.options?.adicionales?.length || 0;
+  const hasConfig =
+    entradasCount > 0 || bebidasCount > 0 || adicionalesCount > 0;
+
   return (
     <div
-      className={`bg-white p-4 rounded-[1.5rem] shadow-sm border border-slate-200 flex flex-col gap-4 transition-all duration-300 hover:shadow-lg hover:shadow-orange-500/10 hover:border-orange-200 group relative overflow-hidden ${!isAvailable ? "opacity-60 bg-slate-50" : ""}`}
+      className={`bg-white p-4 rounded-[1.5rem] shadow-sm border border-slate-200 flex flex-col gap-4 transition-all duration-300 hover:shadow-lg hover:shadow-orange-500/10 hover:border-orange-200 group relative overflow-hidden ${!isAvailable ? "opacity-60 bg-slate-50 grayscale-[0.5]" : ""}`}
     >
       <div className="flex gap-4">
         {/* Imagen con fondo sutil naranja */}
-        <div className="relative w-20 h-20 shrink-0 bg-orange-50 rounded-xl overflow-hidden border border-orange-100/50">
+        <div className="relative w-24 h-24 sm:w-20 sm:h-20 shrink-0 bg-orange-50 rounded-xl overflow-hidden border border-orange-100/50">
           <Image
             src={safeImageUrl}
             alt={product.name || "Plato"}
@@ -45,29 +52,58 @@ export default function ProductCard({
           />
         </div>
 
-        {/* Info */}
-        <div className="flex-1 flex flex-col justify-start py-1 min-w-0">
-          <div className="flex justify-between items-start">
+        {/* Información Principal */}
+        <div className="flex-1 flex flex-col justify-start min-w-0">
+          <div className="flex justify-between items-start gap-2">
             <h3 className="font-bold text-slate-900 text-sm leading-tight line-clamp-2 pr-2 group-hover:text-orange-600 transition-colors">
               {product.name}
             </h3>
-            <div className="flex gap-1.5 opacity-0 group-hover:opacity-100 transition-opacity">
+            {/* Botones de Acción */}
+            <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity shrink-0 bg-white/80 backdrop-blur-sm rounded-lg">
               <button
                 onClick={() => onEdit(product)}
-                className="p-1.5 text-slate-400 hover:text-blue-500 hover:bg-blue-50 rounded-lg transition-all"
+                className="p-1.5 text-slate-400 hover:text-blue-500 hover:bg-blue-50 rounded-md transition-all"
                 title="Editar producto"
               >
-                <Edit2 size={16} />
+                <Edit2 size={14} strokeWidth={2.5} />
               </button>
               <button
                 onClick={() => onDelete(product.id)}
-                className="p-1.5 text-slate-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-all"
+                className="p-1.5 text-slate-400 hover:text-red-500 hover:bg-red-50 rounded-md transition-all"
                 title="Eliminar producto"
               >
-                <Trash2 size={16} />
+                <Trash2 size={14} strokeWidth={2.5} />
               </button>
             </div>
           </div>
+
+          {/* Descripción Corta */}
+          {product.description && (
+            <p className="text-[10px] text-slate-500 line-clamp-1 mt-0.5 font-medium leading-tight">
+              {product.description}
+            </p>
+          )}
+
+          {/* Badges de Configuración (Upselling) */}
+          {hasConfig && (
+            <div className="flex flex-wrap gap-1 mt-1.5">
+              {entradasCount > 0 && (
+                <span className="text-[8px] font-bold bg-slate-100 text-slate-600 px-1.5 py-0.5 rounded border border-slate-200">
+                  🍲 {entradasCount} Ent
+                </span>
+              )}
+              {bebidasCount > 0 && (
+                <span className="text-[8px] font-bold bg-slate-100 text-slate-600 px-1.5 py-0.5 rounded border border-slate-200">
+                  🥤 {bebidasCount} Beb
+                </span>
+              )}
+              {adicionalesCount > 0 && (
+                <span className="text-[8px] font-bold bg-orange-50 text-orange-600 px-1.5 py-0.5 rounded border border-orange-200/50">
+                  ⭐ {adicionalesCount} Ext
+                </span>
+              )}
+            </div>
+          )}
 
           <div className="mt-auto pt-2 flex items-center justify-between">
             <span className="font-black text-slate-900 tracking-tight">

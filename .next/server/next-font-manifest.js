@@ -1,1 +1,0 @@
-self.__NEXT_FONT_MANIFEST='{"pages":{},"app":{"/Users/yammir/Documents/Yammir/DOCUMENTOSSSS ANTES DE LA ACRTUALIZACION/WEB\xb4S/d-irma/src/app/layout":["static/media/e4af272ccee01ff0-s.p.woff2"]},"appUsingSizeAdjust":true,"pagesUsingSizeAdjust":false}';

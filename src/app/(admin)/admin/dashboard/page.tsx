@@ -28,6 +28,8 @@ import {
   ListFilter,
   CheckCircle2,
   SlidersHorizontal,
+  Trash2,
+  Info,
 } from "lucide-react";
 import { clsx, type ClassValue } from "clsx";
 import { twMerge } from "tailwind-merge";
@@ -61,7 +63,11 @@ type Product = {
   image_url: string;
   is_available: boolean;
   stock?: number | null;
-  options?: { entradas?: string[]; bebidas?: string[] } | null;
+  options?: {
+    entradas?: string[];
+    bebidas?: string[];
+    adicionales?: { name: string; price: number }[];
+  } | null;
 };
 
 type CustomerSummary = {
@@ -101,17 +107,27 @@ export default function AdminDashboard() {
     onConfirm: () => {},
     type: "danger" as "danger" | "info" | "success",
   });
-
-  // ESTADO DEL PRODUCTO CON OPCIONES DINÁMICAS
-  const [newProduct, setNewProduct] = useState({
+  // ESTADO DEL PRODUCTO CON OPCIONES DINÁMICAS (LISTAS)
+  const [newProduct, setNewProduct] = useState<{
+    name: string;
+    description: string;
+    price: string;
+    category: string;
+    image_url: string;
+    stock: string;
+    entradas: string[];
+    bebidas: string[];
+    adicionales: { name: string; price: string }[];
+  }>({
     name: "",
     description: "",
     price: "",
     category: "menu",
     image_url: "",
     stock: "",
-    entradas: "",
-    bebidas: "", // Se manejarán como strings separadas por comas en el form
+    entradas: [],
+    bebidas: [],
+    adicionales: [],
   });
 
   const router = useRouter();
@@ -341,18 +357,17 @@ export default function AdminDashboard() {
         const parsedPrice = parseFloat(newProduct.price as string);
         if (isNaN(parsedPrice)) throw new Error("Precio inválido");
 
-        // Convertir strings separadas por coma en Arrays limpios
+        // Preparamos las opciones leyendo directamente de las nuevas listas dinámicas
         const optionsObj = {
-          entradas: newProduct.entradas
-            .split(",")
-            .map((s) => s.trim())
-            .filter(Boolean),
-          bebidas: newProduct.bebidas
-            .split(",")
-            .map((s) => s.trim())
-            .filter(Boolean),
+          entradas: newProduct.entradas.map((s) => s.trim()).filter(Boolean),
+          bebidas: newProduct.bebidas.map((s) => s.trim()).filter(Boolean),
+          adicionales: newProduct.adicionales
+            .filter((a) => a.name.trim() !== "" && a.price !== "")
+            .map((a) => ({
+              name: a.name.trim(),
+              price: parseFloat(a.price) || 0,
+            })),
         };
-
         const productData = {
           name: newProduct.name,
           description: newProduct.description,
@@ -360,7 +375,7 @@ export default function AdminDashboard() {
           category: newProduct.category,
           image_url: newProduct.image_url,
           stock: finalStock,
-          options: optionsObj, // Se guarda en PostgreSQL como JSONB
+          options: optionsObj,
           is_available: true,
         };
 
@@ -386,8 +401,9 @@ export default function AdminDashboard() {
           category: "menu",
           image_url: "",
           stock: "",
-          entradas: "",
-          bebidas: "",
+          entradas: [], // <-- Ahora son arreglos vacíos
+          bebidas: [], // <-- Ahora son arreglos vacíos
+          adicionales: [], // <-- Ahora son arreglos vacíos
         });
       } catch (err: any) {
         console.error("Error al guardar:", err);
@@ -454,7 +470,7 @@ export default function AdminDashboard() {
               key={tab.id}
               onClick={() => setActiveTab(tab.id)}
               className={cn(
-                "relative px-6 py-3 rounded-xl text-sm font-bold flex items-center justify-center gap-2 transition-all duration-300 min-w-max",
+                "relative px-6 py-3 rounded-xl text-sm font-bold transition-all duration-300 min-w-max",
                 activeTab === tab.id
                   ? "text-white shadow-md shadow-orange-500/20"
                   : "text-slate-500 hover:text-slate-800 hover:bg-slate-50",
@@ -463,11 +479,15 @@ export default function AdminDashboard() {
               {activeTab === tab.id && (
                 <motion.div
                   layoutId="adminTab"
-                  className="absolute inset-0 bg-orange-600 rounded-xl -z-10"
+                  // Le quitamos el -z-10
+                  className="absolute inset-0 bg-orange-600 rounded-xl"
                   transition={{ type: "spring", stiffness: 400, damping: 30 }}
                 />
               )}
-              <tab.icon size={16} strokeWidth={2.5} /> {tab.label}
+              {/* Envolvemos el texto y el ícono en un z-10 para que resalten sobre el fondo naranja */}
+              <span className="relative z-10 flex items-center justify-center gap-2">
+                <tab.icon size={16} strokeWidth={2.5} /> {tab.label}
+              </span>
             </button>
           ))}
         </div>
@@ -632,26 +652,35 @@ export default function AdminDashboard() {
           >
             <button
               onClick={() => {
-                setEditingId(null);
-                setNewProduct({
-                  name: "",
-                  description: "",
-                  price: "",
-                  category: "menu",
-                  image_url: "",
-                  stock: "",
-                  entradas: "",
-                  bebidas: "",
-                });
+                // Si estábamos editando un plato existente, limpiamos el formulario para empezar uno nuevo.
+                if (editingId !== null) {
+                  setEditingId(null);
+                  setNewProduct({
+                    name: "",
+                    description: "",
+                    price: "",
+                    category: "menu",
+                    image_url: "",
+                    stock: "",
+                    entradas: [],
+                    bebidas: [],
+                    adicionales: [],
+                  });
+                }
+                // Si NO estábamos editando, significa que tenemos un "borrador" guardado.
+                // Simplemente abrimos el modal y React mostrará lo que ya estaba escrito.
                 setIsAddOpen(true);
               }}
-              className="w-full bg-orange-50 border-2 border-dashed border-orange-200 hover:border-orange-500 p-8 rounded-[2rem] flex flex-col items-center justify-center gap-3 text-orange-600 hover:bg-orange-100 transition-all group"
+              className="w-full bg-orange-50 border-2 border-dashed border-orange-200 hover:border-orange-500 p-8 rounded-[2rem] flex flex-col items-center justify-center gap-3 text-orange-600 hover:bg-orange-100 transition-all group cursor-pointer"
             >
               <div className="bg-white group-hover:bg-orange-600 group-hover:text-white text-orange-500 p-4 rounded-full shadow-sm transition-colors">
                 <Plus size={24} strokeWidth={2.5} />
               </div>
               <span className="font-black text-sm tracking-widest uppercase drop-shadow-sm">
-                Crear Nuevo Producto
+                {/* Micro-interacción: Si hay un nombre escrito, cambiamos el texto del botón */}
+                {newProduct.name && editingId === null
+                  ? "Continuar Borrador"
+                  : "Crear Nuevo Producto"}
               </span>
             </button>
 
@@ -673,12 +702,6 @@ export default function AdminDashboard() {
                 title: "Dietas Saludables",
                 icon: Salad,
                 color: "bg-green-500",
-              },
-              {
-                id: "adicional",
-                title: "Adicionales",
-                icon: Coffee,
-                color: "bg-yellow-500",
               },
             ].map((section) => {
               const sectionProducts = products.filter(
@@ -723,8 +746,13 @@ export default function AdminDashboard() {
                             image_url: prod.image_url || "",
                             stock:
                               prod.stock === null ? "" : prod.stock.toString(),
-                            entradas: prod.options?.entradas?.join(", ") || "",
-                            bebidas: prod.options?.bebidas?.join(", ") || "",
+                            entradas: prod.options?.entradas || [],
+                            bebidas: prod.options?.bebidas || [],
+                            adicionales:
+                              prod.options?.adicionales?.map((a: any) => ({
+                                name: a.name,
+                                price: a.price.toString(),
+                              })) || [],
                           });
                           setIsAddOpen(true);
                         }}
@@ -739,326 +767,453 @@ export default function AdminDashboard() {
         )}
       </main>
 
-      {/* --- MODAL CREAR / EDITAR PRODUCTO (CON OPCIONES DINÁMICAS) --- */}
+      {/* ============================================================== */}
+      {/* MODAL CREAR / EDITAR PRODUCTO (NIVEL SENIOR UX/UI) */}
+      {/* ============================================================== */}
       <AnimatePresence>
         {isAddOpen && (
-          <div className="fixed inset-0 z-[60] flex items-center justify-center p-4 isolate overflow-hidden">
+          <div className="fixed inset-0 z-[60] flex items-end sm:items-center justify-center sm:p-4 isolate overflow-hidden">
             <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              onClick={() => setIsAddOpen(false)}
+              onClick={() => setIsAddOpen(false)} // <--- Vuelve a poner esto
               className="absolute inset-0 bg-slate-900/60 backdrop-blur-sm"
             />
             <motion.div
-              initial={{ scale: 0.95, opacity: 0, y: 10 }}
+              initial={{ scale: 0.95, opacity: 0, y: 20 }}
               animate={{ scale: 1, opacity: 1, y: 0 }}
-              exit={{ scale: 0.95, opacity: 0, y: 10 }}
+              exit={{ scale: 0.95, opacity: 0, y: 20 }}
               transition={{ type: "spring", damping: 25, stiffness: 300 }}
-              className="relative bg-white w-full max-w-lg rounded-[2.5rem] p-8 shadow-2xl shadow-black/10 ring-1 ring-slate-100 max-h-[90vh] overflow-y-auto custom-scrollbar"
+              className="relative bg-white w-full sm:max-w-[600px] sm:rounded-[2.5rem] rounded-t-[2.5rem] shadow-2xl flex flex-col max-h-[90vh] sm:max-h-[85vh] z-10 overflow-hidden ring-1 ring-white/10"
             >
-              <h2 className="text-2xl font-black text-slate-900 mb-6 tracking-tight flex items-center gap-2">
-                <ChefHat className="text-orange-500" />{" "}
-                {editingId ? "Editar Plato" : "Nuevo Plato"}
-              </h2>
-
-              <form onSubmit={handleActions.saveProduct} className="space-y-4">
-                <div>
-                  <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest ml-1 mb-1 block">
-                    Nombre
-                  </label>
-                  <input
-                    required
-                    placeholder="Ej: Arroz con Pato"
-                    value={newProduct.name}
-                    onChange={(e) =>
-                      setNewProduct({ ...newProduct, name: e.target.value })
-                    }
-                    className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:border-orange-500 focus:ring-2 focus:ring-orange-200 outline-none text-sm font-bold text-slate-900 transition-all"
-                  />
-                </div>
-
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest ml-1 mb-1 block">
-                      Precio (S/)
-                    </label>
-                    <input
-                      type="number"
-                      step="0.1"
-                      required
-                      placeholder="0.00"
-                      value={newProduct.price}
-                      onChange={(e) =>
-                        setNewProduct({ ...newProduct, price: e.target.value })
-                      }
-                      className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:border-orange-500 focus:ring-2 focus:ring-orange-200 outline-none text-sm font-black text-slate-900 transition-all"
-                    />
+              {/* --- HEADER FIJO --- */}
+              <div className="px-6 sm:px-8 py-5 border-b border-slate-100 flex items-center justify-between shrink-0 bg-white z-10 shadow-[0_4px_20px_-12px_rgba(0,0,0,0.05)]">
+                <div className="flex items-center gap-4">
+                  <div className="bg-orange-50 text-orange-600 p-3 rounded-2xl shadow-sm border border-orange-100">
+                    <ChefHat size={24} strokeWidth={2.5} />
                   </div>
                   <div>
-                    <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest ml-1 mb-1 block">
-                      Categoría
-                    </label>
-                    <select
-                      value={newProduct.category}
-                      onChange={(e) =>
-                        setNewProduct({
-                          ...newProduct,
-                          category: e.target.value,
-                        })
-                      }
-                      className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:border-orange-500 focus:ring-2 focus:ring-orange-200 outline-none text-sm font-bold text-slate-900 transition-all cursor-pointer"
-                    >
-                      <option value="menu">Menú Ejecutivo</option>
-                      <option value="menu">Menú Ejecutivo</option>
-                      <option value="plato">A la Carta</option>
-                      <option value="diet">Dieta</option>
-                      <option value="adicional">Adicional / Extra</option>{" "}
-                      {/* Cambiamos "extra" y borramos "bebida" */}
-                    </select>
+                    <h2 className="text-xl sm:text-2xl font-black text-slate-900 tracking-tight leading-none">
+                      {editingId ? "Editar Plato" : "Nuevo Producto"}
+                    </h2>
+                    <p className="text-xs text-slate-500 font-medium mt-1">
+                      Configura la información del catálogo.
+                    </p>
                   </div>
                 </div>
+                <button
+                  type="button"
+                  onClick={() => setIsAddOpen(false)}
+                  className="p-2.5 bg-slate-50 border border-slate-200 text-slate-400 hover:text-slate-700 hover:bg-slate-100 rounded-full transition-colors active:scale-95 shadow-sm"
+                >
+                  <X size={20} strokeWidth={2.5} />
+                </button>
+              </div>
 
-                {/* PANEL DE OPCIONES DINÁMICAS (Solo para Menú y Dietas) */}
-                {["menu", "diet"].includes(newProduct.category) && (
-                  <motion.div
-                    initial={{ opacity: 0, height: 0 }}
-                    animate={{ opacity: 1, height: "auto" }}
-                    className="p-4 bg-orange-50/50 rounded-2xl border border-orange-100 space-y-3"
-                  >
-                    <h4 className="text-[10px] font-black text-orange-600 uppercase tracking-widest flex items-center gap-1.5">
-                      <SlidersHorizontal size={12} /> Configurar Opciones
-                      (Opcional)
-                    </h4>
+              {/* --- FORMULARIO Y CONTENIDO SCROLLABLE --- */}
+              <form
+                onSubmit={handleActions.saveProduct}
+                className="flex flex-col flex-1 overflow-hidden"
+              >
+                <div className="flex-1 overflow-y-auto px-6 sm:px-8 py-6 space-y-8 custom-scrollbar bg-slate-50/50">
+                  {/* PASO 1: INFORMACIÓN BÁSICA */}
+                  <div className="space-y-4 bg-white p-5 sm:p-6 rounded-3xl border border-slate-200 shadow-sm">
+                    <h3 className="text-[11px] font-black text-slate-800 uppercase tracking-widest flex items-center gap-2 mb-4 border-b border-slate-100 pb-3">
+                      <span className="bg-slate-900 text-white w-5 h-5 rounded-full flex items-center justify-center text-[10px] shadow-sm">
+                        1
+                      </span>{" "}
+                      Información Básica
+                    </h3>
+
                     <div>
+                      <label className="text-[10px] font-bold text-slate-500 uppercase tracking-widest ml-1 mb-1.5 block">
+                        Nombre del Plato
+                      </label>
                       <input
-                        placeholder="Entradas (ej: Sopa, Ensalada Rusa)"
-                        value={newProduct.entradas}
+                        required
+                        placeholder="Ej: Seco de Cabrito"
+                        value={newProduct.name}
+                        onChange={(e) =>
+                          setNewProduct({ ...newProduct, name: e.target.value })
+                        }
+                        className="w-full px-4 py-3.5 bg-slate-50 border border-slate-200 rounded-2xl focus:bg-white focus:border-orange-500 focus:ring-4 focus:ring-orange-500/10 outline-none text-sm font-bold text-slate-900 transition-all shadow-sm placeholder:text-slate-300"
+                      />
+                    </div>
+
+                    <div>
+                      <label className="text-[10px] font-bold text-slate-500 uppercase tracking-widest ml-1 mb-1.5 block">
+                        Descripción del Plato
+                      </label>
+                      <textarea
+                        placeholder="Detalla los ingredientes para enamorar al cliente..."
+                        value={newProduct.description}
                         onChange={(e) =>
                           setNewProduct({
                             ...newProduct,
-                            entradas: e.target.value,
+                            description: e.target.value,
                           })
                         }
-                        className="w-full px-3 py-2 bg-white border border-orange-200 rounded-lg text-xs font-medium text-slate-700 outline-none focus:border-orange-500"
+                        className="w-full px-4 py-3.5 bg-slate-50 border border-slate-200 rounded-2xl focus:bg-white focus:border-orange-500 focus:ring-4 focus:ring-orange-500/10 outline-none text-sm font-medium text-slate-700 transition-all shadow-sm resize-none h-20 placeholder:text-slate-300"
                       />
-                      <p className="text-[9px] text-orange-400/80 mt-1 ml-1">
-                        Sepáralas con una coma (,)
-                      </p>
                     </div>
-                    <div>
-                      <input
-                        placeholder="Bebidas (ej: Chicha, Maracuyá)"
-                        value={newProduct.bebidas}
-                        onChange={(e) =>
+
+                    {/* ENTRADAS Y BEBIDAS DINÁMICAS */}
+                    <AnimatePresence>
+                      {["menu", "diet"].includes(newProduct.category) && (
+                        <motion.div
+                          initial={{ opacity: 0, height: 0 }}
+                          animate={{ opacity: 1, height: "auto" }}
+                          exit={{ opacity: 0, height: 0 }}
+                          className="pt-2 overflow-hidden"
+                        >
+                          <div className="bg-slate-50 border border-slate-200 rounded-2xl p-4 grid grid-cols-1 sm:grid-cols-2 gap-5">
+                            {/* ENTRADAS */}
+                            <div>
+                              <label className="text-[10px] font-black text-slate-700 uppercase tracking-widest ml-1 mb-2 flex items-center justify-between">
+                                Entradas{" "}
+                                <span className="bg-slate-200 text-slate-600 px-1.5 py-0.5 rounded text-[8px]">
+                                  GRATIS
+                                </span>
+                              </label>
+                              <div className="space-y-2">
+                                {newProduct.entradas.map((ent, idx) => (
+                                  <div
+                                    key={idx}
+                                    className="flex items-center gap-2"
+                                  >
+                                    <input
+                                      placeholder={`Opción ${idx + 1}`}
+                                      value={ent}
+                                      onChange={(e) => {
+                                        const arr = [...newProduct.entradas];
+                                        arr[idx] = e.target.value;
+                                        setNewProduct({
+                                          ...newProduct,
+                                          entradas: arr,
+                                        });
+                                      }}
+                                      className="w-full px-3 py-2 bg-white border border-slate-200 rounded-xl outline-none text-xs font-bold text-slate-700 focus:border-orange-500 transition-all shadow-sm"
+                                    />
+                                    <button
+                                      type="button"
+                                      onClick={() => {
+                                        const arr = newProduct.entradas.filter(
+                                          (_, i) => i !== idx,
+                                        );
+                                        setNewProduct({
+                                          ...newProduct,
+                                          entradas: arr,
+                                        });
+                                      }}
+                                      className="p-2 bg-white border border-slate-200 rounded-xl text-slate-400 hover:text-red-500 hover:border-red-200 transition-colors shadow-sm shrink-0"
+                                    >
+                                      <X size={14} />
+                                    </button>
+                                  </div>
+                                ))}
+                                <button
+                                  type="button"
+                                  onClick={() =>
+                                    setNewProduct({
+                                      ...newProduct,
+                                      entradas: [...newProduct.entradas, ""],
+                                    })
+                                  }
+                                  className="text-[10px] font-bold text-slate-500 bg-white border border-slate-200 hover:border-slate-300 hover:text-slate-700 px-3 py-2 rounded-xl flex items-center justify-center gap-1.5 transition-colors w-full shadow-sm"
+                                >
+                                  <Plus size={12} strokeWidth={3} /> Añadir
+                                  Entrada
+                                </button>
+                              </div>
+                            </div>
+
+                            {/* BEBIDAS */}
+                            <div>
+                              <label className="text-[10px] font-black text-slate-700 uppercase tracking-widest ml-1 mb-2 flex items-center justify-between">
+                                Bebidas{" "}
+                                <span className="bg-slate-200 text-slate-600 px-1.5 py-0.5 rounded text-[8px]">
+                                  GRATIS
+                                </span>
+                              </label>
+                              <div className="space-y-2">
+                                {newProduct.bebidas.map((beb, idx) => (
+                                  <div
+                                    key={idx}
+                                    className="flex items-center gap-2"
+                                  >
+                                    <input
+                                      placeholder={`Opción ${idx + 1}`}
+                                      value={beb}
+                                      onChange={(e) => {
+                                        const arr = [...newProduct.bebidas];
+                                        arr[idx] = e.target.value;
+                                        setNewProduct({
+                                          ...newProduct,
+                                          bebidas: arr,
+                                        });
+                                      }}
+                                      className="w-full px-3 py-2 bg-white border border-slate-200 rounded-xl outline-none text-xs font-bold text-slate-700 focus:border-orange-500 transition-all shadow-sm"
+                                    />
+                                    <button
+                                      type="button"
+                                      onClick={() => {
+                                        const arr = newProduct.bebidas.filter(
+                                          (_, i) => i !== idx,
+                                        );
+                                        setNewProduct({
+                                          ...newProduct,
+                                          bebidas: arr,
+                                        });
+                                      }}
+                                      className="p-2 bg-white border border-slate-200 rounded-xl text-slate-400 hover:text-red-500 hover:border-red-200 transition-colors shadow-sm shrink-0"
+                                    >
+                                      <X size={14} />
+                                    </button>
+                                  </div>
+                                ))}
+                                <button
+                                  type="button"
+                                  onClick={() =>
+                                    setNewProduct({
+                                      ...newProduct,
+                                      bebidas: [...newProduct.bebidas, ""],
+                                    })
+                                  }
+                                  className="text-[10px] font-bold text-slate-500 bg-white border border-slate-200 hover:border-slate-300 hover:text-slate-700 px-3 py-2 rounded-xl flex items-center justify-center gap-1.5 transition-colors w-full shadow-sm"
+                                >
+                                  <Plus size={12} strokeWidth={3} /> Añadir
+                                  Bebida
+                                </button>
+                              </div>
+                            </div>
+                          </div>
+                          <div className="grid grid-cols-2 gap-4">
+                            <div>
+                              <label className="text-[10px] font-bold text-slate-500 uppercase tracking-widest ml-1 mb-1.5 block">
+                                Precio (S/)
+                              </label>
+                              <div className="relative">
+                                <span className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 font-black">
+                                  S/
+                                </span>
+                                <input
+                                  type="number"
+                                  step="0.1"
+                                  required
+                                  placeholder="0.00"
+                                  value={newProduct.price}
+                                  onChange={(e) =>
+                                    setNewProduct({
+                                      ...newProduct,
+                                      price: e.target.value,
+                                    })
+                                  }
+                                  className="w-full pl-10 pr-4 py-3.5 bg-slate-50 border border-slate-200 rounded-2xl focus:bg-white focus:border-orange-500 focus:ring-4 focus:ring-orange-500/10 outline-none text-sm font-black text-slate-900 transition-all shadow-sm placeholder:text-slate-300"
+                                />
+                              </div>
+                            </div>
+                            <div>
+                              <label className="text-[10px] font-bold text-slate-500 uppercase tracking-widest ml-1 mb-1.5 block">
+                                Categoría
+                              </label>
+                              <div className="relative">
+                                <select
+                                  value={newProduct.category}
+                                  onChange={(e) =>
+                                    setNewProduct({
+                                      ...newProduct,
+                                      category: e.target.value,
+                                    })
+                                  }
+                                  className="w-full px-4 py-3.5 bg-slate-50 border border-slate-200 rounded-2xl focus:bg-white focus:border-orange-500 focus:ring-4 focus:ring-orange-500/10 outline-none text-sm font-bold text-slate-900 transition-all shadow-sm appearance-none cursor-pointer"
+                                >
+                                  <option value="menu">Menú Ejecutivo</option>
+                                  <option value="plato">A la Carta</option>
+                                  <option value="diet">Dieta</option>
+                                </select>
+                                <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-slate-400">
+                                  <svg
+                                    xmlns="http://www.w3.org/2000/svg"
+                                    width="16"
+                                    height="16"
+                                    viewBox="0 0 24 24"
+                                    fill="none"
+                                    stroke="currentColor"
+                                    strokeWidth="2"
+                                    strokeLinecap="round"
+                                    strokeLinejoin="round"
+                                  >
+                                    <path d="m6 9 6 6 6-6" />
+                                  </svg>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        </motion.div>
+                      )}
+                    </AnimatePresence>
+                  </div>
+
+                  {/* PASO 2: EXTRAS DE PAGO (Upselling Dinámico) */}
+                  <div className="space-y-4 bg-orange-50/50 p-5 sm:p-6 rounded-3xl border border-orange-100 shadow-sm relative overflow-hidden">
+                    <div className="absolute top-0 right-0 w-32 h-32 bg-orange-200/30 rounded-bl-full -mr-4 -mt-4 blur-2xl pointer-events-none" />
+
+                    <h3 className="text-[11px] font-black text-orange-800 uppercase tracking-widest flex items-center gap-2 mb-3 border-b border-orange-200/60 pb-3 relative z-10">
+                      <span className="bg-orange-500 text-white w-5 h-5 rounded-full flex items-center justify-center text-[10px] shadow-sm shadow-orange-500/30">
+                        2
+                      </span>{" "}
+                      Extras de Pago (Opcional)
+                    </h3>
+
+                    <div className="relative z-10 space-y-2">
+                      {newProduct.adicionales.map((add, idx) => (
+                        <div key={idx} className="flex items-center gap-2">
+                          <input
+                            placeholder="Nombre (Ej: Huevo frito)"
+                            value={add.name}
+                            onChange={(e) => {
+                              const arr = [...newProduct.adicionales];
+                              // FORMA SENIOR: Clonamos el objeto de esa posición en lugar de mutarlo
+                              arr[idx] = { ...arr[idx], name: e.target.value };
+                              setNewProduct({
+                                ...newProduct,
+                                adicionales: arr,
+                              });
+                            }}
+                            className="flex-1 px-3 py-2.5 bg-white border border-orange-200 rounded-xl outline-none text-xs font-bold text-slate-700 focus:border-orange-500 transition-all shadow-sm"
+                          />
+                          <div className="relative w-24 shrink-0">
+                            <span className="absolute left-2.5 top-1/2 -translate-y-1/2 text-[10px] font-black text-slate-400">
+                              S/
+                            </span>
+                            <input
+                              type="number"
+                              step="0.1"
+                              placeholder="0.00"
+                              value={add.price}
+                              onChange={(e) => {
+                                const arr = [...newProduct.adicionales];
+                                // FORMA SENIOR: Clonamos el objeto de esa posición en lugar de mutarlo
+                                arr[idx] = {
+                                  ...arr[idx],
+                                  price: e.target.value,
+                                };
+                                setNewProduct({
+                                  ...newProduct,
+                                  adicionales: arr,
+                                });
+                              }}
+                              className="w-full pl-6 pr-2 py-2.5 bg-white border border-orange-200 rounded-xl outline-none text-xs font-black text-slate-700 focus:border-orange-500 transition-all shadow-sm"
+                            />
+                          </div>
+                          <button
+                            type="button"
+                            onClick={() => {
+                              const arr = newProduct.adicionales.filter(
+                                (_, i) => i !== idx,
+                              );
+                              setNewProduct({
+                                ...newProduct,
+                                adicionales: arr,
+                              });
+                            }}
+                            className="p-2.5 bg-white border border-orange-200 rounded-xl text-slate-400 hover:text-red-500 hover:border-red-200 transition-colors shadow-sm shrink-0"
+                          >
+                            <Trash2 size={14} />
+                          </button>
+                        </div>
+                      ))}
+                      <button
+                        type="button"
+                        onClick={() =>
                           setNewProduct({
                             ...newProduct,
-                            bebidas: e.target.value,
+                            adicionales: [
+                              ...newProduct.adicionales,
+                              { name: "", price: "" },
+                            ],
                           })
                         }
-                        className="w-full px-3 py-2 bg-white border border-orange-200 rounded-lg text-xs font-medium text-slate-700 outline-none focus:border-orange-500"
-                      />
+                        className="text-[10px] font-bold text-orange-600 bg-white border border-orange-200 hover:border-orange-400 px-4 py-2.5 rounded-xl flex items-center justify-center gap-1.5 transition-colors w-full shadow-sm mt-2"
+                      >
+                        <Plus size={12} strokeWidth={3} /> Añadir Ítem Extra
+                      </button>
                     </div>
-                  </motion.div>
-                )}
+                  </div>
 
-                <div>
-                  <label className="flex items-center gap-1.5 text-[10px] font-bold text-slate-400 uppercase tracking-widest ml-1 mb-1">
-                    <Package size={12} className="text-orange-500" /> Límite de
-                    Platos
-                  </label>
-                  <input
-                    type="number"
-                    min="0"
-                    placeholder="Dejar vacío si es ilimitado"
-                    value={newProduct.stock}
-                    onChange={(e) =>
-                      setNewProduct({ ...newProduct, stock: e.target.value })
-                    }
-                    className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:border-orange-500 focus:ring-2 focus:ring-orange-200 outline-none text-sm font-bold text-slate-900 transition-all placeholder:text-slate-400"
-                  />
+                  {/* PASO 3: INVENTARIO & MULTIMEDIA */}
+                  <div className="space-y-4 bg-white p-5 sm:p-6 rounded-3xl border border-slate-200 shadow-sm pb-8">
+                    <h3 className="text-[11px] font-black text-slate-800 uppercase tracking-widest flex items-center gap-2 mb-4 border-b border-slate-100 pb-3">
+                      <span className="bg-slate-900 text-white w-5 h-5 rounded-full flex items-center justify-center text-[10px] shadow-sm">
+                        3
+                      </span>{" "}
+                      Inventario & Multimedia
+                    </h3>
+
+                    <div className="grid grid-cols-5 gap-4">
+                      <div className="col-span-2">
+                        <label className="text-[10px] font-bold text-slate-500 uppercase tracking-widest ml-1 mb-1.5 flex items-center gap-1">
+                          <Package size={12} className="text-slate-400" /> Stock
+                        </label>
+                        <input
+                          type="number"
+                          min="0"
+                          placeholder="Ilimitado"
+                          value={newProduct.stock}
+                          onChange={(e) =>
+                            setNewProduct({
+                              ...newProduct,
+                              stock: e.target.value,
+                            })
+                          }
+                          className="w-full px-4 py-3.5 bg-slate-50 border border-slate-200 rounded-2xl focus:bg-white focus:border-orange-500 focus:ring-4 focus:ring-orange-500/10 outline-none text-sm font-black text-slate-900 transition-all shadow-sm placeholder:text-slate-400"
+                        />
+                      </div>
+                      <div className="col-span-3">
+                        <label className="text-[10px] font-bold text-slate-500 uppercase tracking-widest ml-1 mb-1.5 block">
+                          URL de Fotografía
+                        </label>
+                        <input
+                          placeholder="https://..."
+                          value={newProduct.image_url}
+                          onChange={(e) =>
+                            setNewProduct({
+                              ...newProduct,
+                              image_url: e.target.value,
+                            })
+                          }
+                          className="w-full px-4 py-3.5 bg-slate-50 border border-slate-200 rounded-2xl focus:bg-white focus:border-orange-500 focus:ring-4 focus:ring-orange-500/10 outline-none text-xs font-mono text-slate-500 transition-all shadow-sm placeholder:font-sans placeholder:text-sm placeholder:text-slate-300"
+                        />
+                      </div>
+                    </div>
+                  </div>
                 </div>
 
-                <div>
-                  <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest ml-1 mb-1 block">
-                    Descripción (Opcional)
-                  </label>
-                  <textarea
-                    placeholder="Ingredientes..."
-                    value={newProduct.description}
-                    onChange={(e) =>
-                      setNewProduct({
-                        ...newProduct,
-                        description: e.target.value,
-                      })
-                    }
-                    className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:border-orange-500 focus:ring-2 focus:ring-orange-200 outline-none text-sm font-medium text-slate-700 transition-all resize-none h-16"
-                  />
-                </div>
-
-                <div>
-                  <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest ml-1 mb-1 block">
-                    Imagen URL
-                  </label>
-                  <input
-                    placeholder="https://..."
-                    value={newProduct.image_url}
-                    onChange={(e) =>
-                      setNewProduct({
-                        ...newProduct,
-                        image_url: e.target.value,
-                      })
-                    }
-                    className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:border-orange-500 focus:ring-2 focus:ring-orange-200 outline-none text-xs font-mono text-slate-500 transition-all"
-                  />
-                </div>
-
-                <div className="flex gap-3 pt-4">
+                {/* --- FOOTER FIJO --- */}
+                <div className="px-6 sm:px-8 py-5 border-t border-slate-100 bg-white flex gap-3 shrink-0 z-10 shadow-[0_-15px_30px_rgba(0,0,0,0.02)]">
                   <button
                     type="button"
                     onClick={() => setIsAddOpen(false)}
-                    className="flex-1 py-4 rounded-xl font-bold text-slate-500 bg-slate-100 hover:bg-slate-200 transition-colors"
+                    className="flex-1 py-4 rounded-[1.25rem] font-bold text-slate-500 bg-slate-50 border border-slate-200 hover:bg-slate-100 hover:text-slate-700 transition-colors"
                   >
                     Cancelar
                   </button>
                   <button
                     type="submit"
                     disabled={isSubmitting}
-                    className="flex-1 bg-orange-600 text-white rounded-xl font-bold py-4 hover:bg-orange-700 transition-all active:scale-95 disabled:opacity-70 flex items-center justify-center gap-2 shadow-lg shadow-orange-500/30"
+                    className="flex-1 bg-orange-600 text-white rounded-[1.25rem] font-black py-4 hover:bg-orange-700 transition-all active:scale-95 disabled:opacity-70 flex items-center justify-center gap-2 shadow-lg shadow-orange-500/30"
                   >
                     {isSubmitting ? (
-                      <Loader2 className="animate-spin" size={18} />
+                      <Loader2 className="animate-spin" size={20} />
                     ) : editingId ? (
                       "Guardar Cambios"
                     ) : (
-                      "Crear Plato"
+                      "Publicar Plato"
                     )}
                   </button>
                 </div>
               </form>
-            </motion.div>
-          </div>
-        )}
-      </AnimatePresence>
-
-      {/* Resto de modales (Customer Detail, Confirmation) se mantienen... */}
-      <AnimatePresence>
-        {selectedCustomer && (
-          <div className="fixed inset-0 z-[60] flex items-end sm:items-center justify-center p-4 isolate">
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              onClick={() => setSelectedCustomer(null)}
-              className="absolute inset-0 bg-slate-900/60 backdrop-blur-sm"
-            />
-            <motion.div
-              initial={{ y: "100%" }}
-              animate={{ y: 0 }}
-              exit={{ y: "100%" }}
-              transition={{ type: "spring", damping: 25, stiffness: 300 }}
-              className="relative bg-white w-full max-w-lg rounded-t-[2.5rem] sm:rounded-[2.5rem] p-0 shadow-2xl overflow-hidden flex flex-col max-h-[90vh]"
-            >
-              <div className="p-6 bg-slate-50 border-b border-slate-100 flex justify-between items-start">
-                <div>
-                  <h2 className="text-2xl font-black text-slate-900 leading-tight">
-                    {selectedCustomer.name}
-                  </h2>
-                  <div className="flex flex-col gap-1 mt-2">
-                    <span className="inline-flex items-center gap-1.5 text-xs font-bold text-slate-500 bg-white px-2 py-1 rounded-md border border-slate-200 w-fit">
-                      <Users size={12} /> {selectedCustomer.office}
-                    </span>
-                    <span className="text-xs font-mono text-slate-400">
-                      {selectedCustomer.phone}{" "}
-                      {selectedCustomer.dni
-                        ? `• DNI: ${selectedCustomer.dni}`
-                        : ""}
-                    </span>
-                  </div>
-                </div>
-                <button
-                  onClick={() => setSelectedCustomer(null)}
-                  className="p-2 bg-white border border-slate-200 rounded-full hover:bg-slate-100 transition-colors"
-                >
-                  <X size={20} className="text-slate-400" />
-                </button>
-              </div>
-
-              <div className="flex-1 overflow-y-auto p-6 custom-scrollbar">
-                <div
-                  className={`p-6 rounded-3xl mb-8 text-center relative overflow-hidden ${selectedCustomer.total_debt > 0 ? "bg-red-50 border border-red-100" : "bg-emerald-50 border border-emerald-100"}`}
-                >
-                  <p
-                    className={`text-[10px] font-black uppercase tracking-[0.2em] ${selectedCustomer.total_debt > 0 ? "text-red-400" : "text-emerald-500"}`}
-                  >
-                    {selectedCustomer.total_debt > 0
-                      ? "Deuda Pendiente"
-                      : "Estado de Cuenta"}
-                  </p>
-                  <p
-                    className={`text-5xl font-black mt-2 tracking-tighter ${selectedCustomer.total_debt > 0 ? "text-red-600" : "text-emerald-600"}`}
-                  >
-                    S/ {selectedCustomer.total_debt.toFixed(2)}
-                  </p>
-                  {selectedCustomer.total_debt > 0 ? (
-                    <button
-                      onClick={() =>
-                        askConfirmation(
-                          "Cobrar Deuda",
-                          `¿Confirmar pago total de S/ ${selectedCustomer.total_debt.toFixed(2)}?`,
-                          async () => handleActions.payDebt(selectedCustomer),
-                          "info",
-                        )
-                      }
-                      className="mt-6 w-full bg-red-600 hover:bg-red-700 text-white py-3.5 rounded-2xl font-bold shadow-lg shadow-red-500/30 flex items-center justify-center gap-2 transition-all active:scale-95"
-                    >
-                      <Wallet size={18} /> REGISTRAR PAGO TOTAL
-                    </button>
-                  ) : (
-                    <div className="mt-4 inline-flex items-center gap-2 px-4 py-2 bg-white rounded-full shadow-sm text-emerald-700 text-xs font-bold">
-                      <CheckCircle2 size={14} /> Cliente al día
-                    </div>
-                  )}
-                </div>
-
-                <h3 className="text-sm font-black text-slate-400 uppercase tracking-widest mb-4 px-2">
-                  Historial Reciente
-                </h3>
-                <div className="space-y-3">
-                  {selectedCustomer.history
-                    .slice()
-                    .reverse()
-                    .map((o) => (
-                      <div
-                        key={o.id}
-                        className="flex justify-between items-center p-4 bg-white rounded-2xl border border-slate-100 shadow-sm"
-                      >
-                        <div>
-                          <p className="text-[10px] font-bold text-slate-400 uppercase">
-                            {new Date(o.created_at).toLocaleDateString()} •{" "}
-                            {new Date(o.created_at).toLocaleTimeString([], {
-                              hour: "2-digit",
-                              minute: "2-digit",
-                            })}
-                          </p>
-                          <p className="font-bold text-slate-700 mt-0.5">
-                            {o.items.length} items
-                          </p>
-                        </div>
-                        <div className="text-right">
-                          <p className="font-black text-slate-900">
-                            S/ {o.total_amount.toFixed(2)}
-                          </p>
-                          <span
-                            className={`text-[10px] font-bold px-2 py-0.5 rounded ${o.payment_status === "paid" ? "bg-green-100 text-green-700" : "bg-red-100 text-red-700"}`}
-                          >
-                            {o.payment_status === "paid" ? "Pagado" : "Deuda"}
-                          </span>
-                        </div>
-                      </div>
-                    ))}
-                </div>
-              </div>
             </motion.div>
           </div>
         )}
